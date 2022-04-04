@@ -11,9 +11,7 @@ module.exports = {
     },
     extends: [
         'plugin:@typescript-eslint/recommended', // Uses the recommended rules from the @typescript-eslint/eslint-plugin
-        'plugin:react/recommended', // Supports React JSX
     ],
-    plugins: ['react'],
     settings: {
         react: {
             version: 'detect',
