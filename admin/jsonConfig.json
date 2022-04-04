@@ -1,0 +1,130 @@
+{
+  "type": "tabs",
+  "i18n": true,
+  "items": {
+    "mainTab": {
+      "type": "panel",
+      "label": "Main settings",
+      "items": {
+        "token":{
+          "type": "text",
+          "newLine": true,
+          "sm": 12,
+          "lg": 8,
+          "label": "Token",
+          "help": "Your bot token from the discord developers portal",
+          "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxx.yyyyyy.zzzzzzzzzzzzzzzzzzzzzzzzzzz",
+          "validator": "data.token.match(/^\\w{24}\\.\\w{6}\\.\\w{27}$/)",
+          "validatorNoSaveOnError": true,
+          "noTranslation": true
+        },
+        "_devPortalLink": {
+          "type": "staticLink",
+          "sm": 12,
+          "lg": 4,
+          "href": "https://discord.com/developers/applications",
+          "text": "🔗 Discord Developers Portal",
+          "style": {
+            "fontSize": 16,
+            "cursor": "pointer"
+          }
+        },
+
+        "botName": {
+          "type": "text",
+          "newLine": true,
+          "sm": 12,
+          "lg": 6,
+          "label": "Name of the bot",
+          "help": "Set a name for the bot on adapter start. Leave empty to keep current bot name."
+        },
+
+        "dynamicServerUpdates": {
+          "type": "checkbox",
+          "newLine": true,
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "label": "Dynamic server updates",
+          "help": "Watch for server, channel and user updates and update objects according. If disabled, the objects will only be updated on adapter start."
+        },
+        "observeUserPresence": {
+          "type": "checkbox",
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "label": "Observe user presence",
+          "help": "Observe presence status for all known users."
+        }
+      }
+    },
+    "messagesTab": {
+      "type": "panel",
+      "label": "Messages",
+      "items": {
+        "processAllMessagesInServerChannel": {
+          "type": "checkbox",
+          "newLine": true,
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "label": "Process all messages in server channels",
+          "help": "If checked, all messages in server channels will be processed by the adapter. Otherwise only mentions and commands will be processed."
+        },
+
+        "reactOnMentions": {
+          "type": "checkbox",
+          "newLine": true,
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "label": "React on mentions",
+          "help": "Let the adapter react on bot mentions."
+        },
+        "reactOnMentionsEmoji": {
+          "type": "text",
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "label": "React with emoji",
+          "help": "Emoji to react with on mentions. Default is 👍.",
+          "hidden": "!data.reactOnMentions",
+          "hideOnlyControl": true
+        },
+
+        "text2commandInstance": {
+          "type": "autocompleteSendTo",
+          "newLine": true,
+          "sm": 12,
+          "lg": 6,
+          "label": "text2command instance",
+          "help": "Send messages from states with enabled text2command to the given text2command instance.",
+          "noMultiEdit": true,
+          "noTranslation": true,
+          "command": "getText2commandInstances"
+        },
+        "_text2commandInstanceHelp": {
+          "type": "staticText",
+          "sm": 12,
+          "lg": 6,
+          "hidden": "_alive",
+          "hideOnlyControl": true,
+          "text": "Adapter needs to be running to be able to select a text2command instance!"
+        },
+        "text2commandRespondWith": {
+          "type": "select",
+          "label": "Response of text2command",
+          "help": "How the response of text2command is send",
+          "sm": 12,
+          "lg": 6,
+          "hidden": "!data.text2commandInstance",
+          "options": [
+            { "label": "Reply", "value": "reply" },
+            { "label": "Message", "value": "message" },
+            { "label": "None", "value": "none" }
+          ]
+        }
+      }
+    }
+  }
+}

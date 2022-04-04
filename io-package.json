@@ -1,0 +1,296 @@
+{
+    "common": {
+        "name": "discord",
+        "version": "0.0.1",
+        "news": {
+            "0.0.1": {
+                "en": "initial release",
+                "de": "Erstveröffentlichung",
+                "ru": "Начальная версия",
+                "pt": "lançamento inicial",
+                "nl": "Eerste uitgave",
+                "fr": "Première version",
+                "it": "Versione iniziale",
+                "es": "Versión inicial",
+                "pl": "Pierwsze wydanie",
+                "zh-cn": "首次出版"
+            }
+        },
+        "title": "Discord",
+        "titleLang": {
+            "en": "Discord",
+            "de": "Discord",
+            "ru": "Discord",
+            "pt": "Discord",
+            "nl": "Discord",
+            "fr": "Discord",
+            "it": "Discord",
+            "es": "Discord",
+            "pl": "Discord",
+            "zh-cn": "Discord"
+        },
+        "desc": {
+            "en": "ioBroker Discord bot integration",
+            "de": "ioBroker Discord-Bot-Integration",
+            "ru": "Интеграция с ботом ioBroker Discord",
+            "pt": "Integração do bot ioBroker Discord",
+            "nl": "ioBroker Discord-botintegratie",
+            "fr": "Intégration du robot ioBroker Discord",
+            "it": "ioBroker Integrazione del bot Discord",
+            "es": "Integración del bot Discord de ioBroker",
+            "pl": "Integracja z botem ioBroker Discord",
+            "zh-cn": "ioBroker Discord 机器人集成"
+        },
+        "authors": [
+            "Peter Müller <peter@crycode.de>"
+        ],
+        "keywords": [
+            "bot",
+            "discord",
+            "iobroker",
+            "message",
+            "notification"
+        ],
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "main": "build/main.js",
+        "icon": "discord.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/crycode-de/ioBroker.discord/main/admin/discord.png",
+        "readme": "https://github.com/crycode-de/ioBroker.discord/blob/main/README.md",
+        "loglevel": "info",
+        "mode": "daemon",
+        "type": "messaging",
+        "compact": true,
+        "connectionType": "cloud",
+        "dataSource": "push",
+        "materialize": true,
+        "adminUI": {
+            "custom": "json",
+            "config": "json"
+        },
+        "messagebox": true,
+        "supportCustoms": true,
+        "plugins": {
+            "sentry": {
+                "dsn": "https://6ee57be76f2d4df2b592e3dbee37fb89@sentry.cryhost.de/8"
+            }
+        },
+        "dependencies": [
+            {
+                "js-controller": ">=4.0.0"
+            }
+        ],
+        "globalDependencies": [
+            {
+                "admin": ">=5.3.0"
+            }
+        ]
+    },
+    "protectedNative": [
+        "token"
+    ],
+    "encryptedNative": [
+        "token"
+    ],
+    "native": {
+        "token": "",
+        "botName": "",
+        "processAllMessagesInServerChannel": false,
+        "reactOnMentions": true,
+        "reactOnMentionsEmoji": "👍",
+        "text2commandInstance": "",
+        "text2commandRespondWith": "reply",
+        "dynamicServerUpdates": true,
+        "observeUserPresence": false
+    },
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Information",
+                    "de": "Informationen",
+                    "ru": "Информация",
+                    "pt": "Em formação",
+                    "nl": "Informatie",
+                    "fr": "Information",
+                    "it": "Informazione",
+                    "es": "Información",
+                    "pl": "Informacja",
+                    "zh-cn": "信息"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": {
+                    "en": "Connected to discord",
+                    "de": "Verbunden mit Discord",
+                    "ru": "Подключен к дискорду",
+                    "pt": "Conectado à discórdia",
+                    "nl": "Verbonden met onenigheid",
+                    "fr": "Connecté à la discorde",
+                    "it": "Collegato alla discordia",
+                    "es": "Conectado a la discordia",
+                    "pl": "Połączony z niezgodą",
+                    "zh-cn": "连接到不和谐"
+                },
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        },
+        {
+            "_id": "bot",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Bot",
+                    "de": "Bot",
+                    "ru": "Бот",
+                    "pt": "Robô",
+                    "nl": "Bot",
+                    "fr": "Robot",
+                    "it": "Bot",
+                    "es": "Bot",
+                    "pl": "Nerw",
+                    "zh-cn": "机器人"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "bot.status",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "Presence status",
+                    "de": "Anwesenheitsstatus",
+                    "ru": "Состояние присутствия",
+                    "pt": "Status de presença",
+                    "nl": "Aanwezigheidsstatus",
+                    "fr": "Statut de présence",
+                    "it": "Stato di presenza",
+                    "es": "Estado de presencia",
+                    "pl": "Status obecności",
+                    "zh-cn": "存在状态"
+                },
+                "type": "string",
+                "role": "text",
+                "read": true,
+                "write": true,
+                "def": "online",
+                "states": {
+                    "online": "online",
+                    "idle": "idle",
+                    "dnd": "dnd",
+                    "invisible": "invisible"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "bot.activityType",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "Activity type",
+                    "de": "Aktivitätstyp",
+                    "ru": "Тип деятельности",
+                    "pt": "Tipo de atividade",
+                    "nl": "Activiteitstype",
+                    "fr": "Type d'activité",
+                    "it": "Tipo di attività",
+                    "es": "Tipo de actividad",
+                    "pl": "Rodzaj aktywności",
+                    "zh-cn": "活动类型"
+                },
+                "type": "string",
+                "role": "text",
+                "read": true,
+                "write": true,
+                "def": "COMPETING",
+                "states": {
+                    "": "---",
+                    "PLAYING": "playing",
+                    "STREAMING": "streaming",
+                    "LISTENING": "listening",
+                    "WATCHING": "watching",
+                    "COMPETING": "competing"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "bot.activityName",
+            "type": "state",
+            "common": {
+                "name": {
+                    "en": "Activity name",
+                    "de": "Aktivitätsname",
+                    "ru": "Название деятельности",
+                    "pt": "Nome da atividade",
+                    "nl": "Naam activiteit",
+                    "fr": "Nom de l'activité",
+                    "it": "Nome dell'attività",
+                    "es": "Nombre de la actividad",
+                    "pl": "Nazwa działania",
+                    "zh-cn": "活动名称"
+                },
+                "type": "string",
+                "role": "text",
+                "read": true,
+                "write": true,
+                "def": "ioBroker"
+            },
+            "native": {}
+        },
+        {
+            "_id": "servers",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Servers",
+                    "de": "Server",
+                    "ru": "Серверы",
+                    "pt": "Servidores",
+                    "nl": "Servers",
+                    "fr": "Les serveurs",
+                    "it": "Server",
+                    "es": "Servidores",
+                    "pl": "Serwery",
+                    "zh-cn": "服务器"
+                }
+            },
+            "native": {}
+        },
+        {
+            "_id": "users",
+            "type": "channel",
+            "common": {
+                "name": {
+                    "en": "Users",
+                    "de": "Benutzer",
+                    "ru": "Пользователи",
+                    "pt": "Comercial",
+                    "nl": "Gebruikers",
+                    "fr": "Utilisateurs",
+                    "it": "Utenti",
+                    "es": "Usuarios",
+                    "pl": "Użytkownicy",
+                    "zh-cn": "用户"
+                }
+            },
+            "native": {}
+        }
+    ]
+}

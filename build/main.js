@@ -1,0 +1,1189 @@
+var __defProp = Object.defineProperty;
+var __defProps = Object.defineProperties;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
+var __getOwnPropSymbols = Object.getOwnPropertySymbols;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __propIsEnum = Object.prototype.propertyIsEnumerable;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __spreadValues = (a, b) => {
+  for (var prop in b || (b = {}))
+    if (__hasOwnProp.call(b, prop))
+      __defNormalProp(a, prop, b[prop]);
+  if (__getOwnPropSymbols)
+    for (var prop of __getOwnPropSymbols(b)) {
+      if (__propIsEnum.call(b, prop))
+        __defNormalProp(a, prop, b[prop]);
+    }
+  return a;
+};
+var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
+var __decorateClass = (decorators, target, key, kind) => {
+  var result = kind > 1 ? void 0 : kind ? __getOwnPropDesc(target, key) : target;
+  for (var i = decorators.length - 1, decorator; i >= 0; i--)
+    if (decorator = decorators[i])
+      result = (kind ? decorator(target, key, result) : decorator(result)) || result;
+  if (kind && result)
+    __defProp(target, key, result);
+  return result;
+};
+var import_register = require("source-map-support/register");
+var import_node_path = require("node:path");
+var import_node_util = require("node:util");
+var import_autobind_decorator = require("autobind-decorator");
+var import_adapter_core = require("@iobroker/adapter-core");
+var import_discord = require("discord.js");
+var import_definitions = require("./lib/definitions");
+class DiscordAdapter extends import_adapter_core.Adapter {
+  constructor(options = {}) {
+    super(__spreadProps(__spreadValues({}, options), {
+      name: "discord"
+    }));
+    this.infoConnected = false;
+    this.client = null;
+    this.stateId2SendTargetInfo = /* @__PURE__ */ new Map();
+    this.messageReceiveStates = /* @__PURE__ */ new Set();
+    this.text2commandObjects = /* @__PURE__ */ new Set();
+    this.extendObjectCache = new import_discord.Collection();
+    this.jsonStateCache = new import_discord.Collection();
+    this.on("ready", this.onReady);
+    this.on("stateChange", this.onStateChange);
+    this.on("objectChange", this.onObjectChange);
+    this.on("message", this.onMessage);
+    this.on("unload", this.onUnload);
+  }
+  async onReady() {
+    var _a;
+    this.setInfoConnectionState(false, true);
+    this.client = new import_discord.Client({
+      intents: [
+        import_discord.Intents.FLAGS.GUILDS,
+        import_discord.Intents.FLAGS.GUILD_MEMBERS,
+        import_discord.Intents.FLAGS.GUILD_MESSAGES,
+        import_discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+        import_discord.Intents.FLAGS.GUILD_MESSAGE_TYPING,
+        import_discord.Intents.FLAGS.GUILD_PRESENCES,
+        import_discord.Intents.FLAGS.DIRECT_MESSAGES,
+        import_discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+        import_discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING
+      ],
+      partials: [
+        "CHANNEL"
+      ]
+    });
+    this.client.on("ready", this.onClientReady);
+    this.client.on("warn", (message) => this.log.warn(`Discord client warning: ${message}`));
+    this.client.on("error", (err) => this.log.error(`Discord client error: ${err.toString()}`));
+    this.client.on("rateLimit", (rateLimitData) => this.log.warn(`Discord client rate limit hit: ${JSON.stringify(rateLimitData)}`));
+    this.client.on("invalidRequestWarning", (invalidRequestWarningData) => this.log.warn(`Discord client invalid request warning: ${JSON.stringify(invalidRequestWarningData)}`));
+    this.client.on("invalidated", () => {
+      this.log.warn("Discord client session invalidated");
+      this.setInfoConnectionState(false);
+    });
+    this.client.on("shardError", (err) => {
+      this.log.warn(`Discord client websocket error: ${err.toString()}`);
+      this.setInfoConnectionState(false);
+    });
+    this.client.on("shardReady", (shardId) => {
+      this.log.info(`Discord client websocket connected (shardId:${shardId})`);
+      this.setInfoConnectionState(true);
+      this.setBotPresence();
+    });
+    this.client.on("shardResume", (shardId, replayedEvents) => this.log.debug(`Discord client websocket resume (shardId:${shardId} replayedEvents:${replayedEvents})`));
+    this.client.on("shardDisconnect", (event, shardId) => this.log.debug(`Discord client websocket disconnect (shardId:${shardId} ${event.reason})`));
+    this.client.on("shardReconnecting", (shardId) => this.log.debug(`Discord client websocket reconnecting (shardId:${shardId})`));
+    this.client.on("messageCreate", this.onClientMessageCreate);
+    if (this.config.dynamicServerUpdates) {
+      this.client.on("channelCreate", () => this.updateGuilds());
+      this.client.on("channelDelete", () => this.updateGuilds());
+      this.client.on("channelUpdate", () => this.updateGuilds());
+      this.client.on("guildCreate", () => this.updateGuilds());
+      this.client.on("guildDelete", () => this.updateGuilds());
+      this.client.on("guildUpdate", () => this.updateGuilds());
+      this.client.on("guildMemberAdd", () => this.updateGuilds());
+      this.client.on("guildMemberRemove", () => this.updateGuilds());
+      this.client.on("roleCreate", () => this.updateGuilds());
+      this.client.on("roleDelete", () => this.updateGuilds());
+      this.client.on("roleUpdate", () => this.updateGuilds());
+      this.client.on("userUpdate", () => this.updateGuilds());
+    }
+    if (this.config.observeUserPresence) {
+      this.client.on("presenceUpdate", (_oldPresence, newPresence) => {
+        this.updateUserPresence(newPresence.userId, newPresence);
+      });
+    }
+    this.subscribeStates("*.send");
+    this.subscribeStates("*.sendFile");
+    this.subscribeStates("*.sendReply");
+    this.subscribeStates("*.sendReaction");
+    this.subscribeStates("bot.*");
+    this.subscribeForeignObjects("*");
+    const view = await this.getObjectViewAsync("system", "custom", {
+      startkey: `${this.namespace}.`,
+      endkey: `${this.namespace}.\u9999`
+    });
+    if (view == null ? void 0 : view.rows) {
+      for (const item of view.rows) {
+        this.setupObjCustom(item.id, (_a = item.value) == null ? void 0 : _a[this.namespace]);
+      }
+    }
+    try {
+      await this.client.login(this.config.token);
+    } catch (err) {
+      if (err instanceof Error) {
+        this.log.error(`Discord login error: ${err.toString()}`);
+      } else {
+        this.log.error(`Discord login error`);
+      }
+    }
+  }
+  async onClientReady() {
+    var _a;
+    if (!((_a = this.client) == null ? void 0 : _a.user)) {
+      this.log.error("Discord client has no user!");
+      return;
+    }
+    this.log.info(`Logged in as ${this.client.user.tag}!`);
+    this.log.debug(`User ID: ${this.client.user.id}`);
+    if (this.config.botName) {
+      if (this.client.user.username !== this.config.botName) {
+        this.log.debug(`Update of bot name needed - current name: ${this.client.user.username} - configured name: ${this.config.botName}`);
+        try {
+          const proms = [];
+          proms.push(this.client.user.setUsername(this.config.botName));
+          for (const [, guild] of this.client.guilds.cache) {
+            const me = guild.members.cache.get(this.client.user.id);
+            if (me) {
+              proms.push(me.setNickname(this.config.botName));
+            }
+          }
+          await Promise.all(proms);
+          this.log.debug(`Bot name updated`);
+        } catch (err) {
+          this.log.warn(`Error setting the bot name to "${this.config.botName}": ${err}`);
+        }
+      } else {
+        this.log.debug("Bot name is up to date");
+      }
+    }
+    await this.updateGuilds();
+  }
+  async updateGuilds() {
+    var _a;
+    if (!((_a = this.client) == null ? void 0 : _a.user)) {
+      throw new Error("Client not loaded");
+    }
+    const allServersUsers = new import_discord.Collection();
+    const knownServersAndChannelsIds = /* @__PURE__ */ new Set();
+    const guilds = await this.client.guilds.fetch();
+    for (const [, guildBase] of guilds) {
+      const guild = await guildBase.fetch();
+      knownServersAndChannelsIds.add(`${this.namespace}.servers.${guild.id}`);
+      await this.extendObjectAsyncCached(`servers.${guild.id}`, {
+        type: "channel",
+        common: {
+          name: guild.name
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`servers.${guild.id}.members`, {
+        type: "channel",
+        common: {
+          name: `Members`
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`servers.${guild.id}.channels`, {
+        type: "channel",
+        common: {
+          name: `Channels`
+        },
+        native: {}
+      });
+      const guildMembers = await guild.members.fetch();
+      for (const [, member] of guildMembers) {
+        if (member.user.id !== this.client.user.id) {
+          allServersUsers.set(member.user.id, { user: member.user, presence: member.presence });
+        }
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}`, {
+          type: "channel",
+          common: {
+            name: `${member.displayName} (${member.user.tag})`
+          },
+          native: {}
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.roles`, {
+          type: "state",
+          common: {
+            name: `Roles`,
+            desc: "Roles of this member",
+            role: "text",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        });
+        const memberRoles = member.roles.cache.map((role) => role.name);
+        await this.setStateAsync(`servers.${guild.id}.members.${member.id}.roles`, memberRoles.join(", "), true);
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.tag`, {
+          type: "state",
+          common: {
+            name: `Tag`,
+            desc: "Tag of this member",
+            role: "text",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        });
+        await this.setStateAsync(`servers.${guild.id}.members.${member.id}.tag`, member.user.tag, true);
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.displayName`, {
+          type: "state",
+          common: {
+            name: `Display name`,
+            desc: "Display name of this member",
+            role: "text",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        });
+        await this.setStateAsync(`servers.${guild.id}.members.${member.id}.displayName`, member.displayName, true);
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.joinedAt`, {
+          type: "state",
+          common: {
+            name: `Joined at`,
+            desc: "When the member joined the server",
+            role: "date",
+            type: "number",
+            read: true,
+            write: false,
+            def: 0
+          },
+          native: {}
+        });
+        await this.setStateAsync(`servers.${guild.id}.members.${member.id}.joinedAt`, member.joinedTimestamp, true);
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.json`, {
+          type: "state",
+          common: {
+            name: `JSON`,
+            desc: "JSON data for this member",
+            role: "json",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        });
+        const json = {
+          tag: member.user.tag,
+          id: member.id,
+          displayName: member.displayName,
+          roles: memberRoles,
+          joined: member.joinedTimestamp
+        };
+        if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.servers.${guild.id}.members.${member.id}.json`))) {
+          await this.setStateAsync(`servers.${guild.id}.members.${member.id}.json`, JSON.stringify(json), true);
+          this.jsonStateCache.set(`${this.namespace}.servers.${guild.id}.members.${member.id}.json`, json);
+        }
+      }
+      const channels = await guild.channels.fetch();
+      for (const parents of [true, false]) {
+        for (const [, channel] of channels) {
+          if (parents && channel.parentId || !parents && !channel.parentId) {
+            continue;
+          }
+          const channelIdPrefix = parents ? `servers.${guild.id}.channels.${channel.id}` : `servers.${guild.id}.channels.${channel.parentId}.channels.${channel.id}`;
+          knownServersAndChannelsIds.add(`${this.namespace}.${channelIdPrefix}`);
+          let icon = void 0;
+          if (channel.isText()) {
+            icon = "channel-text.svg";
+          }
+          if (channel.isVoice()) {
+            icon = "channel-voice.svg";
+          }
+          await this.extendObjectAsyncCached(channelIdPrefix, {
+            type: "channel",
+            common: {
+              name: channel.parent ? `${channel.parent.name} / ${channel.name}` : channel.name,
+              icon
+            },
+            native: {
+              channelId: channel.id
+            }
+          });
+          await this.extendObjectAsyncCached(`${channelIdPrefix}.json`, {
+            type: "state",
+            common: {
+              name: `JSON`,
+              desc: "JSON data for this channel",
+              role: "json",
+              type: "string",
+              read: true,
+              write: false,
+              def: ""
+            },
+            native: {}
+          });
+          if (channel.type === "GUILD_CATEGORY") {
+            await this.extendObjectAsyncCached(`${channelIdPrefix}.channels`, {
+              type: "channel",
+              common: {
+                name: `Channels`
+              },
+              native: {}
+            });
+          }
+          await this.extendObjectAsyncCached(`${channelIdPrefix}.memberCount`, {
+            type: "state",
+            common: {
+              name: `Member count`,
+              role: "value",
+              type: "number",
+              read: true,
+              write: false,
+              def: 0
+            },
+            native: {}
+          });
+          await this.extendObjectAsyncCached(`${channelIdPrefix}.members`, {
+            type: "state",
+            common: {
+              name: `Members`,
+              role: "text",
+              type: "string",
+              read: true,
+              write: false,
+              def: ""
+            },
+            native: {}
+          });
+          if (channel.isText()) {
+            await this.extendObjectAsyncCached(`${channelIdPrefix}.message`, {
+              type: "state",
+              common: {
+                name: `Message`,
+                desc: "Last received message",
+                role: "text",
+                type: "string",
+                read: true,
+                write: false,
+                def: ""
+              },
+              native: {}
+            });
+            await this.extendObjectAsyncCached(`${channelIdPrefix}.messageId`, {
+              type: "state",
+              common: {
+                name: `Message ID`,
+                desc: "ID of the last received message",
+                role: "text",
+                type: "string",
+                read: true,
+                write: false,
+                def: ""
+              },
+              native: {}
+            });
+            await this.extendObjectAsyncCached(`${channelIdPrefix}.messageAuthor`, {
+              type: "state",
+              common: {
+                name: `Message author`,
+                desc: "Who send the last received message",
+                role: "text",
+                type: "string",
+                read: true,
+                write: false,
+                def: ""
+              },
+              native: {}
+            });
+            await this.extendObjectAsyncCached(`${channelIdPrefix}.messageTimestamp`, {
+              type: "state",
+              common: {
+                name: `Message timestamp`,
+                desc: "Timestamp of the last received message",
+                role: "date",
+                type: "number",
+                read: true,
+                write: false,
+                def: 0
+              },
+              native: {}
+            });
+            await this.extendObjectAsyncCached(`${channelIdPrefix}.messageJson`, {
+              type: "state",
+              common: {
+                name: `Message JSON`,
+                desc: "JSON for the last received message",
+                role: "json",
+                type: "string",
+                read: true,
+                write: false,
+                def: ""
+              },
+              native: {}
+            });
+            this.messageReceiveStates.add(`${this.namespace}.${channelIdPrefix}.message`);
+            await this.extendObjectAsyncCached(`${channelIdPrefix}.send`, {
+              type: "state",
+              common: {
+                name: `Send`,
+                desc: "Send some text or json formated content",
+                role: "text",
+                type: "string",
+                read: true,
+                write: true,
+                def: ""
+              },
+              native: {}
+            });
+            await this.extendObjectAsyncCached(`${channelIdPrefix}.sendFile`, {
+              type: "state",
+              common: {
+                name: `Send file`,
+                desc: "Send some file",
+                role: "text",
+                type: "string",
+                read: true,
+                write: true,
+                def: ""
+              },
+              native: {}
+            });
+            await this.extendObjectAsyncCached(`${channelIdPrefix}.sendReply`, {
+              type: "state",
+              common: {
+                name: `Send reply`,
+                desc: "Send a reply to a message",
+                role: "text",
+                type: "string",
+                read: true,
+                write: true,
+                def: ""
+              },
+              native: {}
+            });
+            await this.extendObjectAsyncCached(`${channelIdPrefix}.sendReaction`, {
+              type: "state",
+              common: {
+                name: `Send reaction`,
+                desc: "Send a reaction to a message",
+                role: "text",
+                type: "string",
+                read: true,
+                write: true,
+                def: ""
+              },
+              native: {}
+            });
+            this.stateId2SendTargetInfo.set(`${this.namespace}.${channelIdPrefix}`, {
+              guild,
+              channel
+            });
+          }
+          const members = [...channel.members.values()];
+          const json = {
+            id: channel.id,
+            name: channel.name,
+            type: channel.type,
+            memberCount: members.length,
+            members: members.map((m) => ({
+              id: m.user.id,
+              tag: m.user.tag,
+              displayName: m.displayName
+            }))
+          };
+          const proms = [];
+          if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.${channelIdPrefix}.json`))) {
+            proms.push(this.setStateAsync(`${channelIdPrefix}.json`, JSON.stringify(json), true));
+            this.jsonStateCache.set(`${this.namespace}.${channelIdPrefix}.json`, json);
+          }
+          await Promise.all([
+            this.setStateAsync(`${channelIdPrefix}.memberCount`, members.length, true),
+            this.setStateAsync(`${channelIdPrefix}.members`, members.map((m) => m.displayName).join(", "), true),
+            ...proms
+          ]);
+        }
+      }
+    }
+    for (const [, { user, presence }] of allServersUsers) {
+      this.log.debug(`Known user: ${user.tag} id:${user.id}`);
+      await this.extendObjectAsyncCached(`users.${user.id}`, {
+        type: "channel",
+        common: {
+          name: user.tag
+        },
+        native: {
+          userId: user.id
+        }
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.json`, {
+        type: "state",
+        common: {
+          name: `JSON`,
+          desc: "JSON data for this user",
+          role: "json",
+          type: "string",
+          read: true,
+          write: false,
+          def: ""
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.tag`, {
+        type: "state",
+        common: {
+          name: `Tag`,
+          desc: "Tag of the user",
+          role: "text",
+          type: "string",
+          read: true,
+          write: false,
+          def: ""
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.message`, {
+        type: "state",
+        common: {
+          name: `Message`,
+          desc: "Last received message",
+          role: "text",
+          type: "string",
+          read: true,
+          write: false,
+          def: ""
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.messageId`, {
+        type: "state",
+        common: {
+          name: `Message ID`,
+          desc: "ID of the last received message",
+          role: "text",
+          type: "string",
+          read: true,
+          write: false,
+          def: ""
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.messageTimestamp`, {
+        type: "state",
+        common: {
+          name: `Message timestamp`,
+          desc: "Timestamp of the last received message",
+          role: "date",
+          type: "number",
+          read: true,
+          write: false,
+          def: 0
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.messageJson`, {
+        type: "state",
+        common: {
+          name: `Message JSON`,
+          desc: "JSON for the last received message",
+          role: "json",
+          type: "string",
+          read: true,
+          write: false,
+          def: ""
+        },
+        native: {}
+      });
+      this.messageReceiveStates.add(`${this.namespace}.users.${user.id}.message`);
+      await this.extendObjectAsyncCached(`users.${user.id}.send`, {
+        type: "state",
+        common: {
+          name: `Send`,
+          desc: "Send some text or json formated content",
+          role: "text",
+          type: "string",
+          read: true,
+          write: true,
+          def: ""
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.sendFile`, {
+        type: "state",
+        common: {
+          name: `Send file`,
+          desc: "Send some file",
+          role: "text",
+          type: "string",
+          read: true,
+          write: true,
+          def: ""
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.sendReply`, {
+        type: "state",
+        common: {
+          name: `Send reply`,
+          desc: "Send a reply to a message",
+          role: "text",
+          type: "string",
+          read: true,
+          write: true,
+          def: ""
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.sendReaction`, {
+        type: "state",
+        common: {
+          name: `Send reaction`,
+          desc: "Send a reaction to a message",
+          role: "text",
+          type: "string",
+          read: true,
+          write: true,
+          def: ""
+        },
+        native: {}
+      });
+      this.stateId2SendTargetInfo.set(`${this.namespace}.users.${user.id}`, { user });
+      await this.extendObjectAsyncCached(`users.${user.id}.avatarUrl`, {
+        type: "state",
+        common: {
+          name: `Avatar`,
+          role: "media.link",
+          type: "string",
+          read: true,
+          write: false,
+          def: ""
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.bot`, {
+        type: "state",
+        common: {
+          name: `Bot`,
+          desc: "If the user is a bot",
+          role: "indicator",
+          type: "boolean",
+          read: true,
+          write: false,
+          def: false
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.status`, {
+        type: "state",
+        common: {
+          name: `Status`,
+          role: "text",
+          type: "string",
+          read: true,
+          write: false,
+          def: ""
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.activityType`, {
+        type: "state",
+        common: {
+          name: `Activity type`,
+          role: "text",
+          type: "string",
+          read: true,
+          write: false,
+          def: ""
+        },
+        native: {}
+      });
+      await this.extendObjectAsyncCached(`users.${user.id}.activityName`, {
+        type: "state",
+        common: {
+          name: `Activity name`,
+          role: "text",
+          type: "string",
+          read: true,
+          write: false,
+          def: ""
+        },
+        native: {}
+      });
+      const ps = await this.updateUserPresence(user.id, presence, true);
+      const proms = [];
+      const json = {
+        id: user.id,
+        tag: user.tag,
+        activityName: ps.activityName,
+        activityType: ps.activityType,
+        avatarUrl: user.displayAvatarURL(),
+        bot: user.bot,
+        status: ps.status
+      };
+      if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.users.${user.id}.json`))) {
+        proms.push(this.setStateAsync(`users.${user.id}.json`, JSON.stringify(json), true));
+        this.jsonStateCache.set(`${this.namespace}.users.${user.id}.json`, json);
+      }
+      await Promise.all([
+        this.setStateAsync(`users.${user.id}.tag`, user.tag, true),
+        this.setStateAsync(`users.${user.id}.avatarUrl`, json.avatarUrl, true),
+        this.setStateAsync(`users.${user.id}.bot`, user.bot, true),
+        ...proms,
+        this.updateUserPresence(user.id, presence)
+      ]);
+    }
+    const objListServers = await this.getObjectListAsync({
+      startkey: `${this.namespace}.servers.`,
+      endkey: `${this.namespace}.servers.\u9999`
+    });
+    const reServersChannels = new RegExp(`^${this.name}\\.${this.instance}\\.servers\\.((\\d+)(\\.channels\\.(\\d+)){0,2})$`);
+    for (const item of objListServers.rows) {
+      const m = item.id.match(reServersChannels);
+      if (m) {
+        const idPath = m[1];
+        if (!knownServersAndChannelsIds.has(item.id)) {
+          this.log.debug(`Server/Channel ${idPath} "${item.value.common.name}" is no longer available - deleting objects`);
+          this.messageReceiveStates.delete(`${this.namespace}.servers.${idPath}.message`);
+          this.stateId2SendTargetInfo.delete(`${this.namespace}.servers.${idPath}`);
+          this.jsonStateCache.delete(`${this.namespace}.servers.${idPath}.json`);
+          await this.delObjectAsyncCached(`servers.${idPath}`, { recursive: true });
+        }
+      }
+    }
+    const objListUsers = await this.getObjectListAsync({
+      startkey: `${this.namespace}.users.`,
+      endkey: `${this.namespace}.users.\u9999`
+    });
+    const reUsers = new RegExp(`^${this.name}\\.${this.instance}\\.users\\.(\\d+)$`);
+    for (const item of objListUsers.rows) {
+      const m = item.id.match(reUsers);
+      if (m) {
+        const userId = m[1];
+        if (!allServersUsers.has(userId)) {
+          this.log.debug(`User ${userId} "${item.value.common.name}" is no longer available - deleting objects`);
+          this.messageReceiveStates.delete(`${this.namespace}.users.${userId}.message`);
+          this.stateId2SendTargetInfo.delete(`${this.namespace}.users.${userId}`);
+          this.jsonStateCache.delete(`${this.namespace}.users.${userId}.json`);
+          await this.delObjectAsyncCached(`users.${userId}`, { recursive: true });
+        }
+      }
+    }
+  }
+  async updateUserPresence(userId, presence, skipJsonStateUpdate = false) {
+    var _a, _b, _c, _d;
+    if (!this.config.observeUserPresence) {
+      return { activityName: "", activityType: "", status: "" };
+    }
+    try {
+      const p = {
+        status: (presence == null ? void 0 : presence.status) || "",
+        activityName: (((_a = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _a.type) === "CUSTOM" ? (_b = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _b.state : (_c = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _c.name) || "",
+        activityType: ((_d = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _d.type) || ""
+      };
+      const proms = [];
+      if (!skipJsonStateUpdate) {
+        const json = this.jsonStateCache.get(`${this.namespace}.users.${userId}.json`);
+        if (json) {
+          json.status = p.status;
+          json.activityName = p.activityName;
+          json.activityType = p.activityType;
+          this.jsonStateCache.set(`${this.namespace}.users.${userId}.json`, json);
+          proms.push(this.setStateAsync(`users.${userId}.json`, JSON.stringify(json), true));
+        }
+      }
+      await Promise.all([
+        this.setStateAsync(`users.${userId}.status`, p.status, true),
+        this.setStateAsync(`users.${userId}.activityName`, p.activityType, true),
+        this.setStateAsync(`users.${userId}.activityType`, p.activityName, true),
+        ...proms
+      ]);
+      return p;
+    } catch (err) {
+      this.log.warn(`Error while updating user presence of user ${userId}: ${err}`);
+      return { activityName: "", activityType: "", status: "" };
+    }
+  }
+  async setBotPresence(opts) {
+    var _a, _b, _c, _d;
+    if (!((_a = this.client) == null ? void 0 : _a.user))
+      return;
+    if (!opts) {
+      opts = {};
+    }
+    if (!opts.status) {
+      opts.status = ((_b = await this.getStateAsync("bot.status")) == null ? void 0 : _b.val) || "online";
+    }
+    if (!import_definitions.VALID_PRESENCE_STATUS_DATA.includes(opts.status)) {
+      opts.status = "online";
+    }
+    const presenceData = {
+      status: opts.status,
+      activities: []
+    };
+    if (opts.activityType === void 0) {
+      opts.activityType = ((_c = await this.getStateAsync("bot.activityType")) == null ? void 0 : _c.val) || "";
+    }
+    if (!import_definitions.VALID_ACTIVITY_TYPES.includes(opts.activityType)) {
+      opts.activityType = "";
+    }
+    if (opts.activityName === void 0) {
+      opts.activityName = ((_d = await this.getStateAsync("bot.activityName")) == null ? void 0 : _d.val) || "";
+    }
+    if (opts.activityType && opts.activityName) {
+      presenceData.activities = [{
+        type: opts.activityType,
+        name: opts.activityName
+      }];
+    }
+    this.log.debug(`Set bot presence: ${JSON.stringify(presenceData)}`);
+    this.client.user.setPresence(presenceData);
+  }
+  async onClientMessageCreate(message) {
+    var _a, _b, _c, _d, _e;
+    this.log.debug(`Discord message: mId:${message.id} cId:${message.channelId} uId: ${message.author.id} - ${message.content}`);
+    if (!((_b = (_a = this.client) == null ? void 0 : _a.user) == null ? void 0 : _b.id))
+      return;
+    const { author, channel, content } = message;
+    if (author.id === this.client.user.id) {
+      return;
+    }
+    const mentioned = message.mentions.users.has(this.client.user.id);
+    if (mentioned && this.config.reactOnMentions) {
+      try {
+        await message.react(this.config.reactOnMentionsEmoji);
+      } catch (err) {
+        this.log.warn(`Error while adding reaction to message ${message.id}! ${err}`);
+      }
+    }
+    if (!mentioned && channel.type === "GUILD_TEXT" && !this.config.processAllMessagesInServerChannel) {
+      this.log.debug("Server message without mention ignored");
+      return;
+    }
+    let msgStateIdPrefix;
+    if (channel.type === "GUILD_TEXT") {
+      msgStateIdPrefix = channel.parentId ? `${this.namespace}.servers.${message.guildId}.channels.${channel.parentId}.channels.${channel.id}` : `${this.namespace}.servers.${message.guildId}.channels.${channel.id}`;
+    } else if (channel.type === "DM") {
+      msgStateIdPrefix = `${this.namespace}.users.${author.id}`;
+    } else {
+      this.log.warn("Received unexpected message!");
+      return;
+    }
+    if (!this.messageReceiveStates.has(`${msgStateIdPrefix}.message`)) {
+      this.log.debug(`State for received message ${msgStateIdPrefix} it not known for receiving messages`);
+      return;
+    }
+    const json = {
+      content,
+      attachments: message.attachments.map((att) => ({ attachment: att.attachment.toString(), name: att.name, size: att.size, id: att.id })),
+      id: message.id,
+      mentions: ((_c = message.mentions.members) == null ? void 0 : _c.map((m) => ({ id: m.id, tag: m.user.tag, displayName: m.displayName }))) || [],
+      mentioned,
+      timestamp: message.createdTimestamp
+    };
+    const proms = [];
+    if (message.guildId) {
+      json.author = {
+        id: author.id,
+        tag: author.tag,
+        displayName: ((_e = (_d = this.client.guilds.cache.get(message.guildId)) == null ? void 0 : _d.members.cache.get(author.id)) == null ? void 0 : _e.displayName) || author.username
+      };
+      proms.push(this.setStateAsync(`${msgStateIdPrefix}.messageAuthor`, author.tag, true));
+    }
+    if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.${msgStateIdPrefix}.messageJson`))) {
+      proms.push(this.setStateAsync(`${msgStateIdPrefix}.messageJson`, JSON.stringify(json), true));
+      this.jsonStateCache.set(`${this.namespace}.${msgStateIdPrefix}.messageJson`, json);
+    }
+    await Promise.all([
+      this.setStateAsync(`${msgStateIdPrefix}.message`, content, true),
+      this.setStateAsync(`${msgStateIdPrefix}.messageId`, message.id, true),
+      this.setStateAsync(`${msgStateIdPrefix}.messageTimestamp`, message.createdTimestamp, true),
+      ...proms
+    ]);
+    if (content && this.config.text2commandInstance && this.text2commandObjects.has(`${msgStateIdPrefix}.message`)) {
+      this.log.debug(`Sending "${content}" to ${this.config.text2commandInstance}`);
+      const payload = {
+        text: content
+      };
+      this.sendTo(this.config.text2commandInstance, "send", payload, async (responseObj) => {
+        const response = responseObj == null ? void 0 : responseObj.response;
+        try {
+          if (!response) {
+            this.log.debug(`Empty response from ${this.config.text2commandInstance}`);
+            return;
+          }
+          this.log.debug(`Response from ${this.config.text2commandInstance}: ${response}`);
+          switch (this.config.text2commandRespondWith) {
+            case "reply":
+              await message.reply(response);
+              break;
+            case "message":
+              await message.channel.send(response);
+              break;
+            default:
+          }
+        } catch (err) {
+          this.log.warn(`Error while processing response "${response}" from ${this.config.text2commandInstance}! ${err}`);
+        }
+      });
+    }
+  }
+  setupObjCustom(objId, customCfg) {
+    if (objId.startsWith(`${this.namespace}.`) && objId.endsWith(".message")) {
+      if ((customCfg == null ? void 0 : customCfg.enabled) && customCfg.enableText2command) {
+        this.log.debug(`Custom option text2command enabled for ${objId}`);
+        this.text2commandObjects.add(objId);
+      } else if (this.text2commandObjects.has(objId)) {
+        this.log.debug(`Custom option text2command disabled for ${objId}`);
+        this.text2commandObjects.delete(objId);
+      }
+    }
+  }
+  onObjectChange(objId, obj) {
+    var _a, _b;
+    if (obj) {
+      this.log.silly(`object ${objId} changed: ${JSON.stringify(obj)}`);
+      this.setupObjCustom(objId, (_b = (_a = obj.common) == null ? void 0 : _a.custom) == null ? void 0 : _b[this.namespace]);
+    } else {
+      this.log.silly(`object ${objId} deleted`);
+      this.setupObjCustom(objId, void 0);
+    }
+  }
+  async onStateChange(stateId, state) {
+    this.log.silly(`State changed: ${stateId} ${state == null ? void 0 : state.val} (ack=${state == null ? void 0 : state.ack})`);
+    if (!state || state.ack)
+      return;
+    let setAck = false;
+    if (stateId.startsWith(`${this.namespace}.`)) {
+      switch (stateId) {
+        case `${this.namespace}.bot.status`:
+          await this.setBotPresence({ status: state.val });
+          setAck = true;
+          break;
+        case `${this.namespace}.bot.activityType`:
+          await this.setBotPresence({ activityType: state.val });
+          setAck = true;
+          break;
+        case `${this.namespace}.bot.activityName`:
+          await this.setBotPresence({ activityName: state.val });
+          setAck = true;
+          break;
+        default:
+          if (stateId.endsWith(".send") || stateId.endsWith(".sendFile") || stateId.endsWith(".sendReply") || stateId.endsWith(".sendReaction")) {
+            setAck = await this.onSendStateChange(stateId, state);
+          }
+      }
+    }
+    if (setAck) {
+      await this.setStateAsync(stateId, __spreadProps(__spreadValues({}, state), {
+        ack: true
+      }));
+    }
+  }
+  async onSendStateChange(stateId, state) {
+    var _a, _b, _c, _d;
+    if (!((_a = this.client) == null ? void 0 : _a.isReady())) {
+      this.log.warn(`State ${stateId} changed but client is not ready!`);
+      return false;
+    }
+    if (typeof state.val !== "string") {
+      this.log.warn(`State ${stateId} changed but value if not a string!`);
+      return false;
+    }
+    if (state.val.length === 0) {
+      this.log.debug(`State ${stateId} changed but value is empty`);
+      return false;
+    }
+    const stateIdChannel = stateId.replace(/^(.+)\.\w+$/, "$1");
+    const sendTargetInfo = this.stateId2SendTargetInfo.get(stateIdChannel);
+    let target;
+    let targetName = "";
+    if ((sendTargetInfo == null ? void 0 : sendTargetInfo.guild) && (sendTargetInfo == null ? void 0 : sendTargetInfo.channel)) {
+      if (!sendTargetInfo.channel.isText()) {
+        this.log.warn(`State ${stateId} changed but target is not a text channel!`);
+        return false;
+      }
+      target = sendTargetInfo.channel;
+      targetName = sendTargetInfo.channel.parent ? `${sendTargetInfo.guild.name}/${sendTargetInfo.channel.parent.name}/${sendTargetInfo.channel.name}` : `${sendTargetInfo.guild.name}/${sendTargetInfo.channel.name}`;
+    } else if (sendTargetInfo == null ? void 0 : sendTargetInfo.user) {
+      target = sendTargetInfo.user;
+      targetName = sendTargetInfo.user.tag;
+    } else {
+      this.log.warn(`State ${stateId} changed but I don't know where to send this to!`);
+      return false;
+    }
+    let mo;
+    if (stateId.endsWith(".sendFile")) {
+      const idx = state.val.indexOf("|");
+      let file;
+      let content = void 0;
+      if (idx > 0) {
+        file = state.val.slice(0, idx);
+        content = state.val.slice(idx + 1);
+      } else {
+        file = state.val;
+      }
+      mo = {
+        content,
+        files: [{
+          attachment: file,
+          name: (0, import_node_path.basename)(file)
+        }]
+      };
+    } else if (stateId.endsWith(".sendReply") || stateId.endsWith(".sendReaction")) {
+      const idx = state.val.indexOf("|");
+      let messageReference;
+      let content;
+      if (idx > 0) {
+        messageReference = state.val.slice(0, idx);
+        content = state.val.slice(idx + 1);
+      } else {
+        this.log.debug(`Get reply message reference from last received message for ${stateIdChannel}`);
+        messageReference = (_b = await this.getForeignStateAsync(`${stateIdChannel}.messageId`)) == null ? void 0 : _b.val;
+        content = state.val;
+      }
+      if (stateId.endsWith(".sendReply")) {
+        if (!messageReference || !content) {
+          this.log.warn(`No message reference or no content for reply for ${stateId}!`);
+          return false;
+        }
+        mo = {
+          content,
+          reply: {
+            messageReference
+          }
+        };
+      } else {
+        if (!messageReference || !content) {
+          this.log.warn(`No message reference or no/invalid content for reaction for ${stateId}!`);
+          return false;
+        }
+        const channel = sendTargetInfo.channel || ((_c = sendTargetInfo.user) == null ? void 0 : _c.dmChannel) || await ((_d = sendTargetInfo.user) == null ? void 0 : _d.createDM());
+        if (!channel || !channel.isText()) {
+          this.log.warn(`Could not determine target channel for reaction ${stateId}`);
+          return false;
+        }
+        const message = channel.messages.cache.get(messageReference) || await channel.messages.fetch(messageReference);
+        if (!message) {
+          this.log.warn(`Could not determine target message for reaction ${stateId}`);
+          return false;
+        }
+        try {
+          await message.react(content);
+          return true;
+        } catch (err) {
+          this.log.warn(`Message reaction ${stateId} failed: ${err}`);
+          return false;
+        }
+      }
+    } else if (state.val.startsWith("{") && state.val.endsWith("}")) {
+      this.log.debug(`State ${stateId} value seams to be json`);
+      try {
+        mo = JSON.parse(state.val);
+      } catch (err) {
+        this.log.warn(`State ${stateId} value seams to be json but cannot be parsed!`);
+        return false;
+      }
+      if (!(mo == null ? void 0 : mo.files) && !mo.content || mo.files && !Array.isArray(mo.files) || mo.embeds && !Array.isArray(mo.embeds)) {
+        this.log.warn(`State ${stateId} value seams to be json but seams to be invalid!`);
+        return false;
+      }
+    } else {
+      mo = {
+        content: state.val
+      };
+    }
+    this.log.debug(`Send to ${targetName}: ${JSON.stringify(mo)}`);
+    try {
+      const msg = await target.send(mo);
+      this.log.debug(`Sent with message ID ${msg.id}`);
+      return true;
+    } catch (err) {
+      this.log.warn(`Error sending value of ${stateId} to ${targetName}: ${err}`);
+      return false;
+    }
+  }
+  async onMessage(obj) {
+    if (typeof obj !== "object")
+      return;
+    this.log.debug(`Got message: ${JSON.stringify(obj)}`);
+    if (obj.command === "getText2commandInstances" && obj.callback) {
+      const view = await this.getObjectViewAsync("system", "instance", {
+        startkey: "system.adapter.text2command.",
+        endkey: "system.adapter.text2command.\u9999"
+      });
+      const text2commandInstances = view.rows.map((r) => r.id.slice(15));
+      this.log.debug(`Found text2command instances: ${text2commandInstances}`);
+      this.sendTo(obj.from, obj.command, [{ value: "", label: "---" }, ...text2commandInstances], obj.callback);
+    }
+  }
+  async setInfoConnectionState(connected, force = false) {
+    if (force || connected !== this.infoConnected) {
+      await this.setStateAsync("info.connection", connected, true);
+      this.infoConnected = connected;
+    }
+  }
+  async extendObjectAsyncCached(id, objPart, options) {
+    const cachedObj = this.extendObjectCache.get(id);
+    if ((0, import_node_util.isDeepStrictEqual)(cachedObj, objPart)) {
+      return { id };
+    }
+    const ret = await this.extendObjectAsync(id, objPart, options);
+    this.extendObjectCache.set(id, objPart);
+    return ret;
+  }
+  async delObjectAsyncCached(id, options) {
+    if (options == null ? void 0 : options.recursive) {
+      this.extendObjectCache.filter((_obj, id2) => id2.startsWith(id)).each((_obj, id2) => this.extendObjectCache.delete(id2));
+    } else {
+      this.extendObjectCache.delete(id);
+    }
+    return this.delObjectAsync(id, options);
+  }
+  async onUnload(callback) {
+    try {
+      await this.setInfoConnectionState(false, true);
+      if (this.client) {
+        this.client.destroy();
+      }
+      callback();
+    } catch (e) {
+      callback();
+    }
+  }
+}
+__decorateClass([
+  import_autobind_decorator.boundMethod
+], DiscordAdapter.prototype, "onReady", 1);
+__decorateClass([
+  import_autobind_decorator.boundMethod
+], DiscordAdapter.prototype, "onClientReady", 1);
+__decorateClass([
+  import_autobind_decorator.boundMethod
+], DiscordAdapter.prototype, "onClientMessageCreate", 1);
+__decorateClass([
+  import_autobind_decorator.boundMethod
+], DiscordAdapter.prototype, "onObjectChange", 1);
+__decorateClass([
+  import_autobind_decorator.boundMethod
+], DiscordAdapter.prototype, "onStateChange", 1);
+__decorateClass([
+  import_autobind_decorator.boundMethod
+], DiscordAdapter.prototype, "onMessage", 1);
+__decorateClass([
+  import_autobind_decorator.boundMethod
+], DiscordAdapter.prototype, "onUnload", 1);
+if (require.main !== module) {
+  module.exports = (options) => new DiscordAdapter(options);
+} else {
+  (() => new DiscordAdapter())();
+}
+//# sourceMappingURL=main.js.map

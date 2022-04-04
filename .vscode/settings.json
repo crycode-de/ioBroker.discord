@@ -1,0 +1,24 @@
+{
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "eslint.enable": true,
+    "editor.insertSpaces": true,
+    "editor.tabSize": 2,
+    "json.schemas": [
+        {
+            "fileMatch": [
+                "io-package.json"
+            ],
+            "url": "https://json.schemastore.org/io-package"
+        },
+        {
+            "fileMatch": [
+                "jsonConfig.json",
+                "jsonCustom.json"
+            ],
+            "url": "https://raw.githubusercontent.com/ioBroker/adapter-react/master/schemas/jsonConfig.json"
+        }
+    ],
+    "cSpell.words": [
+        "discordjs"
+    ]
+}
