@@ -18,6 +18,13 @@ ioBroker Discord bot integration
 
 **This adapter uses Sentry libraries to automatically report exceptions and code errors to the developers.** For more details and for information how to disable the error reporting see [Sentry-Plugin Documentation](https://github.com/ioBroker/plugin-sentry#plugin-sentry)! Sentry reporting is used starting with js-controller 3.0.
 
+## Requirements
+
+* Node.js >= 16.6
+* js-controller >= 4.0
+* admin >= 5.3
+
+Node.js 16 is required by the underlaying [discord.js](https://github.com/discordjs) library.
 ## Features
 
 * ioBroker states for all servers and servers of the bot to receive and send messages
