@@ -102,7 +102,9 @@
         "text2commandInstance": "",
         "text2commandRespondWith": "reply",
         "dynamicServerUpdates": true,
-        "observeUserPresence": false
+        "observeUserPresence": false,
+        "enableAuthentication": true,
+        "authenticatedUsers": []
     },
     "objects": [],
     "instanceObjects": [

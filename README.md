@@ -25,6 +25,7 @@ ioBroker Discord bot integration
 * admin >= 5.3
 
 Node.js 16 is required by the underlaying [discord.js](https://github.com/discordjs) library.
+
 ## Features
 
 * ioBroker states for all servers and servers of the bot to receive and send messages
@@ -37,7 +38,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 * `.json` states for channel, user and message data
 * Send messages, send files, send reactions (emojis), send reply messages, or send custom json-formated message contents
 * List server and channel members including member roles
-* Support for [text2command](https://github.com/ioBroker/ioBroker.text2command) (have to enabled for each `.message` state where it should be used)
+* Support for [text2command](https://github.com/ioBroker/ioBroker.text2command) (has to enabled for each `.message` state where it should be used)
 
 ## Planned features
 

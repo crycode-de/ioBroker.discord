@@ -1359,14 +1359,37 @@ class DiscordAdapter extends Adapter {
     if (typeof obj !== 'object') return;
     this.log.debug(`Got message: ${JSON.stringify(obj)}`);
 
-    if (obj.command === 'getText2commandInstances' && obj.callback) {
-      const view = await this.getObjectViewAsync('system', 'instance', {
-        startkey: 'system.adapter.text2command.',
-        endkey: 'system.adapter.text2command.\u9999',
-      });
-      const text2commandInstances = view.rows.map((r) => r.id.slice(15));
-      this.log.debug(`Found text2command instances: ${text2commandInstances}`);
-      this.sendTo(obj.from, obj.command, [{value: '', label: '---'}, ...text2commandInstances], obj.callback);
+    switch (obj.command) {
+      case 'getText2commandInstances':
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        const view = await this.getObjectViewAsync('system', 'instance', {
+          startkey: 'system.adapter.text2command.',
+          endkey: 'system.adapter.text2command.\u9999',
+        });
+        const text2commandInstances = view.rows.map((r) => {
+          const id = r.id.slice(15);
+          return {
+            label: id,
+            value: id,
+          };
+        });
+        this.log.debug(`Found text2command instances: ${text2commandInstances.map((i) => i.value)}`);
+        this.sendTo(obj.from, obj.command, [{value: '', label: '---'}, ...text2commandInstances], obj.callback);
+        break;
+
+      case 'getUsers':
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+
+        const users = this.client?.users.cache.map((u) => ({ label: u.tag, value: u.id })) || [];
+        this.log.debug(`Users: ${users.map((i) => i.value)}`);
+        this.sendTo(obj.from, obj.command, users, obj.callback);
+        break;
     }
   }
 
