@@ -103,8 +103,9 @@
         "text2commandRespondWith": "reply",
         "dynamicServerUpdates": true,
         "observeUserPresence": false,
-        "enableAuthentication": true,
-        "authenticatedUsers": []
+        "enableAuthorization": true,
+        "authorizedUsers": [],
+        "processMessagesFromUnauthorizedUsers": false
     },
     "objects": [],
     "instanceObjects": [

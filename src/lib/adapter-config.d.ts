@@ -15,11 +15,12 @@ declare global {
       text2commandRespondWith: 'message' | 'reply' | 'none';
       dynamicServerUpdates: boolean;
       observeUserPresence: boolean;
-      enableAuthentication: boolean;
-      authenticatedUsers: AdapterConfigAuthenticatedUser[];
+      enableAuthorization: boolean;
+      authorizedUsers: AdapterConfigAuthorizedUser[];
+      processMessagesFromUnauthorizedUsers: boolean;
     }
 
-    interface AdapterConfigAuthenticatedUser {
+    interface AdapterConfigAuthorizedUser {
       userId: Snowflake;
       getStates: boolean;
       setStates: boolean;

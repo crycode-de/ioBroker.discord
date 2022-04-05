@@ -15,8 +15,7 @@
           "help": "Your bot token from the discord developers portal",
           "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxx.yyyyyy.zzzzzzzzzzzzzzzzzzzzzzzzzzz",
           "validator": "data.token.match(/^\\w{24}\\.\\w{6}\\.\\w{27}$/)",
-          "validatorNoSaveOnError": true,
-          "noTranslation": true
+          "validatorNoSaveOnError": true
         },
         "_devPortalLink": {
           "type": "staticLink",
@@ -79,7 +78,7 @@
           "md": 6,
           "lg": 4,
           "label": "React on mentions",
-          "help": "Let the adapter react on bot mentions."
+          "help": "Let the adapter react on bot mentions. If authorization is enabled, this only works for authorized users."
         },
         "reactOnMentionsEmoji": {
           "type": "text",
@@ -100,7 +99,6 @@
           "label": "text2command instance",
           "help": "Send messages from states with enabled text2command to the given text2command instance.",
           "noMultiEdit": true,
-          "noTranslation": true,
           "command": "getText2commandInstances",
           "defaultFunc": "data.text2commandInstance || ''"
         },
@@ -133,41 +131,41 @@
 
     "authTab": {
       "type": "panel",
-      "label": "Authentication",
+      "label": "Authorization",
       "items": {
-        "enableAuthentication": {
+        "enableAuthorization": {
           "type": "checkbox",
           "newLine": true,
           "sm": 12,
           "md": 6,
           "lg": 4,
-          "label": "Enable authentication",
-          "help": "If checked, only authenticated users will be allowed to interact with the bot.",
+          "label": "Enable authorization",
+          "help": "If checked, only authorized users will be allowed to interact with the bot.",
           "confirm": {
-            "condition": "!data.enableAuthentication",
+            "condition": "!data.enableAuthorization",
             "type": "warning",
             "title": "Warning",
-            "text": "When authentication is disabled, any user is able to interact with the bot! You should only disable authentication if you trust all users on any server where the bot is on. Do you really want to disable authentication?",
+            "text": "When authorization is disabled, any user is able to interact with the bot! You should only disable authorization if you trust all users on any server where the bot is on. Do you really want to disable authorization?",
             "ok": "Ignore warning",
-            "cancel": "Disable authentication"
+            "cancel": "Keep authorization enabled"
           }
         },
 
-        "_authenticatedUsersInstanceHelp": {
+        "_authorizedUsersInstanceHelp": {
           "type": "staticText",
           "newLine": true,
           "sm": 12,
-          "hidden": "_alive || !data.enableAuthentication",
+          "hidden": "_alive || !data.enableAuthorization",
           "text": "Adapter instance needs to be running to be able to select allowed users from a drop down list! Otherwise you need to enter the user IDs manually.",
           "style": {
             "color": "red"
           }
         },
-        "authenticatedUsers": {
+        "authorizedUsers": {
           "type": "table",
           "newLine": true,
           "sm": 12,
-          "hidden": "!data.enableAuthentication",
+          "hidden": "!data.enableAuthorization",
           "label": "Allowed users",
           "help": "List of users allowed to interact with the bot.",
           "items": [
@@ -208,6 +206,17 @@
               "sort": false
             }
           ]
+        },
+
+        "processMessagesFromUnauthorizedUsers": {
+          "type": "checkbox",
+          "newLine": true,
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "hidden": "!data.enableAuthorization",
+          "label": "Process messages from unauthorized users",
+          "help": "If checked, messages from all users will be processed and stored into the .message states, but they will not trigger any adapter actions."
         }
       }
     }

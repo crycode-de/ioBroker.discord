@@ -79,7 +79,7 @@
     "test": "npm run test:ts && npm run test:package",
     "check": "tsc --noEmit",
     "lint": "eslint --ext .ts src/",
-    "translate": "translate-adapter"
+    "translate": "translate-adapter -b admin/i18n/en.json"
   },
   "bugs": {
     "url": "https://github.com/crycode-de/ioBroker.discord/issues"

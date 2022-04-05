@@ -55,6 +55,19 @@ class DiscordAdapter extends import_adapter_core.Adapter {
   async onReady() {
     var _a;
     this.setInfoConnectionState(false, true);
+    if (typeof this.config.token !== "string" || !this.config.token.match(/^\w{24}\.\w{6}\.\w{27}$/)) {
+      this.log.error(`No or invalid token!`);
+      return;
+    }
+    if (!Array.isArray(this.config.authorizedUsers)) {
+      this.config.authorizedUsers = [];
+    }
+    if (!this.config.enableAuthorization) {
+      this.log.info("Authorization is disabled, so any user is able to interact with the bot. You should only disable authorization if you trust all users on any server where the bot is on.");
+    }
+    if (this.config.enableAuthorization && this.config.authorizedUsers.length === 0) {
+      this.log.info("Authorization is enabled but no authorized users are defined!");
+    }
     this.client = new import_discord.Client({
       intents: [
         import_discord.Intents.FLAGS.GUILDS,
@@ -856,8 +869,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     if (author.id === this.client.user.id) {
       return;
     }
+    const isAuthorAuthorized = this.checkUserAuthorization(author.id);
+    if (!this.config.processMessagesFromUnauthorizedUsers && !isAuthorAuthorized) {
+      this.log.debug(`Ignore message from unauthorized user ${author.tag} (id:${author.id})`);
+      return;
+    }
     const mentioned = message.mentions.users.has(this.client.user.id);
-    if (mentioned && this.config.reactOnMentions) {
+    if (mentioned && this.config.reactOnMentions && isAuthorAuthorized) {
       try {
         await message.react(this.config.reactOnMentionsEmoji);
       } catch (err) {
@@ -865,7 +883,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       }
     }
     if (!mentioned && channel.type === "GUILD_TEXT" && !this.config.processAllMessagesInServerChannel) {
-      this.log.debug("Server message without mention ignored");
+      this.log.debug("Server channel message without mention ignored");
       return;
     }
     let msgStateIdPrefix;
@@ -878,7 +896,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       return;
     }
     if (!this.messageReceiveStates.has(`${msgStateIdPrefix}.message`)) {
-      this.log.debug(`State for received message ${msgStateIdPrefix} it not known for receiving messages`);
+      this.log.debug(`State for received message ${msgStateIdPrefix} is not known for receiving messages`);
       return;
     }
     const json = {
@@ -887,7 +905,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       id: message.id,
       mentions: ((_c = message.mentions.members) == null ? void 0 : _c.map((m) => ({ id: m.id, tag: m.user.tag, displayName: m.displayName }))) || [],
       mentioned,
-      timestamp: message.createdTimestamp
+      timestamp: message.createdTimestamp,
+      authorized: isAuthorAuthorized
     };
     const proms = [];
     if (message.guildId) {
@@ -909,31 +928,35 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       ...proms
     ]);
     if (content && this.config.text2commandInstance && this.text2commandObjects.has(`${msgStateIdPrefix}.message`)) {
-      this.log.debug(`Sending "${content}" to ${this.config.text2commandInstance}`);
-      const payload = {
-        text: content
-      };
-      this.sendTo(this.config.text2commandInstance, "send", payload, async (responseObj) => {
-        const response = responseObj == null ? void 0 : responseObj.response;
-        try {
-          if (!response) {
-            this.log.debug(`Empty response from ${this.config.text2commandInstance}`);
-            return;
+      if (this.checkUserAuthorization(author.id, { useText2command: true })) {
+        this.log.debug(`Sending "${content}" to ${this.config.text2commandInstance}`);
+        const payload = {
+          text: content
+        };
+        this.sendTo(this.config.text2commandInstance, "send", payload, async (responseObj) => {
+          const response = responseObj == null ? void 0 : responseObj.response;
+          try {
+            if (!response) {
+              this.log.debug(`Empty response from ${this.config.text2commandInstance}`);
+              return;
+            }
+            this.log.debug(`Response from ${this.config.text2commandInstance}: ${response}`);
+            switch (this.config.text2commandRespondWith) {
+              case "reply":
+                await message.reply(response);
+                break;
+              case "message":
+                await message.channel.send(response);
+                break;
+              default:
+            }
+          } catch (err) {
+            this.log.warn(`Error while processing response "${response}" from ${this.config.text2commandInstance}! ${err}`);
           }
-          this.log.debug(`Response from ${this.config.text2commandInstance}: ${response}`);
-          switch (this.config.text2commandRespondWith) {
-            case "reply":
-              await message.reply(response);
-              break;
-            case "message":
-              await message.channel.send(response);
-              break;
-            default:
-          }
-        } catch (err) {
-          this.log.warn(`Error while processing response "${response}" from ${this.config.text2commandInstance}! ${err}`);
-        }
-      });
+        });
+      } else {
+        this.log.debug(`User ${author.tag} (id:${author.id}) NOT allowed to use text2command`);
+      }
     }
   }
   setupObjCustom(objId, customCfg) {
@@ -1146,6 +1169,22 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.sendTo(obj.from, obj.command, users, obj.callback);
         break;
     }
+  }
+  checkUserAuthorization(userId, required) {
+    if (!this.config.enableAuthorization) {
+      return true;
+    }
+    const user = this.config.authorizedUsers.find((au) => au.userId === userId);
+    if (!user) {
+      return false;
+    }
+    if (!required) {
+      return true;
+    }
+    if (required.getStates && !user.getStates || required.setStates && !user.setStates || required.useText2command && !user.useText2command) {
+      return false;
+    }
+    return true;
   }
   async setInfoConnectionState(connected, force = false) {
     if (force || connected !== this.infoConnected) {

@@ -70,6 +70,7 @@ export interface JsonMessageObj {
   }[];
   mentioned: boolean;
   timestamp: number;
+  authorized: boolean;
 
   author?: {
     id: Snowflake;
@@ -82,4 +83,10 @@ export interface UpdateUserPresenceResult {
   status: PresenceStatus | '';
   activityType: ValidActivityType | 'CUSTOM' | '';
   activityName: string;
+}
+
+export interface CheckAuthorizationOpts {
+  getStates?: boolean;
+  setStates?: boolean;
+  useText2command?: boolean;
 }
