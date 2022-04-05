@@ -1,4 +1,26 @@
 {
     "Token": "Simbólico",
-    "Your bot token from the discord developers portal": "Tu token de bot del portal de desarrolladores de discord"
+    "Your bot token from the discord developers portal": "Tu token de bot del portal de desarrolladores de discord",
+    "Members": "Miembros",
+    "Channels": "Canales",
+    "Roles": "roles",
+    "Display name": "Nombre para mostrar",
+    "Joined at": "Se unió a",
+    "JSON data": "datos JSON",
+    "Member count": "Cuenta de miembro",
+    "Last message": "Ultimo mensaje",
+    "Last message ID": "Identificación del último mensaje",
+    "Last message author": "Autor del último mensaje",
+    "Last message timestamp": "Marca de tiempo del último mensaje",
+    "Last message JSON data": "Datos JSON del último mensaje",
+    "Send message": "Enviar mensaje",
+    "Send file": "Enviar archivo",
+    "Send reply": "Enviar respuesta",
+    "Send reaction": "Enviar reacción",
+    "Avatar": "Avatar",
+    "Bot": "Bot",
+    "Status": "Estado",
+    "Activity type": "Tipo de actividad",
+    "Activity name": "Nombre de la actividad",
+    "User tag": "Etiqueta de usuario"
 }

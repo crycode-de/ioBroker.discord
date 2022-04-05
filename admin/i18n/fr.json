@@ -1,4 +1,26 @@
 {
     "Token": "Jeton",
-    "Your bot token from the discord developers portal": "Votre jeton de bot du portail des développeurs discord"
+    "Your bot token from the discord developers portal": "Votre jeton de bot du portail des développeurs discord",
+    "Members": "Membres",
+    "Channels": "Chaînes",
+    "Roles": "Les rôles",
+    "Display name": "Afficher un nom",
+    "Joined at": "Inscrit à",
+    "JSON data": "Données JSON",
+    "Member count": "Nombre de membres",
+    "Last message": "Dernier message",
+    "Last message ID": "Identifiant du dernier message",
+    "Last message author": "Auteur du dernier message",
+    "Last message timestamp": "Horodatage du dernier message",
+    "Last message JSON data": "Données JSON du dernier message",
+    "Send message": "Envoyer le message",
+    "Send file": "Envoyer le fichier",
+    "Send reply": "Envoyer la réponse",
+    "Send reaction": "Envoyer la réaction",
+    "Avatar": "Avatar",
+    "Bot": "Robot",
+    "Status": "Statut",
+    "Activity type": "Type d'activité",
+    "Activity name": "Nom de l'activité",
+    "User tag": "Balise d'utilisateur"
 }

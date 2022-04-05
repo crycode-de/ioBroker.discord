@@ -1,4 +1,27 @@
 {
+    "Members": "Members",
+    "Channels": "Channels",
+    "Roles": "Roles",
+    "User tag": "User tag",
+    "Display name": "Display name",
+    "Joined at": "Joined at",
+    "JSON data": "JSON data",
+    "Member count": "Member count",
+    "Last message": "Last message",
+    "Last message ID": "Last message ID",
+    "Last message author": "Last message author",
+    "Last message timestamp": "Last message timestamp",
+    "Last message JSON data": "Last message JSON data",
+    "Send message": "Send message",
+    "Send file": "Send file",
+    "Send reply": "Send reply",
+    "Send reaction": "Send reaction",
+    "Avatar": "Avatar",
+    "Bot": "Bot",
+    "Status": "Status",
+    "Activity type": "Activity type",
+    "Activity name": "Activity name",
+
     "Token": "Token",
     "Your bot token from the discord developers portal": "Your bot token from the discord developers portal"
 }

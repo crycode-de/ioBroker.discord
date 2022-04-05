@@ -1,4 +1,26 @@
 {
     "Token": "Токен",
-    "Your bot token from the discord developers portal": "Ваш токен бота с портала разработчиков Discord"
+    "Your bot token from the discord developers portal": "Ваш токен бота с портала разработчиков Discord",
+    "Members": "Члены",
+    "Channels": "каналы",
+    "Roles": "Роли",
+    "Display name": "Показать имя",
+    "Joined at": "Присоединился в",
+    "JSON data": "JSON-данные",
+    "Member count": "Количество участников",
+    "Last message": "Последнее сообщение",
+    "Last message ID": "Идентификатор последнего сообщения",
+    "Last message author": "Автор последнего сообщения",
+    "Last message timestamp": "Отметка времени последнего сообщения",
+    "Last message JSON data": "Данные JSON последнего сообщения",
+    "Send message": "Отправить сообщение",
+    "Send file": "Отправить файл",
+    "Send reply": "Отправить ответ",
+    "Send reaction": "Отправить реакцию",
+    "Avatar": "Аватар",
+    "Bot": "Бот",
+    "Status": "Положение дел",
+    "Activity type": "Тип деятельности",
+    "Activity name": "Название деятельности",
+    "User tag": "Тег пользователя"
 }

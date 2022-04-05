@@ -34,6 +34,7 @@ var import_autobind_decorator = require("autobind-decorator");
 var import_adapter_core = require("@iobroker/adapter-core");
 var import_discord = require("discord.js");
 var import_definitions = require("./lib/definitions");
+var import_i18n = require("./lib/i18n");
 class DiscordAdapter extends import_adapter_core.Adapter {
   constructor(options = {}) {
     super(__spreadProps(__spreadValues({}, options), {
@@ -202,14 +203,14 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`servers.${guild.id}.members`, {
         type: "channel",
         common: {
-          name: `Members`
+          name: (0, import_i18n.getI18nStringOrTranslated)("Members")
         },
         native: {}
       });
       await this.extendObjectAsyncCached(`servers.${guild.id}.channels`, {
         type: "channel",
         common: {
-          name: `Channels`
+          name: (0, import_i18n.getI18nStringOrTranslated)("Channels")
         },
         native: {}
       });
@@ -228,8 +229,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.roles`, {
           type: "state",
           common: {
-            name: `Roles`,
-            desc: "Roles of this member",
+            name: (0, import_i18n.getI18nStringOrTranslated)("Roles"),
             role: "text",
             type: "string",
             read: true,
@@ -243,8 +243,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.tag`, {
           type: "state",
           common: {
-            name: `Tag`,
-            desc: "Tag of this member",
+            name: (0, import_i18n.getI18nStringOrTranslated)("User tag"),
             role: "text",
             type: "string",
             read: true,
@@ -257,8 +256,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.displayName`, {
           type: "state",
           common: {
-            name: `Display name`,
-            desc: "Display name of this member",
+            name: (0, import_i18n.getI18nStringOrTranslated)("Display name"),
             role: "text",
             type: "string",
             read: true,
@@ -271,8 +269,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.joinedAt`, {
           type: "state",
           common: {
-            name: `Joined at`,
-            desc: "When the member joined the server",
+            name: (0, import_i18n.getI18nStringOrTranslated)("Joined at"),
             role: "date",
             type: "number",
             read: true,
@@ -285,8 +282,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.json`, {
           type: "state",
           common: {
-            name: `JSON`,
-            desc: "JSON data for this member",
+            name: (0, import_i18n.getI18nStringOrTranslated)("JSON data"),
             role: "json",
             type: "string",
             read: true,
@@ -335,8 +331,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           await this.extendObjectAsyncCached(`${channelIdPrefix}.json`, {
             type: "state",
             common: {
-              name: `JSON`,
-              desc: "JSON data for this channel",
+              name: (0, import_i18n.getI18nStringOrTranslated)("JSON data"),
               role: "json",
               type: "string",
               read: true,
@@ -349,7 +344,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.channels`, {
               type: "channel",
               common: {
-                name: `Channels`
+                name: (0, import_i18n.getI18nStringOrTranslated)("Channels")
               },
               native: {}
             });
@@ -357,7 +352,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           await this.extendObjectAsyncCached(`${channelIdPrefix}.memberCount`, {
             type: "state",
             common: {
-              name: `Member count`,
+              name: (0, import_i18n.getI18nStringOrTranslated)("Member count"),
               role: "value",
               type: "number",
               read: true,
@@ -369,7 +364,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           await this.extendObjectAsyncCached(`${channelIdPrefix}.members`, {
             type: "state",
             common: {
-              name: `Members`,
+              name: (0, import_i18n.getI18nStringOrTranslated)("Members"),
               role: "text",
               type: "string",
               read: true,
@@ -382,8 +377,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.message`, {
               type: "state",
               common: {
-                name: `Message`,
-                desc: "Last received message",
+                name: (0, import_i18n.getI18nStringOrTranslated)("Last message"),
                 role: "text",
                 type: "string",
                 read: true,
@@ -395,8 +389,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.messageId`, {
               type: "state",
               common: {
-                name: `Message ID`,
-                desc: "ID of the last received message",
+                name: (0, import_i18n.getI18nStringOrTranslated)("Last message ID"),
                 role: "text",
                 type: "string",
                 read: true,
@@ -408,8 +401,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.messageAuthor`, {
               type: "state",
               common: {
-                name: `Message author`,
-                desc: "Who send the last received message",
+                name: (0, import_i18n.getI18nStringOrTranslated)("Last message author"),
                 role: "text",
                 type: "string",
                 read: true,
@@ -421,8 +413,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.messageTimestamp`, {
               type: "state",
               common: {
-                name: `Message timestamp`,
-                desc: "Timestamp of the last received message",
+                name: (0, import_i18n.getI18nStringOrTranslated)("Last message timestamp"),
                 role: "date",
                 type: "number",
                 read: true,
@@ -434,8 +425,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.messageJson`, {
               type: "state",
               common: {
-                name: `Message JSON`,
-                desc: "JSON for the last received message",
+                name: (0, import_i18n.getI18nStringOrTranslated)("Last message JSON data"),
                 role: "json",
                 type: "string",
                 read: true,
@@ -448,8 +438,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.send`, {
               type: "state",
               common: {
-                name: `Send`,
-                desc: "Send some text or json formated content",
+                name: (0, import_i18n.getI18nStringOrTranslated)("Send message"),
                 role: "text",
                 type: "string",
                 read: true,
@@ -461,8 +450,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.sendFile`, {
               type: "state",
               common: {
-                name: `Send file`,
-                desc: "Send some file",
+                name: (0, import_i18n.getI18nStringOrTranslated)("Send file"),
                 role: "text",
                 type: "string",
                 read: true,
@@ -474,8 +462,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.sendReply`, {
               type: "state",
               common: {
-                name: `Send reply`,
-                desc: "Send a reply to a message",
+                name: (0, import_i18n.getI18nStringOrTranslated)("Send reply"),
                 role: "text",
                 type: "string",
                 read: true,
@@ -487,8 +474,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.sendReaction`, {
               type: "state",
               common: {
-                name: `Send reaction`,
-                desc: "Send a reaction to a message",
+                name: (0, import_i18n.getI18nStringOrTranslated)("Send reaction"),
                 role: "text",
                 type: "string",
                 read: true,
@@ -541,8 +527,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.json`, {
         type: "state",
         common: {
-          name: `JSON`,
-          desc: "JSON data for this user",
+          name: (0, import_i18n.getI18nStringOrTranslated)("JSON data"),
           role: "json",
           type: "string",
           read: true,
@@ -554,8 +539,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.tag`, {
         type: "state",
         common: {
-          name: `Tag`,
-          desc: "Tag of the user",
+          name: (0, import_i18n.getI18nStringOrTranslated)("User tag"),
           role: "text",
           type: "string",
           read: true,
@@ -567,8 +551,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.message`, {
         type: "state",
         common: {
-          name: `Message`,
-          desc: "Last received message",
+          name: (0, import_i18n.getI18nStringOrTranslated)("Last message"),
           role: "text",
           type: "string",
           read: true,
@@ -580,8 +563,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.messageId`, {
         type: "state",
         common: {
-          name: `Message ID`,
-          desc: "ID of the last received message",
+          name: (0, import_i18n.getI18nStringOrTranslated)("Last message ID"),
           role: "text",
           type: "string",
           read: true,
@@ -593,8 +575,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.messageTimestamp`, {
         type: "state",
         common: {
-          name: `Message timestamp`,
-          desc: "Timestamp of the last received message",
+          name: (0, import_i18n.getI18nStringOrTranslated)("Last message timestamp"),
           role: "date",
           type: "number",
           read: true,
@@ -606,8 +587,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.messageJson`, {
         type: "state",
         common: {
-          name: `Message JSON`,
-          desc: "JSON for the last received message",
+          name: (0, import_i18n.getI18nStringOrTranslated)("Last message JSON data"),
           role: "json",
           type: "string",
           read: true,
@@ -620,8 +600,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.send`, {
         type: "state",
         common: {
-          name: `Send`,
-          desc: "Send some text or json formated content",
+          name: (0, import_i18n.getI18nStringOrTranslated)("Send message"),
           role: "text",
           type: "string",
           read: true,
@@ -633,8 +612,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.sendFile`, {
         type: "state",
         common: {
-          name: `Send file`,
-          desc: "Send some file",
+          name: (0, import_i18n.getI18nStringOrTranslated)("Send file"),
           role: "text",
           type: "string",
           read: true,
@@ -646,8 +624,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.sendReply`, {
         type: "state",
         common: {
-          name: `Send reply`,
-          desc: "Send a reply to a message",
+          name: (0, import_i18n.getI18nStringOrTranslated)("Send reply"),
           role: "text",
           type: "string",
           read: true,
@@ -659,8 +636,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.sendReaction`, {
         type: "state",
         common: {
-          name: `Send reaction`,
-          desc: "Send a reaction to a message",
+          name: (0, import_i18n.getI18nStringOrTranslated)("Send reaction"),
           role: "text",
           type: "string",
           read: true,
@@ -673,7 +649,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.avatarUrl`, {
         type: "state",
         common: {
-          name: `Avatar`,
+          name: (0, import_i18n.getI18nStringOrTranslated)("Avatar"),
           role: "media.link",
           type: "string",
           read: true,
@@ -685,8 +661,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.bot`, {
         type: "state",
         common: {
-          name: `Bot`,
-          desc: "If the user is a bot",
+          name: (0, import_i18n.getI18nStringOrTranslated)("Bot"),
           role: "indicator",
           type: "boolean",
           read: true,
@@ -698,7 +673,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.status`, {
         type: "state",
         common: {
-          name: `Status`,
+          name: (0, import_i18n.getI18nStringOrTranslated)("Status"),
           role: "text",
           type: "string",
           read: true,
@@ -710,7 +685,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.activityType`, {
         type: "state",
         common: {
-          name: `Activity type`,
+          name: (0, import_i18n.getI18nStringOrTranslated)("Activity type"),
           role: "text",
           type: "string",
           read: true,
@@ -722,7 +697,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.activityName`, {
         type: "state",
         common: {
-          name: `Activity name`,
+          name: (0, import_i18n.getI18nStringOrTranslated)("Activity name"),
           role: "text",
           type: "string",
           read: true,

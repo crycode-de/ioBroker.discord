@@ -1,4 +1,26 @@
 {
     "Token": "Símbolo",
-    "Your bot token from the discord developers portal": "Seu token de bot do portal de desenvolvedores de discórdia"
+    "Your bot token from the discord developers portal": "Seu token de bot do portal de desenvolvedores de discórdia",
+    "Members": "Membros",
+    "Channels": "Canais",
+    "Roles": "Funções",
+    "Display name": "Nome em Exibição",
+    "Joined at": "Ingressou em",
+    "JSON data": "Dados JSON",
+    "Member count": "Contagem de membro",
+    "Last message": "Última mensagem",
+    "Last message ID": "Código da última mensagem",
+    "Last message author": "Autor da última mensagem",
+    "Last message timestamp": "Data e hora da última mensagem",
+    "Last message JSON data": "Dados JSON da última mensagem",
+    "Send message": "Enviar mensagem",
+    "Send file": "Enviar arquivo",
+    "Send reply": "Enviar resposta",
+    "Send reaction": "Enviar reação",
+    "Avatar": "Avatar",
+    "Bot": "Robô",
+    "Status": "Status",
+    "Activity type": "Tipo de atividade",
+    "Activity name": "Nome da atividade",
+    "User tag": "Etiqueta do usuário"
 }

@@ -1,4 +1,26 @@
 {
     "Token": "Token",
-    "Your bot token from the discord developers portal": "Uw bottoken van de discord-ontwikkelaarsportal"
+    "Your bot token from the discord developers portal": "Uw bottoken van de discord-ontwikkelaarsportal",
+    "Members": "Leden",
+    "Channels": "Kanalen",
+    "Roles": "Rollen",
+    "Display name": "Weergavenaam",
+    "Joined at": "Aangesloten bij",
+    "JSON data": "JSON-gegevens",
+    "Member count": "Leden Aantal",
+    "Last message": "Laatste bericht",
+    "Last message ID": "Laatste bericht-ID",
+    "Last message author": "Auteur laatste bericht",
+    "Last message timestamp": "Tijdstempel van laatste bericht",
+    "Last message JSON data": "Laatste bericht JSON-gegevens",
+    "Send message": "Bericht versturen",
+    "Send file": "Verstuur bestand",
+    "Send reply": "Stuur antwoord",
+    "Send reaction": "Reactie verzenden",
+    "Avatar": "Avatar",
+    "Bot": "Bot",
+    "Status": "Toestand",
+    "Activity type": "Activiteitstype",
+    "Activity name": "Naam activiteit",
+    "User tag": "Gebruikerstag"
 }

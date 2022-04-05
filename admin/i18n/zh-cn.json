@@ -1,4 +1,26 @@
 {
     "Token": "令牌",
-    "Your bot token from the discord developers portal": "来自不和谐开发者门户的机器人令牌"
+    "Your bot token from the discord developers portal": "来自不和谐开发者门户的机器人令牌",
+    "Members": "成员",
+    "Channels": "频道",
+    "Roles": "角色",
+    "Display name": "显示名称",
+    "Joined at": "加入时间",
+    "JSON data": "JSON数据",
+    "Member count": "会员数",
+    "Last message": "最后一条消息",
+    "Last message ID": "最后一条消息 ID",
+    "Last message author": "最后留言作者",
+    "Last message timestamp": "最后一条消息时间戳",
+    "Last message JSON data": "最后一条消息 JSON 数据",
+    "Send message": "发信息",
+    "Send file": "发送文件",
+    "Send reply": "发送回复",
+    "Send reaction": "发送反应",
+    "Avatar": "阿凡达",
+    "Bot": "机器人",
+    "Status": "状态",
+    "Activity type": "活动类型",
+    "Activity name": "活动名称",
+    "User tag": "用户标签"
 }

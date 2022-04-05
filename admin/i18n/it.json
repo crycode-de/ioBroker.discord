@@ -1,4 +1,26 @@
 {
     "Token": "Gettone",
-    "Your bot token from the discord developers portal": "Il tuo token bot dal portale degli sviluppatori discord"
+    "Your bot token from the discord developers portal": "Il tuo token bot dal portale degli sviluppatori discord",
+    "Members": "Membri",
+    "Channels": "Canali",
+    "Roles": "Ruoli",
+    "Display name": "Nome da visualizzare",
+    "Joined at": "Iscritto a",
+    "JSON data": "Dati JSON",
+    "Member count": "Conte membro",
+    "Last message": "Ultimo messaggio",
+    "Last message ID": "ID ultimo messaggio",
+    "Last message author": "Autore ultimo messaggio",
+    "Last message timestamp": "Data e ora dell'ultimo messaggio",
+    "Last message JSON data": "Dati JSON dell'ultimo messaggio",
+    "Send message": "Invia messaggio",
+    "Send file": "Inviare file",
+    "Send reply": "Invia risposta",
+    "Send reaction": "Invia reazione",
+    "Avatar": "Avatar",
+    "Bot": "Bot",
+    "Status": "Stato",
+    "Activity type": "Tipo di attività",
+    "Activity name": "Nome dell'attività",
+    "User tag": "Etichetta utente"
 }

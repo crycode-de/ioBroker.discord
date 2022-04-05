@@ -1,4 +1,26 @@
 {
     "Token": "Token",
-    "Your bot token from the discord developers portal": "Bot-Token aus dem Discord-Entwicklerportal"
+    "Your bot token from the discord developers portal": "Bot-Token aus dem Discord-Entwicklerportal",
+    "Members": "Mitglieder",
+    "Channels": "Kanäle",
+    "Roles": "Rollen",
+    "Display name": "Anzeigename",
+    "Joined at": "Beigetreten am",
+    "JSON data": "JSON-Daten",
+    "Member count": "Mitgliederzahl",
+    "Last message": "Letzte Nachricht",
+    "Last message ID": "ID der letzten Nachricht",
+    "Last message author": "Autor der letzten Nachricht",
+    "Last message timestamp": "Zeitstempel der letzten Nachricht",
+    "Last message JSON data": "JSON-Daten der letzten Nachricht",
+    "Send message": "Nachricht senden",
+    "Send file": "Datei senden",
+    "Send reply": "Antwort senden",
+    "Send reaction": "Reaktion senden",
+    "Avatar": "Benutzerbild",
+    "Bot": "Bot",
+    "Status": "Status",
+    "Activity type": "Aktivitätstyp",
+    "Activity name": "Aktivitätsname",
+    "User tag": "Benutzer-Tag"
 }
