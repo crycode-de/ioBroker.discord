@@ -22,5 +22,18 @@
     "Status": "状态",
     "Activity type": "活动类型",
     "Activity name": "活动名称",
-    "User tag": "用户标签"
+    "User tag": "用户标签",
+    "Get an ioBroker state value": "获取 ioBroker 状态值",
+    "Set an ioBroker state value": "设置 ioBroker 状态值",
+    "The ioBroker state to get": "要获取的 ioBroker 状态",
+    "The ioBroker state to set": "要设置的 ioBroker 状态",
+    "The value to set": "要设置的值",
+    "Unknown command!": "未知的命令！",
+    "You are not authorized to call this command!": "您无权调用此命令！",
+    "Object `%s` not found!": "找不到对象“%s”！",
+    "State `%s` not found!": "未找到状态“%s”！",
+    "Object `%s` is not of type state!": "对象“%s”不是状态类型！",
+    "true": "真的",
+    "false": "错误的",
+    "not acknowledged": "不承认"
 }

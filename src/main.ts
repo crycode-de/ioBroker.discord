@@ -24,6 +24,10 @@ import {
 } from 'discord.js';
 
 import {
+  CommandObjectConfig,
+  DiscordAdapterSlashCommands,
+} from './commands';
+import {
   SetBotPresenceOptions,
   StateId2SendTargetInfo,
   Text2commandMessagePayload,
@@ -37,7 +41,7 @@ import {
   JsonMessageObj,
   CheckAuthorizationOpts,
 } from './lib/definitions';
-import { getI18nStringOrTranslated } from './lib/i18n';
+import { i18n } from './lib/i18n';
 
 /**
  * ioBroker.discord adapter
@@ -52,7 +56,7 @@ class DiscordAdapter extends Adapter {
   /**
    * Instance of the discord client.
    */
-  private client: Client | null = null;
+  public client: Client | null = null;
 
   /**
    * Mapping of state IDs to some information where to send messages to.
@@ -83,11 +87,26 @@ class DiscordAdapter extends Adapter {
    */
   private jsonStateCache: Collection<string, JsonServersMembersObj | JsonServersChannelsObj | JsonUsersObj | JsonMessageObj> = new Collection();
 
+  /**
+   * Instance of the slash commands handler class.
+   */
+  private discordSlashCommands: DiscordAdapterSlashCommands;
+
+  /**
+   * Flag if the initial setup of the custom object configurations is done or not.
+   * While not done, custom object configuration changes will not trigger a
+   * slash commands registration automatically.
+   */
+  public initialCustomObjectSetupDone: boolean = false;
+
   public constructor(options: Partial<AdapterOptions> = {}) {
     super({
       ...options,
       name: 'discord',
     });
+
+    this.discordSlashCommands = new DiscordAdapterSlashCommands(this);
+
     this.on('ready', this.onReady);
     this.on('stateChange', this.onStateChange);
     this.on('objectChange', this.onObjectChange);
@@ -103,6 +122,11 @@ class DiscordAdapter extends Adapter {
 
     // Reset the connection indicator during startup
     this.setInfoConnectionState(false, true);
+
+    // try to get the system language
+    const systemConfig = await this.getForeignObjectAsync('system.config');
+    i18n.language = systemConfig?.common.language || 'en';
+    i18n.isFloatComma = systemConfig?.common.isFloatComma || false;
 
     // validate config
     if (typeof this.config.token !== 'string' || !this.config.token.match(/^\w{24}\.\w{6}\.\w{27}$/)) {
@@ -140,7 +164,7 @@ class DiscordAdapter extends Adapter {
 
     this.client.on('warn', (message) => this.log.warn(`Discord client warning: ${message}`));
     this.client.on('error', (err) => this.log.error(`Discord client error: ${err.toString()}`));
-    this.client.on('rateLimit', (rateLimitData) => this.log.warn(`Discord client rate limit hit: ${JSON.stringify(rateLimitData)}`));
+    this.client.on('rateLimit', (rateLimitData) => this.log.warn(`Discord client rate limit hit: ${JSON.stringify(rateLimitData)}`)); // rate limit event is just a warning - discord.js handels rate limits
     this.client.on('invalidRequestWarning', (invalidRequestWarningData) => this.log.warn(`Discord client invalid request warning: ${JSON.stringify(invalidRequestWarningData)}`));
 
     this.client.on('invalidated', () => {
@@ -185,6 +209,9 @@ class DiscordAdapter extends Adapter {
       this.client.on('presenceUpdate', (_oldPresence, newPresence) => { this.updateUserPresence(newPresence.userId, newPresence); });
     }
 
+    // init commands instance - need to be done after discord client setup
+    this.discordSlashCommands.onReady();
+
     // subscribe needed states and objects
     this.subscribeStates('*.send');
     this.subscribeStates('*.sendFile');
@@ -193,16 +220,18 @@ class DiscordAdapter extends Adapter {
     this.subscribeStates('bot.*');
     this.subscribeForeignObjects('*'); // needed to handle custom object configs
 
-    // initially get objects with custom.enableText2command enabled
-    const view = await this.getObjectViewAsync('system', 'custom', {
-      startkey: `${this.namespace}.`,
-      endkey: `${this.namespace}.\u9999`,
-    });
+    // initially get all objects with custom config
+    this.log.debug('Get all objects with custom config ...');
+    const view = await this.getObjectViewAsync('system', 'custom', {});
     if (view?.rows) {
       for (const item of view.rows) {
-        this.setupObjCustom(item.id, item.value?.[this.namespace]);
+        await this.setupObjCustom(item.id, item.value?.[this.namespace]);
       }
     }
+    this.log.debug('Getting all objects with custom config done');
+
+    // remember that the initial setup of the custom objects is done
+    this.initialCustomObjectSetupDone = true;
 
     try {
       await this.client.login(this.config.token);
@@ -212,7 +241,11 @@ class DiscordAdapter extends Adapter {
       } else {
         this.log.error(`Discord login error`);
       }
+      return;
     }
+
+    // register discord commands if login was successfull
+    await this.discordSlashCommands.registerSlashCommands();
   }
 
   /**
@@ -296,14 +329,14 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`servers.${guild.id}.members`, {
         type: 'channel',
         common: {
-          name: getI18nStringOrTranslated('Members'),
+          name: i18n.getStringOrTranslated('Members'),
         },
         native: {},
       });
       await this.extendObjectAsyncCached(`servers.${guild.id}.channels`, {
         type: 'channel',
         common: {
-          name: getI18nStringOrTranslated('Channels'),
+          name: i18n.getStringOrTranslated('Channels'),
         },
         native: {},
       });
@@ -327,7 +360,7 @@ class DiscordAdapter extends Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.roles`, {
           type: 'state',
           common: {
-            name: getI18nStringOrTranslated('Roles'),
+            name: i18n.getStringOrTranslated('Roles'),
             role: 'text',
             type: 'string',
             read: true,
@@ -342,7 +375,7 @@ class DiscordAdapter extends Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.tag`, {
           type: 'state',
           common: {
-            name: getI18nStringOrTranslated('User tag'),
+            name: i18n.getStringOrTranslated('User tag'),
             role: 'text',
             type: 'string',
             read: true,
@@ -356,7 +389,7 @@ class DiscordAdapter extends Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.displayName`, {
           type: 'state',
           common: {
-            name: getI18nStringOrTranslated('Display name'),
+            name: i18n.getStringOrTranslated('Display name'),
             role: 'text',
             type: 'string',
             read: true,
@@ -370,7 +403,7 @@ class DiscordAdapter extends Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.joinedAt`, {
           type: 'state',
           common: {
-            name: getI18nStringOrTranslated('Joined at'),
+            name: i18n.getStringOrTranslated('Joined at'),
             role: 'date',
             type: 'number',
             read: true,
@@ -384,7 +417,7 @@ class DiscordAdapter extends Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.json`, {
           type: 'state',
           common: {
-            name: getI18nStringOrTranslated('JSON data'),
+            name: i18n.getStringOrTranslated('JSON data'),
             role: 'json',
             type: 'string',
             read: true,
@@ -440,7 +473,7 @@ class DiscordAdapter extends Adapter {
           await this.extendObjectAsyncCached(`${channelIdPrefix}.json`, {
             type: 'state',
             common: {
-              name: getI18nStringOrTranslated('JSON data'),
+              name: i18n.getStringOrTranslated('JSON data'),
               role: 'json',
               type: 'string',
               read: true,
@@ -453,7 +486,7 @@ class DiscordAdapter extends Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.channels`, {
               type: 'channel',
               common: {
-                name: getI18nStringOrTranslated('Channels'),
+                name: i18n.getStringOrTranslated('Channels'),
               },
               native: {},
             });
@@ -461,7 +494,7 @@ class DiscordAdapter extends Adapter {
           await this.extendObjectAsyncCached(`${channelIdPrefix}.memberCount`, {
             type: 'state',
             common: {
-              name: getI18nStringOrTranslated('Member count'),
+              name: i18n.getStringOrTranslated('Member count'),
               role: 'value',
               type: 'number',
               read: true,
@@ -473,7 +506,7 @@ class DiscordAdapter extends Adapter {
           await this.extendObjectAsyncCached(`${channelIdPrefix}.members`, {
             type: 'state',
             common: {
-              name: getI18nStringOrTranslated('Members'),
+              name: i18n.getStringOrTranslated('Members'),
               role: 'text',
               type: 'string',
               read: true,
@@ -487,7 +520,7 @@ class DiscordAdapter extends Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.message`, {
               type: 'state',
               common: {
-                name: getI18nStringOrTranslated('Last message'),
+                name: i18n.getStringOrTranslated('Last message'),
                 role: 'text',
                 type: 'string',
                 read: true,
@@ -499,7 +532,7 @@ class DiscordAdapter extends Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.messageId`, {
               type: 'state',
               common: {
-                name: getI18nStringOrTranslated('Last message ID'),
+                name: i18n.getStringOrTranslated('Last message ID'),
                 role: 'text',
                 type: 'string',
                 read: true,
@@ -511,7 +544,7 @@ class DiscordAdapter extends Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.messageAuthor`, {
               type: 'state',
               common: {
-                name: getI18nStringOrTranslated('Last message author'),
+                name: i18n.getStringOrTranslated('Last message author'),
                 role: 'text',
                 type: 'string',
                 read: true,
@@ -523,7 +556,7 @@ class DiscordAdapter extends Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.messageTimestamp`, {
               type: 'state',
               common: {
-                name: getI18nStringOrTranslated('Last message timestamp'),
+                name: i18n.getStringOrTranslated('Last message timestamp'),
                 role: 'date',
                 type: 'number',
                 read: true,
@@ -535,7 +568,7 @@ class DiscordAdapter extends Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.messageJson`, {
               type: 'state',
               common: {
-                name: getI18nStringOrTranslated('Last message JSON data'),
+                name: i18n.getStringOrTranslated('Last message JSON data'),
                 role: 'json',
                 type: 'string',
                 read: true,
@@ -549,7 +582,7 @@ class DiscordAdapter extends Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.send`, {
               type: 'state',
               common: {
-                name: getI18nStringOrTranslated('Send message'),
+                name: i18n.getStringOrTranslated('Send message'),
                 role: 'text',
                 type: 'string',
                 read: true,
@@ -561,7 +594,7 @@ class DiscordAdapter extends Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.sendFile`, {
               type: 'state',
               common: {
-                name: getI18nStringOrTranslated('Send file'),
+                name: i18n.getStringOrTranslated('Send file'),
                 role: 'text',
                 type: 'string',
                 read: true,
@@ -573,7 +606,7 @@ class DiscordAdapter extends Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.sendReply`, {
               type: 'state',
               common: {
-                name: getI18nStringOrTranslated('Send reply'),
+                name: i18n.getStringOrTranslated('Send reply'),
                 role: 'text',
                 type: 'string',
                 read: true,
@@ -585,7 +618,7 @@ class DiscordAdapter extends Adapter {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.sendReaction`, {
               type: 'state',
               common: {
-                name: getI18nStringOrTranslated('Send reaction'),
+                name: i18n.getStringOrTranslated('Send reaction'),
                 role: 'text',
                 type: 'string',
                 read: true,
@@ -645,7 +678,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.json`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('JSON data'),
+          name: i18n.getStringOrTranslated('JSON data'),
           role: 'json',
           type: 'string',
           read: true,
@@ -658,7 +691,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.tag`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('User tag'),
+          name: i18n.getStringOrTranslated('User tag'),
           role: 'text',
           type: 'string',
           read: true,
@@ -671,7 +704,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.message`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Last message'),
+          name: i18n.getStringOrTranslated('Last message'),
           role: 'text',
           type: 'string',
           read: true,
@@ -683,7 +716,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.messageId`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Last message ID'),
+          name: i18n.getStringOrTranslated('Last message ID'),
           role: 'text',
           type: 'string',
           read: true,
@@ -695,7 +728,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.messageTimestamp`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Last message timestamp'),
+          name: i18n.getStringOrTranslated('Last message timestamp'),
           role: 'date',
           type: 'number',
           read: true,
@@ -707,7 +740,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.messageJson`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Last message JSON data'),
+          name: i18n.getStringOrTranslated('Last message JSON data'),
           role: 'json',
           type: 'string',
           read: true,
@@ -721,7 +754,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.send`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Send message'),
+          name: i18n.getStringOrTranslated('Send message'),
           role: 'text',
           type: 'string',
           read: true,
@@ -733,7 +766,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.sendFile`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Send file'),
+          name: i18n.getStringOrTranslated('Send file'),
           role: 'text',
           type: 'string',
           read: true,
@@ -745,7 +778,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.sendReply`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Send reply'),
+          name: i18n.getStringOrTranslated('Send reply'),
           role: 'text',
           type: 'string',
           read: true,
@@ -757,7 +790,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.sendReaction`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Send reaction'),
+          name: i18n.getStringOrTranslated('Send reaction'),
           role: 'text',
           type: 'string',
           read: true,
@@ -771,7 +804,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.avatarUrl`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Avatar'),
+          name: i18n.getStringOrTranslated('Avatar'),
           role: 'media.link',
           type: 'string',
           read: true,
@@ -784,7 +817,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.bot`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Bot'),
+          name: i18n.getStringOrTranslated('Bot'),
           role: 'indicator',
           type: 'boolean',
           read: true,
@@ -797,7 +830,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.status`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Status'),
+          name: i18n.getStringOrTranslated('Status'),
           role: 'text',
           type: 'string',
           read: true,
@@ -809,7 +842,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.activityType`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Activity type'),
+          name: i18n.getStringOrTranslated('Activity type'),
           role: 'text',
           type: 'string',
           read: true,
@@ -821,7 +854,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}.activityName`, {
         type: 'state',
         common: {
-          name: getI18nStringOrTranslated('Activity name'),
+          name: i18n.getStringOrTranslated('Activity name'),
           role: 'text',
           type: 'string',
           read: true,
@@ -1112,7 +1145,7 @@ class DiscordAdapter extends Adapter {
    * @param objId The object ID.
    * @param customCfg The custom config part of the object for this adapter instance.
    */
-  private setupObjCustom (objId: string, customCfg: ioBroker.CustomConfig | undefined): void {
+  private async setupObjCustom (objId: string, customCfg: ioBroker.CustomConfig | null | undefined, objCommon?: ioBroker.StateCommon): Promise<void> {
     // own .message objects - enableText2command
     if (objId.startsWith(`${this.namespace}.`) && objId.endsWith('.message')) {
       if (customCfg?.enabled && customCfg.enableText2command) {
@@ -1124,7 +1157,55 @@ class DiscordAdapter extends Adapter {
       }
     }
 
-    // TODO: other objects
+    if (customCfg?.enableCommands) {
+      // commands enabled
+
+      // load objCommon if not provided
+      if (!objCommon) {
+        const obj = await this.getForeignObjectAsync(objId);
+        if (obj?.type === 'state') {
+          objCommon = obj.common;
+        } else {
+          this.log.warn(`Object ${objId} has commands enabled but this seams to be an error because it is not a state object!`);
+        }
+      }
+
+      // try to get the name
+      let name = customCfg.commandsName;
+      if (!name && objCommon) {
+        if (typeof objCommon.name === 'object') {
+          name = objCommon.name[i18n.language] || objCommon.name.en;
+        } else {
+          name = objCommon.name;
+        }
+      }
+
+      const cfg: CommandObjectConfig = {
+        id: objId,
+        alias: customCfg.commandsAlias || objId,
+        name: name || objId,
+        get: !!customCfg.commandsAllowGet,
+        set: !!customCfg.commandsAllowSet,
+      };
+
+      // do some checks
+      let cfgOk: boolean = true;
+      if (cfg.name.length > 100) {
+        this.log.warn(`Command name for ${objId} exceeds the limit of 100 chars! This object will be ignored.`);
+        cfgOk = false;
+      }
+      if (!cfg.alias.match(/^[0-9a-zA-Z._-]{0,100}$/)) {
+        this.log.warn(`Command alias for ${objId} includes invalid chars or exceeds the limit of 100 chars! This object will be ignored.`);
+        cfgOk = false;
+      }
+
+      // setup command
+      this.discordSlashCommands.setupCommandObject(objId, cfgOk ? cfg : null);
+
+    } else {
+      // commands not enabled
+      this.discordSlashCommands.setupCommandObject(objId, null);
+    }
   }
 
   /**
@@ -1134,12 +1215,14 @@ class DiscordAdapter extends Adapter {
   private onObjectChange (objId: string, obj: ioBroker.Object | null | undefined): void {
     if (obj) {
       // The object was changed
-      this.log.silly(`object ${objId} changed: ${JSON.stringify(obj)}`);
-      this.setupObjCustom(objId, obj.common?.custom?.[this.namespace]);
+      if (obj.type === 'state') {
+        this.log.silly(`Object ${objId} changed: ${JSON.stringify(obj)}`);
+        this.setupObjCustom(objId, obj.common?.custom?.[this.namespace], obj.common);
+      }
     } else {
       // The object was deleted
-      this.log.silly(`object ${objId} deleted`);
-      this.setupObjCustom(objId, undefined);
+      this.log.silly(`Object ${objId} deleted`);
+      this.setupObjCustom(objId, null);
     }
   }
 
@@ -1150,7 +1233,7 @@ class DiscordAdapter extends Adapter {
   private async onStateChange(stateId: string, state: ioBroker.State | null | undefined): Promise<void> {
     this.log.silly(`State changed: ${stateId} ${state?.val} (ack=${state?.ack})`);
 
-    if (!state || state.ack) return;
+    if (!state?.ack) return;
 
     let setAck = false;
 
@@ -1398,7 +1481,13 @@ class DiscordAdapter extends Adapter {
     }
   }
 
-  private checkUserAuthorization (userId: Snowflake, required?: CheckAuthorizationOpts): boolean {
+  /**
+   * Check if a user is authorized to do something.
+   * @param userId ID of the user.
+   * @param required Object containing the required flags. If not provided the check returns if the user in the list of authorized users.
+   * @returns `true` if the user is authorized or authorization is not enabled, `false` otherwise
+   */
+  public checkUserAuthorization (userId: Snowflake, required?: CheckAuthorizationOpts): boolean {
     if (!this.config.enableAuthorization) {
       return true;
     }
@@ -1495,3 +1584,6 @@ if (require.main !== module) {
   // otherwise start the instance directly
   (() => new DiscordAdapter())();
 }
+
+// export the type of the adapter class to use it in other files
+export type { DiscordAdapter };

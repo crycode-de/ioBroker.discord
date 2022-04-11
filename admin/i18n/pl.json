@@ -22,5 +22,18 @@
     "Status": "Status",
     "Activity type": "Rodzaj aktywności",
     "Activity name": "Nazwa działania",
-    "User tag": "Tag użytkownika"
+    "User tag": "Tag użytkownika",
+    "Get an ioBroker state value": "Uzyskaj wartość stanu ioBroker",
+    "Set an ioBroker state value": "Ustaw wartość stanu ioBroker",
+    "The ioBroker state to get": "Stan ioBroker do uzyskania",
+    "The ioBroker state to set": "Stan ioBroker do ustawienia",
+    "The value to set": "Wartość do ustawienia",
+    "Unknown command!": "Nieznane polecenie!",
+    "You are not authorized to call this command!": "Nie masz uprawnień do wywołania tego polecenia!",
+    "Object `%s` not found!": "Nie znaleziono obiektu `%s`!",
+    "State `%s` not found!": "Nie znaleziono stanu `%s`!",
+    "Object `%s` is not of type state!": "Obiekt `%s` nie jest typu stan!",
+    "true": "PRAWDA",
+    "false": "fałszywy",
+    "not acknowledged": "nie potwierdzony"
 }

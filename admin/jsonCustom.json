@@ -1,6 +1,12 @@
 {
   "i18n": true,
   "items": {
+    "_language": {
+      "type": "language",
+      "system": true,
+      "hidden": "true"
+    },
+
     "enableText2command": {
       "type": "checkbox",
       "sm": 12,
@@ -23,43 +29,87 @@
       "default": false
     },
 
-    "name": {
+    "commandsName": {
       "type": "text",
       "sm": 12,
       "md": 6,
       "label": "Name",
-      "defaultFunc": "customObj.common && customObj.common.name",
-      "help": "A name for this object. Leave empty to use object's name.",
+      "defaultFunc": "(typeof customObj.common.name === 'object' ? customObj.common.name[data._language] : customObj.common.name) || ''",
+      "help": "A name for this object. Leave empty to use the object name. Must not exceed 100 chars.",
+      "validator": "!!data.commandsName.match(/^.{0,100}$/)",
       "hidden": "!data.enableCommands"
     },
-    "alias": {
+    "commandsAlias": {
       "type": "text",
       "sm": 12,
       "md": 6,
       "label": "Alias",
       "defaultFunc": "customObj._id",
-      "help": "A ID alias for this object. Leave empty to use object's id.",
-      "validator": "!!data.alias.match(/^[0-9a-zA-Z._-]*$/)",
+      "help": "An ID alias for this object. Leave empty to use the object ID. Must not exceed 100 chars.",
+      "validator": "!!data.commandsAlias.match(/^[0-9a-zA-Z._-]{0,100}$/)",
       "hidden": "!data.enableCommands"
     },
-    "readOnly": {
-      "newLine": true,
+    "commandsAllowGet": {
       "type": "checkbox",
-      "label": "Read only",
-      "help": "Only read the actual state value",
-      "defaultFunc": "customObj.common && customObj.common.write === false",
-      "sm": 6,
+      "newLine": true,
+      "sm": 12,
+      "md": 6,
+      "label": "Allow get",
+      "help": "Allow to get the state value by discord slash command.",
+      "hidden": "!data.enableCommands",
+      "defaultFunc": "customObj.common.read === true",
+      "disabled": "customObj.common.read !== true"
+    },
+    "commandsAllowSet": {
+      "type": "checkbox",
+      "sm": 12,
+      "md": 6,
+      "label": "Allow set",
+      "help": "Allow to set the state value by discord slash command.",
+      "hidden": "!data.enableCommands",
+      "defaultFunc": "customObj.common.write === true",
+      "disabled": "customObj.common.write !== true"
+    },
+
+    "commandsBooleanValueTrue": {
+      "type": "text",
+      "newLine": true,
+      "sm": 12,
+      "md": 6,
+      "label": "True value",
+      "help": "Value to be shown if the state is true.",
+      "hidden": "!data.enableCommands || customObj.common.type !== 'boolean'",
+      "default": "true"
+    },
+    "commandsBooleanValueFalse": {
+      "type": "text",
+      "sm": 12,
+      "md": 6,
+      "label": "False value",
+      "help": "Value to be shown if the state is false.",
+      "hidden": "!data.enableCommands || customObj.common.type !== 'boolean'",
+      "default": "false"
+    },
+    "commandsNumberDecimals": {
+      "type": "number",
+      "newLine": true,
+      "sm": 12,
+      "md": 6,
+      "label": "Decimals",
+      "help": "Decimals to round the value to.",
+      "hidden": "!data.enableCommands || customObj.common.type !== 'number' || (customObj.common.type === 'number' && customObj.common.role === 'date')",
+      "default": 0
+    },
+
+    "commandsShowAckFalse": {
+      "type": "checkbox",
+      "newLine": true,
+      "sm": 12,
+      "md": 6,
+      "label": "Show ack=false",
+      "help": "Show information if the state is not acknowledged.",
       "hidden": "!data.enableCommands",
       "default": true
-    },
-    "writeOnly": {
-      "type": "checkbox",
-      "label": "Write only",
-      "default": false,
-      "help": "No status query",
-      "defaultFunc": "customObj.common && customObj.common.read === false",
-      "sm": 6,
-      "hidden": "!data.enableCommands"
     }
   }
 }

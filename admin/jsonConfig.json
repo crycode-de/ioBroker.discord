@@ -219,6 +219,44 @@
           "help": "If checked, messages from all users will be processed and stored into the .message states, but they will not trigger any adapter actions."
         }
       }
+    },
+
+    "commandsTab": {
+      "type": "panel",
+      "label": "Commands",
+      "items": {
+        "enableCommands": {
+          "type": "checkbox",
+          "newLine": true,
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "label": "Enable commands",
+          "help": "If checked, the bot will register discord slash commands to get and set ioBroker states."
+        },
+
+        "cmdGetStateName": {
+          "type": "text",
+          "newLine": true,
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "hidden": "!data.enableCommands",
+          "label": "Custom get state command name",
+          "help": "Custom name for the get state command. Defaults to 'iob-get'.",
+          "placeholder": "iob-get"
+        },
+        "cmdSetStateName": {
+          "type": "text",
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "hidden": "!data.enableCommands",
+          "label": "Custom set state command name",
+          "help": "Custom name for the set state command. Defaults to 'iob-get'.",
+          "placeholder": "iob-set"
+        }
+      }
     }
   }
 }

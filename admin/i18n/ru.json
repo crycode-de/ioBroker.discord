@@ -22,5 +22,18 @@
     "Status": "Положение дел",
     "Activity type": "Тип деятельности",
     "Activity name": "Название деятельности",
-    "User tag": "Тег пользователя"
+    "User tag": "Тег пользователя",
+    "Get an ioBroker state value": "Получить значение состояния ioBroker",
+    "Set an ioBroker state value": "Установите значение состояния ioBroker",
+    "The ioBroker state to get": "Состояние ioBroker для получения",
+    "The ioBroker state to set": "Состояние ioBroker для установки",
+    "The value to set": "Значение для установки",
+    "Unknown command!": "Неизвестная команда!",
+    "You are not authorized to call this command!": "Вы не авторизованы для вызова этой команды!",
+    "Object `%s` not found!": "Объект `%s` не найден!",
+    "State `%s` not found!": "Состояние `%s` не найдено!",
+    "Object `%s` is not of type state!": "Объект `%s` не имеет состояния типа!",
+    "true": "истинный",
+    "false": "ЛОЖЬ",
+    "not acknowledged": "не подтверждено"
 }

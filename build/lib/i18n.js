@@ -20,7 +20,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var i18n_exports = {};
 __export(i18n_exports, {
-  getI18nStringOrTranslated: () => getI18nStringOrTranslated
+  i18n: () => i18n
 });
 module.exports = __toCommonJS(i18n_exports);
 var import_de = __toESM(require("../../admin/i18n/de.json"));
@@ -33,26 +33,74 @@ var import_pl = __toESM(require("../../admin/i18n/pl.json"));
 var import_pt = __toESM(require("../../admin/i18n/pt.json"));
 var import_ru = __toESM(require("../../admin/i18n/ru.json"));
 var import_zh_cn = __toESM(require("../../admin/i18n/zh-cn.json"));
-function getI18nStringOrTranslated(key) {
-  if (import_en.default[key]) {
-    return {
-      de: import_de.default[key] || key,
-      en: import_en.default[key] || key,
-      es: import_es.default[key] || key,
-      fr: import_fr.default[key] || key,
-      it: import_it.default[key] || key,
-      nl: import_nl.default[key] || key,
-      pl: import_pl.default[key] || key,
-      pt: import_pt.default[key] || key,
-      ru: import_ru.default[key] || key,
-      "zh-cn": import_zh_cn.default[key] || key
-    };
-  } else {
-    return key;
+class I18n {
+  constructor() {
+    this.language = "en";
+    this.isFloatComma = false;
+  }
+  getStringOrTranslated(key) {
+    if (import_en.default[key]) {
+      return {
+        de: import_de.default[key] || key,
+        en: import_en.default[key] || key,
+        es: import_es.default[key] || key,
+        fr: import_fr.default[key] || key,
+        it: import_it.default[key] || key,
+        nl: import_nl.default[key] || key,
+        pl: import_pl.default[key] || key,
+        pt: import_pt.default[key] || key,
+        ru: import_ru.default[key] || key,
+        "zh-cn": import_zh_cn.default[key] || key
+      };
+    } else {
+      return key;
+    }
+  }
+  getString(key, ...args) {
+    let str;
+    switch (this.language) {
+      case "de":
+        str = import_de.default[key] || key;
+        break;
+      case "en":
+        str = import_en.default[key] || key;
+        break;
+      case "es":
+        str = import_es.default[key] || key;
+        break;
+      case "fr":
+        str = import_fr.default[key] || key;
+        break;
+      case "it":
+        str = import_it.default[key] || key;
+        break;
+      case "nl":
+        str = import_nl.default[key] || key;
+        break;
+      case "pl":
+        str = import_pl.default[key] || key;
+        break;
+      case "pt":
+        str = import_pt.default[key] || key;
+        break;
+      case "ru":
+        str = import_ru.default[key] || key;
+        break;
+      case "zh-cn":
+        str = import_zh_cn.default[key] || key;
+        break;
+      default:
+        str = key;
+    }
+    for (const s of args) {
+      str = str.replace("%s", s);
+    }
+    return str;
   }
 }
+const i18n = new I18n();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  getI18nStringOrTranslated
+  i18n
 });
 //# sourceMappingURL=i18n.js.map

@@ -9,29 +9,80 @@ import pt from '../../admin/i18n/pt.json';
 import ru from '../../admin/i18n/ru.json';
 import zhCn from '../../admin/i18n/zh-cn.json';
 
-type I18nObj = typeof en;
+type I18nObj = Partial<typeof en>;
 type I18nKey = keyof I18nObj;
 
 /**
- * Get a translation object or a single string for a given translation key.
- * Uses the i18n files in `admin/i18n`.
- * @param key The key from `en.json`.
+ * Internationalization class to handle translations.
  */
-export function getI18nStringOrTranslated (key: I18nKey): ioBroker.StringOrTranslated {
-  if (en[key]) {
-    return {
-      de: (de as I18nObj)[key] || key,
-      en: en[key] || key,
-      es: (es as I18nObj)[key] || key,
-      fr: (fr as I18nObj)[key] || key,
-      it: (it as I18nObj)[key] || key,
-      nl: (nl as I18nObj)[key] || key,
-      pl: (pl as I18nObj)[key] || key,
-      pt: (pt as I18nObj)[key] || key,
-      ru: (ru as I18nObj)[key] || key,
-      'zh-cn': (zhCn as I18nObj)[key] || key,
-    };
-  } else {
-    return key;
+class I18n {
+
+  /**
+   * Language configured in `system.config` object.
+   */
+  public language: ioBroker.Languages = 'en';
+
+  /**
+   * If float numbers should be displayed using a comma instead of a dot.
+   */
+  public isFloatComma: boolean = false;
+
+  /**
+   * Get a translation object or a single string for a given translation key.
+   * Uses the i18n files in `admin/i18n`.
+   * @param key The key from `en.json`.
+   */
+  public getStringOrTranslated (key: I18nKey): ioBroker.StringOrTranslated {
+    if (en[key]) {
+      return {
+        de: (de as I18nObj)[key] || key,
+        en: (en as I18nObj)[key] || key,
+        es: (es as I18nObj)[key] || key,
+        fr: (fr as I18nObj)[key] || key,
+        it: (it as I18nObj)[key] || key,
+        nl: (nl as I18nObj)[key] || key,
+        pl: (pl as I18nObj)[key] || key,
+        pt: (pt as I18nObj)[key] || key,
+        ru: (ru as I18nObj)[key] || key,
+        'zh-cn': (zhCn as I18nObj)[key] || key,
+      };
+    } else {
+      return key;
+    }
+  }
+
+  /**
+   * Get a translated string string for a given translation key and language.
+   * Uses the i18n files in `admin/i18n`.
+   * @param key The key from `en.json`.
+   * @param args Array of strings to be inserted at `%s` in the translated string.
+   */
+  public getString (key: I18nKey, ...args: string[]): string {
+    let str: string;
+    switch (this.language) {
+      case 'de': str = (de as I18nObj)[key] || key; break;
+      case 'en': str = (en as I18nObj)[key] || key; break;
+      case 'es': str = (es as I18nObj)[key] || key; break;
+      case 'fr': str = (fr as I18nObj)[key] || key; break;
+      case 'it': str = (it as I18nObj)[key] || key; break;
+      case 'nl': str = (nl as I18nObj)[key] || key; break;
+      case 'pl': str = (pl as I18nObj)[key] || key; break;
+      case 'pt': str = (pt as I18nObj)[key] || key; break;
+      case 'ru': str = (ru as I18nObj)[key] || key; break;
+      case 'zh-cn': str = (zhCn as I18nObj)[key] || key; break;
+      default: str = key;
+    }
+
+    // replace args
+    for (const s of args) {
+      str = str.replace('%s', s);
+    }
+
+    return str;
   }
 }
+
+/**
+ * Singleton instance of the I18n class.
+ */
+export const i18n = new I18n();

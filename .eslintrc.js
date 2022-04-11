@@ -77,7 +77,19 @@ module.exports = {
             }
         ],
 
-        'semi': ['warn', 'always']
+        'semi': ['warn', 'always'],
+
+        'no-restricted-syntax': [
+            'warn',
+            {
+                selector: 'CallExpression[callee.name="setTimeout"]',
+                message: 'setTimeout should not be used. Use adapter.setTimeout instead.'
+            },
+            {
+                selector: 'CallExpression[callee.name="setInterval"]',
+                message: 'setInterval should not be used. Use adapter.setInterval instead.'
+            }
+        ]
     },
     overrides: [
         {

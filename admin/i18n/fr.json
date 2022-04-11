@@ -22,5 +22,18 @@
     "Status": "Statut",
     "Activity type": "Type d'activité",
     "Activity name": "Nom de l'activité",
-    "User tag": "Balise d'utilisateur"
+    "User tag": "Balise d'utilisateur",
+    "Get an ioBroker state value": "Obtenir une valeur d'état ioBroker",
+    "Set an ioBroker state value": "Définir une valeur d'état ioBroker",
+    "The ioBroker state to get": "L'état ioBroker pour obtenir",
+    "The ioBroker state to set": "L'état ioBroker à définir",
+    "The value to set": "La valeur à définir",
+    "Unknown command!": "Commande inconnue!",
+    "You are not authorized to call this command!": "Vous n'êtes pas autorisé à appeler cette commande !",
+    "Object `%s` not found!": "Objet `%s` introuvable !",
+    "State `%s` not found!": "État `%s` introuvable !",
+    "Object `%s` is not of type state!": "L'objet `%s` n'est pas de type état !",
+    "true": "vrai",
+    "false": "faux",
+    "not acknowledged": "non reconnu"
 }

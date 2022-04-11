@@ -64,7 +64,6 @@
         "compact": true,
         "connectionType": "cloud",
         "dataSource": "push",
-        "materialize": true,
         "adminUI": {
             "custom": "json",
             "config": "json"
@@ -105,7 +104,10 @@
         "observeUserPresence": false,
         "enableAuthorization": true,
         "authorizedUsers": [],
-        "processMessagesFromUnauthorizedUsers": false
+        "processMessagesFromUnauthorizedUsers": false,
+        "enableCommands": false,
+        "cmdGetStateName": "",
+        "cmdSetStateName": ""
     },
     "objects": [],
     "instanceObjects": [

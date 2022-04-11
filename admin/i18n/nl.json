@@ -22,5 +22,18 @@
     "Status": "Toestand",
     "Activity type": "Activiteitstype",
     "Activity name": "Naam activiteit",
-    "User tag": "Gebruikerstag"
+    "User tag": "Gebruikerstag",
+    "Get an ioBroker state value": "Een ioBroker-statuswaarde verkrijgen",
+    "Set an ioBroker state value": "Stel een ioBroker-statuswaarde in",
+    "The ioBroker state to get": "De ioBroker-status om te krijgen",
+    "The ioBroker state to set": "De ioBroker-status die moet worden ingesteld",
+    "The value to set": "De in te stellen waarde",
+    "Unknown command!": "Onbekend commando!",
+    "You are not authorized to call this command!": "U bent niet bevoegd om dit commando aan te roepen!",
+    "Object `%s` not found!": "Object `%s` niet gevonden!",
+    "State `%s` not found!": "Geef aan dat `%s` niet gevonden is!",
+    "Object `%s` is not of type state!": "Object `%s` is niet van het type staat!",
+    "true": "WAAR",
+    "false": "vals",
+    "not acknowledged": "niet erkend"
 }

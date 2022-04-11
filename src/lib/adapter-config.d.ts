@@ -18,6 +18,10 @@ declare global {
       enableAuthorization: boolean;
       authorizedUsers: AdapterConfigAuthorizedUser[];
       processMessagesFromUnauthorizedUsers: boolean;
+
+      enableCommands: boolean;
+      cmdGetStateName: string;
+      cmdSetStateName: string;
     }
 
     interface AdapterConfigAuthorizedUser {
@@ -28,9 +32,20 @@ declare global {
     }
 
     interface CustomConfig {
-      enabled: boolean;
+      enabled?: boolean;
       enableText2command?: boolean;
-      // TODO: add all
+
+      enableCommands?: boolean;
+      commandsName?: string;
+      commandsAlias?: string;
+      commandsAllowGet?: boolean;
+      commandsAllowSet?: boolean;
+
+      commandsBooleanValueTrue?: string;
+      commandsBooleanValueFalse?: string;
+      commandsNumberDecimals?: number;
+
+      commandsShowAckFalse?: boolean;
     }
   }
 }

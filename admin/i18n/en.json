@@ -22,6 +22,20 @@
     "Activity type": "Activity type",
     "Activity name": "Activity name",
 
+    "Get an ioBroker state value": "Get an ioBroker state value",
+    "Set an ioBroker state value": "Set an ioBroker state value",
+    "The ioBroker state to get": "The ioBroker state to get",
+    "The ioBroker state to set": "The ioBroker state to set",
+    "The value to set": "The value to set",
+    "Unknown command!": "Unknown command!",
+    "You are not authorized to call this command!": "You are not authorized to call this command!",
+    "Object `%s` not found!": "Object `%s` not found!",
+    "State `%s` not found!": "State `%s` not found!",
+    "Object `%s` is not of type state!": "Object `%s` is not of type state!",
+    "true": "true",
+    "false": "false",
+    "not acknowledged": "not acknowledged",
+
     "Token": "Token",
     "Your bot token from the discord developers portal": "Your bot token from the discord developers portal"
 }
