@@ -1,7 +1,9 @@
 import 'source-map-support/register';
 
 import { basename } from 'node:path';
+import { URL } from 'node:url';
 import { isDeepStrictEqual } from 'node:util';
+
 import { boundMethod } from 'autobind-decorator';
 
 import {
@@ -42,6 +44,7 @@ import {
   CheckAuthorizationOpts,
 } from './lib/definitions';
 import { i18n } from './lib/i18n';
+import { getBufferAndNameFromBase64String } from './lib/utils';
 
 /**
  * ioBroker.discord adapter
@@ -1233,7 +1236,7 @@ class DiscordAdapter extends Adapter {
   private async onStateChange(stateId: string, state: ioBroker.State | null | undefined): Promise<void> {
     this.log.silly(`State changed: ${stateId} ${state?.val} (ack=${state?.ack})`);
 
-    if (!state?.ack) return;
+    if (!state || state.ack) return;
 
     let setAck = false;
 
@@ -1331,13 +1334,47 @@ class DiscordAdapter extends Adapter {
       } else {
         file = state.val;
       }
-      mo = {
-        content,
-        files: [{
-          attachment: file,
-          name: basename(file),
-        }],
-      };
+
+      // check for base64 encoded data
+      const b64data = getBufferAndNameFromBase64String(file);
+      if (b64data) {
+        // base64 encoded content
+        mo = {
+          content,
+          files: [{
+            attachment: b64data.buffer,
+            name: b64data.name,
+          }],
+        };
+
+      } else {
+        // not base64 encoded content
+
+        // extract the basename from file paths or urls
+        let name: string;
+        if (file.match(/^\w+:\/\//)) {
+          try {
+            const url = new URL(file);
+            name = basename(url.pathname);
+            if (url.protocol === 'file:') {
+              file = url.pathname;
+            }
+          } catch (err) {
+            name = basename(file);
+          }
+        } else {
+          name = basename(file);
+        }
+
+        mo = {
+          content,
+          files: [{
+            attachment: file,
+            name,
+          }],
+        };
+      }
+
 
     /*
       * Special case .sendReply state

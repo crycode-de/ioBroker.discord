@@ -41,6 +41,7 @@ var main_exports = {};
 module.exports = __toCommonJS(main_exports);
 var import_register = require("source-map-support/register");
 var import_node_path = require("node:path");
+var import_node_url = require("node:url");
 var import_node_util = require("node:util");
 var import_autobind_decorator = require("autobind-decorator");
 var import_adapter_core = require("@iobroker/adapter-core");
@@ -48,6 +49,7 @@ var import_discord = require("discord.js");
 var import_commands = require("./commands");
 var import_definitions = require("./lib/definitions");
 var import_i18n = require("./lib/i18n");
+var import_utils = require("./lib/utils");
 class DiscordAdapter extends import_adapter_core.Adapter {
   constructor(options = {}) {
     super(__spreadProps(__spreadValues({}, options), {
@@ -1017,7 +1019,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
   }
   async onStateChange(stateId, state) {
     this.log.silly(`State changed: ${stateId} ${state == null ? void 0 : state.val} (ack=${state == null ? void 0 : state.ack})`);
-    if (!(state == null ? void 0 : state.ack))
+    if (!state || state.ack)
       return;
     let setAck = false;
     if (stateId.startsWith(`${this.namespace}.`)) {
@@ -1089,13 +1091,38 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       } else {
         file = state.val;
       }
-      mo = {
-        content,
-        files: [{
-          attachment: file,
-          name: (0, import_node_path.basename)(file)
-        }]
-      };
+      const b64data = (0, import_utils.getBufferAndNameFromBase64String)(file);
+      if (b64data) {
+        mo = {
+          content,
+          files: [{
+            attachment: b64data.buffer,
+            name: b64data.name
+          }]
+        };
+      } else {
+        let name;
+        if (file.match(/^\w+:\/\//)) {
+          try {
+            const url = new import_node_url.URL(file);
+            name = (0, import_node_path.basename)(url.pathname);
+            if (url.protocol === "file:") {
+              file = url.pathname;
+            }
+          } catch (err) {
+            name = (0, import_node_path.basename)(file);
+          }
+        } else {
+          name = (0, import_node_path.basename)(file);
+        }
+        mo = {
+          content,
+          files: [{
+            attachment: file,
+            name
+          }]
+        };
+      }
     } else if (stateId.endsWith(".sendReply") || stateId.endsWith(".sendReaction")) {
       const idx = state.val.indexOf("|");
       let messageReference;
