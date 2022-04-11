@@ -1,3 +1,5 @@
+import { basename } from 'node:path';
+import { URL } from 'node:url';
 
 interface BufferAndName {
   buffer: Buffer;
@@ -29,4 +31,22 @@ export function getBufferAndNameFromBase64String (base64String: string, name?: s
     buffer,
     name,
   };
+}
+
+/**
+ * Get the basename of a path or URL to a file.
+ * @param file Path or URL to a file.
+ * @returns The basename of the file.
+ */
+export function getBasenameFromFilePathOrUrl (file: string): string {
+  if (file.match(/^\w+:\/\//)) {
+    try {
+      const url = new URL(file);
+      return basename(url.pathname);
+    } catch (err) {
+      return basename(file);
+    }
+  } else {
+    return basename(file);
+  }
 }

@@ -1,7 +1,5 @@
 import 'source-map-support/register';
 
-import { basename } from 'node:path';
-import { URL } from 'node:url';
 import { isDeepStrictEqual } from 'node:util';
 
 import { boundMethod } from 'autobind-decorator';
@@ -44,7 +42,10 @@ import {
   CheckAuthorizationOpts,
 } from './lib/definitions';
 import { i18n } from './lib/i18n';
-import { getBufferAndNameFromBase64String } from './lib/utils';
+import {
+  getBasenameFromFilePathOrUrl,
+  getBufferAndNameFromBase64String,
+} from './lib/utils';
 
 /**
  * ioBroker.discord adapter
@@ -1349,21 +1350,11 @@ class DiscordAdapter extends Adapter {
 
       } else {
         // not base64 encoded content
+        const name = getBasenameFromFilePathOrUrl(file);
 
-        // extract the basename from file paths or urls
-        let name: string;
-        if (file.match(/^\w+:\/\//)) {
-          try {
-            const url = new URL(file);
-            name = basename(url.pathname);
-            if (url.protocol === 'file:') {
-              file = url.pathname;
-            }
-          } catch (err) {
-            name = basename(file);
-          }
-        } else {
-          name = basename(file);
+        // remove file:// prefix
+        if (file.startsWith('file://')) {
+          file = file.slice(7);
         }
 
         mo = {

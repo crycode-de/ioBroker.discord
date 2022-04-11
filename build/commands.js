@@ -29,13 +29,14 @@ __export(commands_exports, {
   DiscordAdapterSlashCommands: () => DiscordAdapterSlashCommands
 });
 module.exports = __toCommonJS(commands_exports);
+var import_node_util = require("node:util");
 var import_autobind_decorator = require("autobind-decorator");
 var import_discord = require("discord.js");
 var import_builders = require("@discordjs/builders");
 var import_rest = require("@discordjs/rest");
 var import_v9 = require("discord-api-types/v9");
 var import_i18n = require("./lib/i18n");
-var import_node_util = require("node:util");
+var import_utils = require("./lib/utils");
 class DiscordAdapterSlashCommands {
   constructor(adapter) {
     this.rest = new import_rest.REST({ version: "9" });
@@ -222,7 +223,7 @@ class DiscordAdapterSlashCommands {
     }
   }
   async handleCmdGetState(interaction) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a;
     await interaction.deferReply();
     const objAlias = interaction.options.getString("state");
     const cfg = this.commandObjectConfig.find((coc) => coc.alias === objAlias);
@@ -239,26 +240,54 @@ class DiscordAdapterSlashCommands {
       await interaction.editReply(import_i18n.i18n.getString("Object `%s` is not of type state!", cfg.id));
       return;
     }
+    const objCustom = (_a = obj.common.custom) == null ? void 0 : _a[this.adapter.namespace];
     const state = await this.adapter.getForeignStateAsync(cfg.id);
     if (!state) {
       await interaction.editReply(import_i18n.i18n.getString("State `%s` not found!", cfg.id));
       return;
     }
     let val = "";
+    let msgOpts = void 0;
+    const unit = obj.common.unit ? ` ${obj.common.unit}` : "";
+    const ack = (objCustom == null ? void 0 : objCustom.commandsShowAckFalse) && !state.ack ? ` (_${import_i18n.i18n.getString("not acknowledged")}_)` : "";
     if (obj.common.role === "date" && (obj.common.type === "string" && typeof state.val === "string" || obj.common.type === "number" && typeof state.val === "number")) {
       const d = new Date(state.val);
       val = d.toLocaleString(import_i18n.i18n.language, { dateStyle: "full", timeStyle: "long" });
+    } else if (obj.common.type === "string" && (objCustom == null ? void 0 : objCustom.commandsStringSendAsFile) && typeof state.val === "string") {
+      const b64data = (0, import_utils.getBufferAndNameFromBase64String)(state.val);
+      if (b64data) {
+        msgOpts = {
+          content: `${cfg.name}${ack}:`,
+          files: [{
+            attachment: b64data.buffer,
+            name: b64data.name
+          }]
+        };
+        val = "file:base64";
+      } else {
+        if (state.val.startsWith("file://")) {
+          state.val = state.val.slice(7);
+        }
+        msgOpts = {
+          content: `${cfg.name}${ack}:`,
+          files: [{
+            attachment: state.val,
+            name: (0, import_utils.getBasenameFromFilePathOrUrl)(state.val)
+          }]
+        };
+        val = `file:${state.val}`;
+      }
     } else {
       switch (obj.common.type) {
         case "boolean":
           if (state.val) {
-            val = ((_a = obj.common.custom) == null ? void 0 : _a[this.adapter.namespace].commandsBooleanValueTrue) || import_i18n.i18n.getString("true");
+            val = (objCustom == null ? void 0 : objCustom.commandsBooleanValueTrue) || import_i18n.i18n.getString("true");
           } else {
-            val = ((_b = obj.common.custom) == null ? void 0 : _b[this.adapter.namespace].commandsBooleanValueFalse) || import_i18n.i18n.getString("false");
+            val = (objCustom == null ? void 0 : objCustom.commandsBooleanValueFalse) || import_i18n.i18n.getString("false");
           }
           break;
         case "number":
-          const decimals = ((_d = (_c = obj.common.custom) == null ? void 0 : _c[this.adapter.namespace]) == null ? void 0 : _d.commandsNumberDecimals) || 0;
+          const decimals = (objCustom == null ? void 0 : objCustom.commandsNumberDecimals) || 0;
           if (typeof state.val === "number") {
             val = state.val.toFixed(decimals);
           } else if (state.val === null) {
@@ -280,11 +309,13 @@ class DiscordAdapterSlashCommands {
           }
       }
     }
-    const unit = obj.common.unit ? ` ${obj.common.unit}` : "";
-    const ack = ((_f = (_e = obj.common.custom) == null ? void 0 : _e[this.adapter.namespace]) == null ? void 0 : _f.commandsShowAckFalse) && !state.ack ? ` (_${import_i18n.i18n.getString("not acknowledged")}_)` : "";
     this.adapter.log.debug(`Get command for ${cfg.id} - ${val}${unit}${ack}`);
     try {
-      await interaction.editReply(`${cfg.name}: ${val}${unit}${ack}`);
+      if (msgOpts) {
+        await interaction.editReply(msgOpts);
+      } else {
+        await interaction.editReply(`${cfg.name}: ${val}${unit}${ack}`);
+      }
     } catch (err) {
       this.adapter.log.warn(`Error sending interaction reply for /${this.cmdGetStateName} command! ${err}`);
     }

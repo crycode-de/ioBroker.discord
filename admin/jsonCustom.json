@@ -71,6 +71,16 @@
       "disabled": "customObj.common.write !== true"
     },
 
+    "commandsShowAckFalse": {
+      "type": "checkbox",
+      "newLine": true,
+      "sm": 12,
+      "label": "Show ack=false",
+      "help": "Show information if the state is not acknowledged.",
+      "hidden": "!data.enableCommands",
+      "default": true
+    },
+
     "commandsBooleanValueTrue": {
       "type": "text",
       "newLine": true,
@@ -100,16 +110,14 @@
       "hidden": "!data.enableCommands || customObj.common.type !== 'number' || (customObj.common.type === 'number' && customObj.common.role === 'date')",
       "default": 0
     },
-
-    "commandsShowAckFalse": {
+    "commandsStringSendAsFile": {
       "type": "checkbox",
       "newLine": true,
       "sm": 12,
-      "md": 6,
-      "label": "Show ack=false",
-      "help": "Show information if the state is not acknowledged.",
-      "hidden": "!data.enableCommands",
-      "default": true
+      "label": "Send as file",
+      "help": "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.",
+      "hidden": "!data.enableCommands || customObj.common.type !== 'string'",
+      "default": false
     }
   }
 }

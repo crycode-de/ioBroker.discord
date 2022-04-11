@@ -44,6 +44,7 @@ declare global {
       commandsBooleanValueTrue?: string;
       commandsBooleanValueFalse?: string;
       commandsNumberDecimals?: number;
+      commandsStringSendAsFile?: boolean;
 
       commandsShowAckFalse?: boolean;
     }

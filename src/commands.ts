@@ -1,13 +1,18 @@
+import { isDeepStrictEqual } from 'node:util';
+
 import { boundMethod } from 'autobind-decorator';
 
-import { ApplicationCommandPermissionData, CacheType, Collection, CommandInteraction, Interaction } from 'discord.js';
+import { ApplicationCommandPermissionData, CacheType, Collection, CommandInteraction, Interaction, MessageOptions } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
 
 import type { DiscordAdapter } from './main';
 import { i18n } from './lib/i18n';
-import { isDeepStrictEqual } from 'node:util';
+import {
+  getBasenameFromFilePathOrUrl,
+  getBufferAndNameFromBase64String,
+} from './lib/utils';
 
 export interface CommandObjectConfig {
   id: string;
@@ -358,6 +363,8 @@ export class DiscordAdapterSlashCommands {
       return;
     }
 
+    const objCustom: ioBroker.CustomConfig | undefined = obj.common.custom?.[this.adapter.namespace];
+
     // get the state
     const state = await this.adapter.getForeignStateAsync(cfg.id);
     if (!state) {
@@ -368,25 +375,67 @@ export class DiscordAdapterSlashCommands {
     // get the value depending on the state type
     let val: string = '';
 
+    // an optional MessageOptions object for special cases (like sending files)
+    let msgOpts: MessageOptions | undefined = undefined;
+
+    // add unit if defined in the object
+    const unit = obj.common.unit ? ` ${obj.common.unit}` : '';
+
+    // add info about missing ack flag if configured so
+    const ack = objCustom?.commandsShowAckFalse && !state.ack ? ` (_${i18n.getString('not acknowledged')}_)` : '';
+
     if (obj.common.role === 'date' && ((obj.common.type === 'string' && typeof state.val === 'string') || (obj.common.type === 'number' && typeof state.val === 'number'))) {
       // date values
       const d = new Date(state.val);
       val = d.toLocaleString(i18n.language, { dateStyle: 'full', timeStyle: 'long' });
 
+    } else if (obj.common.type === 'string' && objCustom?.commandsStringSendAsFile && typeof state.val === 'string') {
+      // path or url to file or base64 encoded file
+      const b64data = getBufferAndNameFromBase64String(state.val);
+      if (b64data) {
+        // base64 encoded content
+
+        msgOpts = {
+          content: `${cfg.name}${ack}:`,
+          files: [{
+            attachment: b64data.buffer,
+            name: b64data.name,
+          }],
+        };
+        val = 'file:base64';
+
+      } else {
+        // file path or url
+
+        // remove file:// prefix
+        if (state.val.startsWith('file://')) {
+          state.val = state.val.slice(7);
+        }
+
+        msgOpts = {
+          content: `${cfg.name}${ack}:`,
+          files: [{
+            attachment: state.val,
+            name: getBasenameFromFilePathOrUrl(state.val),
+          }],
+        };
+        val = `file:${state.val}`;
+      }
+
     } else {
-      // non date values
+      // non special value
       switch (obj.common.type) {
         case 'boolean':
           if (state.val) {
-            val = obj.common.custom?.[this.adapter.namespace].commandsBooleanValueTrue || i18n.getString('true');
+            val = objCustom?.commandsBooleanValueTrue || i18n.getString('true');
           } else {
-            val = obj.common.custom?.[this.adapter.namespace].commandsBooleanValueFalse || i18n.getString('false');
+            val = objCustom?.commandsBooleanValueFalse || i18n.getString('false');
           }
           break;
 
         case 'number':
           // number values
-          const decimals = obj.common.custom?.[this.adapter.namespace]?.commandsNumberDecimals || 0;
+          const decimals = objCustom?.commandsNumberDecimals || 0;
           if (typeof state.val === 'number') {
             val = state.val.toFixed(decimals);
           } else if (state.val === null) {
@@ -410,15 +459,17 @@ export class DiscordAdapterSlashCommands {
       }
     }
 
-    // add unit if defined in the object
-    const unit = obj.common.unit ? ` ${obj.common.unit}` : '';
-    const ack = obj.common.custom?.[this.adapter.namespace]?.commandsShowAckFalse && !state.ack ? ` (_${i18n.getString('not acknowledged')}_)` : '';
-
     this.adapter.log.debug(`Get command for ${cfg.id} - ${val}${unit}${ack}`);
 
     // send the value as reply to the user
     try {
-      await interaction.editReply(`${cfg.name}: ${val}${unit}${ack}`);
+      if (msgOpts) {
+        // message
+        await interaction.editReply(msgOpts);
+      } else {
+        // just text
+        await interaction.editReply(`${cfg.name}: ${val}${unit}${ack}`);
+      }
     } catch (err) {
       this.adapter.log.warn(`Error sending interaction reply for /${this.cmdGetStateName} command! ${err}`);
     }

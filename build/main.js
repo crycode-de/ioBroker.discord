@@ -40,8 +40,6 @@ var __decorateClass = (decorators, target, key, kind) => {
 var main_exports = {};
 module.exports = __toCommonJS(main_exports);
 var import_register = require("source-map-support/register");
-var import_node_path = require("node:path");
-var import_node_url = require("node:url");
 var import_node_util = require("node:util");
 var import_autobind_decorator = require("autobind-decorator");
 var import_adapter_core = require("@iobroker/adapter-core");
@@ -1101,19 +1099,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           }]
         };
       } else {
-        let name;
-        if (file.match(/^\w+:\/\//)) {
-          try {
-            const url = new import_node_url.URL(file);
-            name = (0, import_node_path.basename)(url.pathname);
-            if (url.protocol === "file:") {
-              file = url.pathname;
-            }
-          } catch (err) {
-            name = (0, import_node_path.basename)(file);
-          }
-        } else {
-          name = (0, import_node_path.basename)(file);
+        const name = (0, import_utils.getBasenameFromFilePathOrUrl)(file);
+        if (file.startsWith("file://")) {
+          file = file.slice(7);
         }
         mo = {
           content,
