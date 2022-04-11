@@ -38,11 +38,22 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 * `.json` states for channel, user and message data
 * Send messages, send files, send reactions (emojis), send reply messages, or send custom json-formated message contents
 * List server and channel members including member roles
+* Support for discord slash commands to get and set state values
 * Support for [text2command](https://github.com/ioBroker/ioBroker.text2command) (has to enabled for each `.message` state where it should be used)
 
 ## Planned features
 
 See [GitHub issue](https://github.com/crycode-de/ioBroker.discord/issues/1).
+
+## Limitations
+
+### Slash commands can be used on servers only and not in direct messages
+
+_Background:_  
+Generally it's possible to register slash commands globally which would make them available in direct messages too,
+but this currently leaks of support for setting correct per user permissions.  
+As a consequence the commands would be shown to any user.
+This may be a potential security risk and therefor it's not implemented.
 
 ## Changelog
 
