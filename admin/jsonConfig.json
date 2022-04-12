@@ -107,7 +107,7 @@
           "lg": 6,
           "hidden": "_alive",
           "hideOnlyControl": true,
-          "text": "Adapter needs to be running to be able to select a text2command instance!",
+          "text": "Adapter instance needs to be running to be able to select a text2command instance!",
           "style": {
             "color": "red"
           }

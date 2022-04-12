@@ -63,7 +63,7 @@
     "Emoji to react with on mentions. Default is 👍.": "表情符号对提及做出反应。",
     "text2command instance": "text2command 实例",
     "Send messages from states with enabled text2command to the given text2command instance.": "从启用 text2command 的状态向给定的 text2command 实例发送消息。",
-    "Adapter needs to be running to be able to select a text2command instance!": "适配器需要运行才能选择 text2command 实例！",
+    "Adapter instance needs to be running to be able to select a text2command instance!": "适配器实例需要运行才能选择 text2command 实例！",
     "Response of text2command": "text2command 的响应",
     "How the response of text2command is send.": "text2command 的响应是如何发送的。",
     "Reply": "回复",

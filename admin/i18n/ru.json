@@ -63,7 +63,7 @@
     "Emoji to react with on mentions. Default is 👍.": "Emoji, чтобы реагировать на упоминания. ",
     "text2command instance": "экземпляр text2command",
     "Send messages from states with enabled text2command to the given text2command instance.": "Отправлять сообщения из состояний с включенной командой text2 в данный экземпляр text2command.",
-    "Adapter needs to be running to be able to select a text2command instance!": "Адаптер должен быть запущен, чтобы иметь возможность выбрать экземпляр text2command!",
+    "Adapter instance needs to be running to be able to select a text2command instance!": "Экземпляр адаптера должен быть запущен, чтобы можно было выбрать экземпляр text2command!",
     "Response of text2command": "Ответ text2command",
     "How the response of text2command is send.": "Как отправляется ответ text2command.",
     "Reply": "Отвечать",

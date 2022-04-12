@@ -63,7 +63,7 @@
     "Emoji to react with on mentions. Default is 👍.": "Emoji, z którą można reagować na wzmianki. ",
     "text2command instance": "instancja text2command",
     "Send messages from states with enabled text2command to the given text2command instance.": "Wysyłaj wiadomości ze stanów z włączoną opcją text2command do podanej instancji text2command.",
-    "Adapter needs to be running to be able to select a text2command instance!": "Adapter musi być uruchomiony, aby móc wybrać instancję text2command!",
+    "Adapter instance needs to be running to be able to select a text2command instance!": "Instancja adaptera musi być uruchomiona, aby móc wybrać instancję text2command!",
     "Response of text2command": "Odpowiedź polecenia text2command",
     "How the response of text2command is send.": "Jak wysyłana jest odpowiedź text2command.",
     "Reply": "Odpowiedź",

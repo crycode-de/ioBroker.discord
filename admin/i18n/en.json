@@ -65,7 +65,7 @@
     "Emoji to react with on mentions. Default is 👍.": "Emoji to react with on mentions. Default is 👍.",
     "text2command instance": "text2command instance",
     "Send messages from states with enabled text2command to the given text2command instance.": "Send messages from states with enabled text2command to the given text2command instance.",
-    "Adapter needs to be running to be able to select a text2command instance!": "Adapter needs to be running to be able to select a text2command instance!",
+    "Adapter instance needs to be running to be able to select a text2command instance!": "Adapter instance  needs to be running to be able to select a text2command instance!",
     "Response of text2command": "Response of text2command",
     "How the response of text2command is send.": "How the response of text2command is send.",
     "Reply": "Reply",
