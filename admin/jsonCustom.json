@@ -25,7 +25,7 @@
       "newLine": true,
       "sm": 12,
       "label": "Enable discord commands for this state",
-      "help": "Make this state available for discord commands",
+      "help": "Make this state available for discord commands.",
       "default": false
     },
 
@@ -55,7 +55,7 @@
       "sm": 12,
       "md": 6,
       "label": "Allow get",
-      "help": "Allow to get the state value by discord slash command.",
+      "help": "Allow to get the state value by discord slash commands.",
       "hidden": "!data.enableCommands",
       "defaultFunc": "customObj.common.read === true",
       "disabled": "customObj.common.read !== true"
@@ -65,7 +65,7 @@
       "sm": 12,
       "md": 6,
       "label": "Allow set",
-      "help": "Allow to set the state value by discord slash command.",
+      "help": "Allow to set the state value by discord slash commands.",
       "hidden": "!data.enableCommands",
       "defaultFunc": "customObj.common.write === true",
       "disabled": "customObj.common.write !== true"
@@ -77,7 +77,7 @@
       "sm": 12,
       "md": 6,
       "label": "Show ack=false",
-      "help": "Show information if the state is not acknowledged.",
+      "help": "Show an information on get commands if the state is not acknowledged.",
       "hidden": "!data.enableCommands",
       "default": true
     },

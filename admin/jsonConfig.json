@@ -98,7 +98,6 @@
           "lg": 6,
           "label": "text2command instance",
           "help": "Send messages from states with enabled text2command to the given text2command instance.",
-          "noMultiEdit": true,
           "command": "getText2commandInstances",
           "defaultFunc": "data.text2commandInstance || ''"
         },
@@ -116,7 +115,7 @@
         "text2commandRespondWith": {
           "type": "select",
           "label": "Response of text2command",
-          "help": "How the response of text2command is send",
+          "help": "How the response of text2command is send.",
           "sm": 12,
           "lg": 6,
           "hidden": "!data.text2commandInstance",
