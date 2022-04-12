@@ -46,6 +46,7 @@ class DiscordAdapterSlashCommands {
     this.lastCommandsJson = null;
     this.commandObjectConfig = new import_discord.Collection();
     this.triggerDelayedRegisterSlashCommandsTimeout = null;
+    this.wellKnownbooleanTrueValues = /* @__PURE__ */ new Set(["true", "on", "yes", "1"]);
     this.adapter = adapter;
   }
   async onReady() {
@@ -59,6 +60,7 @@ class DiscordAdapterSlashCommands {
     if (!this.adapter.config.enableCommands) {
       return;
     }
+    this.wellKnownbooleanTrueValues.add(import_i18n.i18n.getString("true")).add(import_i18n.i18n.getString("on")).add(import_i18n.i18n.getString("yes"));
     if (!this.adapter.client) {
       throw new Error("Tried to setup interaction handler for commands, but client is not initialized!");
     }
@@ -222,25 +224,36 @@ class DiscordAdapterSlashCommands {
         interaction.reply(import_i18n.i18n.getString("Unknown command!"));
     }
   }
-  async handleCmdGetState(interaction) {
-    var _a;
-    await interaction.deferReply();
-    const objAlias = interaction.options.getString("state");
+  async getObjectAndCfgFromAlias(objAlias, interaction) {
     const cfg = this.commandObjectConfig.find((coc) => coc.alias === objAlias);
     if (!cfg) {
       await interaction.editReply(import_i18n.i18n.getString("Object `%s` not found!", objAlias || ""));
-      return;
+      return [null, null];
     }
     const obj = await this.adapter.getForeignObjectAsync(cfg.id);
     if (!obj) {
       await interaction.editReply(import_i18n.i18n.getString("Object `%s` not found!", cfg.id));
-      return;
+      return [null, null];
     }
     if (obj.type !== "state") {
       await interaction.editReply(import_i18n.i18n.getString("Object `%s` is not of type state!", cfg.id));
+      return [null, null];
+    }
+    return [obj, cfg];
+  }
+  async handleCmdGetState(interaction) {
+    var _a;
+    await interaction.deferReply();
+    const objAlias = interaction.options.getString("state");
+    const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
+    if (!obj || !cfg) {
       return;
     }
     const objCustom = (_a = obj.common.custom) == null ? void 0 : _a[this.adapter.namespace];
+    if (!(objCustom == null ? void 0 : objCustom.commandsAllowGet)) {
+      await interaction.editReply(import_i18n.i18n.getString("Get not allowed for state `%s`!", cfg.id));
+      return;
+    }
     const state = await this.adapter.getForeignStateAsync(cfg.id);
     if (!state) {
       await interaction.editReply(import_i18n.i18n.getString("State `%s` not found!", cfg.id));
@@ -249,11 +262,11 @@ class DiscordAdapterSlashCommands {
     let val = "";
     let msgOpts = void 0;
     const unit = obj.common.unit ? ` ${obj.common.unit}` : "";
-    const ack = (objCustom == null ? void 0 : objCustom.commandsShowAckFalse) && !state.ack ? ` (_${import_i18n.i18n.getString("not acknowledged")}_)` : "";
+    const ack = objCustom.commandsShowAckFalse && !state.ack ? ` (_${import_i18n.i18n.getString("not acknowledged")}_)` : "";
     if (obj.common.role === "date" && (obj.common.type === "string" && typeof state.val === "string" || obj.common.type === "number" && typeof state.val === "number")) {
       const d = new Date(state.val);
       val = d.toLocaleString(import_i18n.i18n.language, { dateStyle: "full", timeStyle: "long" });
-    } else if (obj.common.type === "string" && (objCustom == null ? void 0 : objCustom.commandsStringSendAsFile) && typeof state.val === "string") {
+    } else if (obj.common.type === "string" && objCustom.commandsStringSendAsFile && typeof state.val === "string") {
       const b64data = (0, import_utils.getBufferAndNameFromBase64String)(state.val);
       if (b64data) {
         msgOpts = {
@@ -281,13 +294,13 @@ class DiscordAdapterSlashCommands {
       switch (obj.common.type) {
         case "boolean":
           if (state.val) {
-            val = (objCustom == null ? void 0 : objCustom.commandsBooleanValueTrue) || import_i18n.i18n.getString("true");
+            val = objCustom.commandsBooleanValueTrue || import_i18n.i18n.getString("true");
           } else {
-            val = (objCustom == null ? void 0 : objCustom.commandsBooleanValueFalse) || import_i18n.i18n.getString("false");
+            val = objCustom.commandsBooleanValueFalse || import_i18n.i18n.getString("false");
           }
           break;
         case "number":
-          const decimals = (objCustom == null ? void 0 : objCustom.commandsNumberDecimals) || 0;
+          const decimals = objCustom.commandsNumberDecimals || 0;
           if (typeof state.val === "number") {
             val = state.val.toFixed(decimals);
           } else if (state.val === null) {
@@ -321,8 +334,81 @@ class DiscordAdapterSlashCommands {
     }
   }
   async handleCmdSetState(interaction) {
-    interaction.deferReply();
-    interaction.editReply("Not supported yet.");
+    var _a, _b;
+    await interaction.deferReply();
+    const objAlias = interaction.options.getString("state");
+    const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
+    if (!obj || !cfg) {
+      return;
+    }
+    const objCustom = (_a = obj.common.custom) == null ? void 0 : _a[this.adapter.namespace];
+    if (!(objCustom == null ? void 0 : objCustom.commandsAllowSet)) {
+      await interaction.editReply(import_i18n.i18n.getString("Set not allowed for state `%s`!", cfg.id));
+      return;
+    }
+    let valueStr = interaction.options.getString("value");
+    if (typeof valueStr !== "string") {
+      await interaction.editReply(import_i18n.i18n.getString("No value provided!"));
+      return;
+    }
+    valueStr = valueStr.trim();
+    const unit = obj.common.unit ? ` ${obj.common.unit}` : "";
+    let value;
+    let valueReply;
+    switch (obj.common.type) {
+      case "boolean":
+        valueStr = valueStr.toLowerCase();
+        if (valueStr === ((_b = objCustom.commandsBooleanValueTrue) == null ? void 0 : _b.toLowerCase()) || this.wellKnownbooleanTrueValues.has(valueStr)) {
+          value = true;
+          valueReply = objCustom.commandsBooleanValueTrue || import_i18n.i18n.getString("true");
+        } else {
+          value = false;
+          valueReply = objCustom.commandsBooleanValueFalse || import_i18n.i18n.getString("false");
+        }
+        break;
+      case "number":
+        if (import_i18n.i18n.isFloatComma) {
+          valueStr = valueStr.replace(",", ".");
+        }
+        value = parseFloat(valueStr);
+        if (isNaN(value)) {
+          interaction.editReply(import_i18n.i18n.getString("The given value is not a number!"));
+          return;
+        }
+        valueReply = value.toString();
+        if (import_i18n.i18n.isFloatComma) {
+          valueReply = valueReply.replace(".", ",");
+        }
+        if (typeof obj.common.min === "number" && value < obj.common.min) {
+          let min = obj.common.min.toString();
+          if (import_i18n.i18n.isFloatComma) {
+            min = min.replace(".", ",");
+          }
+          await interaction.editReply(import_i18n.i18n.getString("Value %s is below the allowed minium of %s!", `${valueReply}${unit}`, `${min}${unit}`));
+          return;
+        }
+        if (typeof obj.common.max === "number" && value > obj.common.max) {
+          let max = obj.common.max.toString();
+          if (import_i18n.i18n.isFloatComma) {
+            max = max.replace(".", ",");
+          }
+          await interaction.editReply(import_i18n.i18n.getString("Value %s is above the allowed maximum of %s!", `${valueReply}${unit}`, `${max}${unit}`));
+          return;
+        }
+        break;
+      default:
+        value = valueStr;
+        valueReply = valueStr;
+    }
+    this.adapter.log.debug(`Set command for ${cfg.id} - ${value}${unit}`);
+    try {
+      await this.adapter.setForeignStateAsync(cfg.id, value, !!objCustom.commandsSetWithAck);
+    } catch (err) {
+      this.adapter.log.warn(`Error while setting state ${cfg.id} to ${value}! ${err}`);
+      await interaction.editReply(import_i18n.i18n.getString("Error while setting the state value!"));
+      return;
+    }
+    await interaction.editReply(`${cfg.name}: ${valueReply}${unit}`);
   }
 }
 __decorateClass([

@@ -2,7 +2,14 @@ import { isDeepStrictEqual } from 'node:util';
 
 import { boundMethod } from 'autobind-decorator';
 
-import { ApplicationCommandPermissionData, CacheType, Collection, CommandInteraction, Interaction, MessageOptions } from 'discord.js';
+import {
+  ApplicationCommandPermissionData,
+  CacheType,
+  Collection,
+  CommandInteraction,
+  Interaction,
+  MessageOptions,
+} from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
 import { Routes } from 'discord-api-types/v9';
@@ -52,11 +59,28 @@ export class DiscordAdapterSlashCommands {
    */
   private registerCommandsDone: boolean = false;
 
+  /**
+   * The last registered commands.
+   * Used to check if something changed an we need to register the commands again.
+   */
   private lastCommandsJson: any[] | null = null;
 
+  /**
+   * Collection of configurations for objects with commands enabled.
+   */
   private commandObjectConfig: Collection<string, CommandObjectConfig> = new Collection();
 
+  /**
+   * Timeout to trigger the delayed registration of the slash commands.
+   */
   private triggerDelayedRegisterSlashCommandsTimeout: ioBroker.Timeout | null = null;
+
+  /**
+   * Set of well known values that will be interperted as true.
+   * This is extended by some localized strings at runtime.
+   * Used to determine true values from iob-set slash commands.
+   */
+  private wellKnownbooleanTrueValues: Set<string> = new Set(['true', 'on', 'yes', '1']);
 
   constructor (adapter: DiscordAdapter) {
     this.adapter = adapter;
@@ -64,7 +88,7 @@ export class DiscordAdapterSlashCommands {
 
   /**
    * When the adapter is Ready.
-   * Called by `adapter.onReady()` after some basic checks.
+   * Called by `adapter.onReady()` after some basic checks and setup.
    */
   public async onReady (): Promise<void> {
     // apply custom command names if configured
@@ -82,6 +106,11 @@ export class DiscordAdapterSlashCommands {
     if (!this.adapter.config.enableCommands) {
       return;
     }
+
+    // add translated versions of true/on/yes to the set of well known boolean true values
+    this.wellKnownbooleanTrueValues.add(i18n.getString('true'))
+      .add(i18n.getString('on'))
+      .add(i18n.getString('yes'));
 
     // setup interaction handler for commands
     if (!this.adapter.client) {
@@ -337,6 +366,35 @@ export class DiscordAdapterSlashCommands {
   }
 
   /**
+   * Try to get the ioBroker object and CommandObjectConfig for a given object alias.
+   * The object will be checked if it's a valid state object.
+   * @param objAlias The alias of the object.
+   * @param interaction The interaction for replies on errors.
+   * @returns Array containing the object and the config or null and null.
+   */
+  private async getObjectAndCfgFromAlias (objAlias: string | null, interaction: CommandInteraction<CacheType>): Promise<[ioBroker.StateObject | null, CommandObjectConfig | null]> {
+    // find the config for the requested object
+    const cfg = this.commandObjectConfig.find((coc) => coc.alias === objAlias);
+    if (!cfg) {
+      await interaction.editReply(i18n.getString('Object `%s` not found!', objAlias || ''));
+      return [null, null];
+    }
+
+    // get the object
+    const obj = await this.adapter.getForeignObjectAsync(cfg.id);
+    if (!obj) {
+      await interaction.editReply(i18n.getString('Object `%s` not found!', cfg.id));
+      return [null, null];
+    }
+    if (obj.type !== 'state') {
+      await interaction.editReply(i18n.getString('Object `%s` is not of type state!', cfg.id));
+      return [null, null];
+    }
+
+    return [obj, cfg];
+  }
+
+  /**
    * Handler for "get state" slash commands.
    * @param interaction The interaction which triggered this.
    */
@@ -345,25 +403,18 @@ export class DiscordAdapterSlashCommands {
 
     const objAlias = interaction.options.getString('state');
 
-    // find the config for the requested object
-    const cfg = this.commandObjectConfig.find((coc) => coc.alias === objAlias);
-    if (!cfg) {
-      await interaction.editReply(i18n.getString('Object `%s` not found!', objAlias || ''));
-      return;
-    }
-
-    // get the object
-    const obj = await this.adapter.getForeignObjectAsync(cfg.id);
-    if (!obj) {
-      await interaction.editReply(i18n.getString('Object `%s` not found!', cfg.id));
-      return;
-    }
-    if (obj.type !== 'state') {
-      await interaction.editReply(i18n.getString('Object `%s` is not of type state!', cfg.id));
+    const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
+    if (!obj || !cfg) {
       return;
     }
 
     const objCustom: ioBroker.CustomConfig | undefined = obj.common.custom?.[this.adapter.namespace];
+
+    // check if get allowed
+    if (!objCustom?.commandsAllowGet) {
+      await interaction.editReply(i18n.getString('Get not allowed for state `%s`!', cfg.id));
+      return;
+    }
 
     // get the state
     const state = await this.adapter.getForeignStateAsync(cfg.id);
@@ -382,14 +433,14 @@ export class DiscordAdapterSlashCommands {
     const unit = obj.common.unit ? ` ${obj.common.unit}` : '';
 
     // add info about missing ack flag if configured so
-    const ack = objCustom?.commandsShowAckFalse && !state.ack ? ` (_${i18n.getString('not acknowledged')}_)` : '';
+    const ack = objCustom.commandsShowAckFalse && !state.ack ? ` (_${i18n.getString('not acknowledged')}_)` : '';
 
     if (obj.common.role === 'date' && ((obj.common.type === 'string' && typeof state.val === 'string') || (obj.common.type === 'number' && typeof state.val === 'number'))) {
       // date values
       const d = new Date(state.val);
       val = d.toLocaleString(i18n.language, { dateStyle: 'full', timeStyle: 'long' });
 
-    } else if (obj.common.type === 'string' && objCustom?.commandsStringSendAsFile && typeof state.val === 'string') {
+    } else if (obj.common.type === 'string' && objCustom.commandsStringSendAsFile && typeof state.val === 'string') {
       // path or url to file or base64 encoded file
       const b64data = getBufferAndNameFromBase64String(state.val);
       if (b64data) {
@@ -427,15 +478,15 @@ export class DiscordAdapterSlashCommands {
       switch (obj.common.type) {
         case 'boolean':
           if (state.val) {
-            val = objCustom?.commandsBooleanValueTrue || i18n.getString('true');
+            val = objCustom.commandsBooleanValueTrue || i18n.getString('true');
           } else {
-            val = objCustom?.commandsBooleanValueFalse || i18n.getString('false');
+            val = objCustom.commandsBooleanValueFalse || i18n.getString('false');
           }
           break;
 
         case 'number':
           // number values
-          const decimals = objCustom?.commandsNumberDecimals || 0;
+          const decimals = objCustom.commandsNumberDecimals || 0;
           if (typeof state.val === 'number') {
             val = state.val.toFixed(decimals);
           } else if (state.val === null) {
@@ -480,9 +531,107 @@ export class DiscordAdapterSlashCommands {
    * @param interaction The interaction which triggered this.
    */
   private async handleCmdSetState (interaction: CommandInteraction<CacheType>): Promise<void> {
-    interaction.deferReply();
+    await interaction.deferReply();
 
-    // TODO: implement set command
-    interaction.editReply('Not supported yet.');
+    const objAlias = interaction.options.getString('state');
+
+    const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
+    if (!obj || !cfg) {
+      return;
+    }
+
+    const objCustom: ioBroker.CustomConfig | undefined = obj.common.custom?.[this.adapter.namespace];
+
+    // check if set allowed
+    if (!objCustom?.commandsAllowSet) {
+      await interaction.editReply(i18n.getString('Set not allowed for state `%s`!', cfg.id));
+      return;
+    }
+
+    let valueStr = interaction.options.getString('value');
+    if (typeof valueStr !== 'string') {
+      await interaction.editReply(i18n.getString('No value provided!'));
+      return;
+    }
+
+    valueStr = valueStr.trim();
+
+    // add unit if defined in the object
+    const unit = obj.common.unit ? ` ${obj.common.unit}` : '';
+
+    let value: string | number | boolean;
+    let valueReply: string;
+
+    switch (obj.common.type) {
+      case 'boolean':
+        // parse as boolean value
+        valueStr = valueStr.toLowerCase();
+        if (valueStr === objCustom.commandsBooleanValueTrue?.toLowerCase() || this.wellKnownbooleanTrueValues.has(valueStr)) {
+          // true value form configures custom value or from well known boolean true values
+          value = true;
+          valueReply = objCustom.commandsBooleanValueTrue || i18n.getString('true');
+        } else {
+          // false value
+          value = false;
+          valueReply = objCustom.commandsBooleanValueFalse || i18n.getString('false');
+        }
+        break;
+
+      case 'number':
+        // parse as number (float) value
+        if (i18n.isFloatComma) {
+          valueStr = valueStr.replace(',', '.');
+        }
+        value = parseFloat(valueStr);
+
+        if (isNaN(value)) {
+          interaction.editReply(i18n.getString('The given value is not a number!'));
+          return;
+        }
+
+        valueReply = value.toString();
+        if (i18n.isFloatComma) {
+          valueReply = valueReply.replace('.', ',');
+        }
+
+        // check min and max if configured
+        if (typeof obj.common.min === 'number' && value < obj.common.min) {
+          let min = obj.common.min.toString();
+          if (i18n.isFloatComma) {
+            min = min.replace('.', ',');
+          }
+          await interaction.editReply(i18n.getString('Value %s is below the allowed minium of %s!', `${valueReply}${unit}`, `${min}${unit}`));
+          return;
+        }
+        if (typeof obj.common.max === 'number' && value > obj.common.max) {
+          let max = obj.common.max.toString();
+          if (i18n.isFloatComma) {
+            max = max.replace('.', ',');
+          }
+          await interaction.editReply(i18n.getString('Value %s is above the allowed maximum of %s!', `${valueReply}${unit}`, `${max}${unit}`));
+          return;
+        }
+
+        break;
+
+      default:
+        // string values
+        value = valueStr;
+        valueReply = valueStr;
+    }
+
+    this.adapter.log.debug(`Set command for ${cfg.id} - ${value}${unit}`);
+
+    // set the state
+    try {
+      await this.adapter.setForeignStateAsync(cfg.id, value, !!objCustom.commandsSetWithAck);
+    } catch (err) {
+      this.adapter.log.warn(`Error while setting state ${cfg.id} to ${value}! ${err}`);
+      await interaction.editReply(i18n.getString('Error while setting the state value!'));
+      return;
+    }
+
+    // send reply
+    await interaction.editReply(`${cfg.name}: ${valueReply}${unit}`);
   }
 }

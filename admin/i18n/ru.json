@@ -35,5 +35,16 @@
     "Object `%s` is not of type state!": "Объект `%s` не имеет состояния типа!",
     "true": "истинный",
     "false": "ЛОЖЬ",
-    "not acknowledged": "не подтверждено"
+    "not acknowledged": "не подтверждено",
+    "Get not allowed for state `%s`!": "Получить не разрешено для состояния `%s`!",
+    "Set not allowed for state `%s`!": "Установка не разрешена для состояния `%s`!",
+    "No value provided!": "Значение не указано!",
+    "The given value is not a number!": "Данное значение не является числом!",
+    "Value %s is below the allowed minium of %s!": "Значение %s ниже допустимого минимума %s!",
+    "Value %s is above the allowed maximum of %s!": "Значение %s превышает допустимый максимум %s!",
+    "on": "на",
+    "off": "выключенный",
+    "yes": "да",
+    "no": "нет",
+    "Error while setting the state value!": "Ошибка при установке значения состояния!"
 }

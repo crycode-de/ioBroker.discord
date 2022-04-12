@@ -35,5 +35,16 @@
     "Object `%s` is not of type state!": "Object `%s` is niet van het type staat!",
     "true": "WAAR",
     "false": "vals",
-    "not acknowledged": "niet erkend"
+    "not acknowledged": "niet erkend",
+    "Get not allowed for state `%s`!": "Krijg niet toegestaan ​​voor status `%s`!",
+    "Set not allowed for state `%s`!": "Instellen niet toegestaan ​​voor status `%s`!",
+    "No value provided!": "Geen waarde opgegeven!",
+    "The given value is not a number!": "De opgegeven waarde is geen getal!",
+    "Value %s is below the allowed minium of %s!": "Waarde %s is lager dan het toegestane minimum van %s!",
+    "Value %s is above the allowed maximum of %s!": "Waarde %s ligt boven het toegestane maximum van %s!",
+    "on": "Aan",
+    "off": "uit",
+    "yes": "ja",
+    "no": "nee",
+    "Error while setting the state value!": "Fout bij het instellen van de statuswaarde!"
 }

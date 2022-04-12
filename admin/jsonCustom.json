@@ -75,10 +75,20 @@
       "type": "checkbox",
       "newLine": true,
       "sm": 12,
+      "md": 6,
       "label": "Show ack=false",
       "help": "Show information if the state is not acknowledged.",
       "hidden": "!data.enableCommands",
       "default": true
+    },
+    "commandsSetWithAck": {
+      "type": "checkbox",
+      "sm": 12,
+      "md": 6,
+      "label": "Set with ack",
+      "help": "Set a value with ack=true.",
+      "hidden": "!data.enableCommands || !data.commandsAllowSet",
+      "default": false
     },
 
     "commandsBooleanValueTrue": {

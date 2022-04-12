@@ -47,6 +47,7 @@ declare global {
       commandsStringSendAsFile?: boolean;
 
       commandsShowAckFalse?: boolean;
+      commandsSetWithAck?: boolean;
     }
   }
 }

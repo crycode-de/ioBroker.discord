@@ -35,5 +35,16 @@
     "Object `%s` is not of type state!": "Objekt `%s` ist nicht vom Typ Zustand!",
     "true": "wahr",
     "false": "falsch",
-    "not acknowledged": "nicht bestätigt"
+    "not acknowledged": "nicht bestätigt",
+    "Get not allowed for state `%s`!": "Abfragen vom Zustand `%s` nicht erlaubt!",
+    "Set not allowed for state `%s`!": "Setzen vom Zustand `%s` nicht erlaubt!",
+    "No value provided!": "Kein Wert angegeben!",
+    "The given value is not a number!": "Der angegebene Wert ist keine Zahl!",
+    "Value %s is below the allowed minium of %s!": "Der Wert %s liegt unter dem zulässigen Minimum von %s!",
+    "Value %s is above the allowed maximum of %s!": "Der Wert %s liegt über dem zulässigen Maximum von %s!",
+    "on": "an",
+    "off": "aus",
+    "yes": "ja",
+    "no": "nein",
+    "Error while setting the state value!": "Fehler beim Setzen des Zustandswertes!"
 }

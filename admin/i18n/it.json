@@ -35,5 +35,16 @@
     "Object `%s` is not of type state!": "L'oggetto `%s` non è di tipo state!",
     "true": "VERO",
     "false": "falso",
-    "not acknowledged": "non riconosciuto"
+    "not acknowledged": "non riconosciuto",
+    "Get not allowed for state `%s`!": "Non essere consentito per lo stato `%s`!",
+    "Set not allowed for state `%s`!": "Impostazione non consentita per lo stato `%s`!",
+    "No value provided!": "Nessun valore fornito!",
+    "The given value is not a number!": "Il valore dato non è un numero!",
+    "Value %s is below the allowed minium of %s!": "Il valore %s è inferiore al minimo consentito di %s!",
+    "Value %s is above the allowed maximum of %s!": "Il valore %s è superiore al massimo consentito di %s!",
+    "on": "su",
+    "off": "spento",
+    "yes": "sì",
+    "no": "No",
+    "Error while setting the state value!": "Errore durante l'impostazione del valore di stato!"
 }

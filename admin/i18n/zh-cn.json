@@ -35,5 +35,16 @@
     "Object `%s` is not of type state!": "对象“%s”不是状态类型！",
     "true": "真的",
     "false": "错误的",
-    "not acknowledged": "不承认"
+    "not acknowledged": "不承认",
+    "Get not allowed for state `%s`!": "状态“%s”不允许！",
+    "Set not allowed for state `%s`!": "状态“%s”不允许设置！",
+    "No value provided!": "不提供价值！",
+    "The given value is not a number!": "给定的值不是数字！",
+    "Value %s is below the allowed minium of %s!": "值 %s 低于 %s 的允许最小值！",
+    "Value %s is above the allowed maximum of %s!": "值 %s 高于允许的最大值 %s！",
+    "on": "在",
+    "off": "离开",
+    "yes": "是的",
+    "no": "不",
+    "Error while setting the state value!": "设置状态值时出错！"
 }

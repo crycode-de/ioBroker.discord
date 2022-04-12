@@ -35,6 +35,17 @@
     "true": "true",
     "false": "false",
     "not acknowledged": "not acknowledged",
+    "Get not allowed for state `%s`!": "Get not allowed for state `%s`!",
+    "Set not allowed for state `%s`!": "Set not allowed for state `%s`!",
+    "No value provided!": "No value provided!",
+    "The given value is not a number!": "The given value is not a number!",
+    "Value %s is below the allowed minium of %s!": "Value %s is below the allowed minium of %s!",
+    "Value %s is above the allowed maximum of %s!": "Value %s is above the allowed maximum of %s!",
+    "on": "on",
+    "off": "off",
+    "yes": "yes",
+    "no": "no",
+    "Error while setting the state value!": "Error while setting the state value!",
 
     "Token": "Token",
     "Your bot token from the discord developers portal": "Your bot token from the discord developers portal"
