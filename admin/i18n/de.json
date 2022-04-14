@@ -54,6 +54,8 @@
     "Watch for server, channel and user updates and update objects according. If disabled, the objects will only be updated on adapter start.": "Auf Server-, Kanal- und Benutzeraktualisierungen achten und Objekte entsprechend aktualisieren. Wenn deaktiviert, dann werden die Objekte nur beim Start des Adapter aktualisiert.",
     "Observe user presence": "Anwesenheit der Benutzer beobachten",
     "Observe presence status for all known users.": "Den Anwesenheitsstatus für alle bekannten Benutzer beobachten und speichern.",
+    "Observe user voice state": "Sprachchatstatus der Benutzer beobachten",
+    "Observe voice state for all known users.": "Den Sprachchatstatus für alle bekannten Benutzer beobachten und speichern.",
     "Messages": "Nachrichten",
     "Process all messages in server channels": "Alle Nachrichten in Serverkanälen verarbeiten",
     "If checked, all messages in server channels will be processed by the adapter. Otherwise only mentions and commands will be processed.": "Wenn diese Option aktiviert ist, werden alle Nachrichten in Serverkanälen vom Adapter verarbeitet. Andernfalls werden nur Nachrichten mit Erwähnungen verarbeitet.",
@@ -115,5 +117,11 @@
     "Decimals": "Dezimalstellen",
     "Decimals to round the value to.": "Dezimalstellen, auf die der Wert gerundet werden soll.",
     "Send as file": "Als Datei versenden",
-    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "Der Wert soll als Pfad oder URL zu einer Datei oder einem Base64-codierten Dateiinhalt behandelt werden. Die Datei wird als Anhang gesendet."
+    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "Der Wert soll als Pfad oder URL zu einer Datei oder einem Base64-codierten Dateiinhalt behandelt werden. Die Datei wird als Anhang gesendet.",
+    "Voice channel": "Sprachkanal",
+    "Voice disconnect": "Sprachkanal trennen",
+    "Voice self deafen": "Sprachkanal selbst taub",
+    "Voice server deafen": "Sprachkanal Server taub",
+    "Voice self mute": "Sprachkanal selbst stumm",
+    "Voice server mute": "Sprachkanal Server stumm"
 }

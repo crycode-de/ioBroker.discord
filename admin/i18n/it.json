@@ -115,5 +115,13 @@
     "Decimals": "Decimali",
     "Decimals to round the value to.": "Decimali a cui arrotondare il valore.",
     "Send as file": "Invia come file",
-    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "Il valore deve essere considerato come il percorso o l'URL di un file o il contenuto di un file con codifica base64. "
+    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "Il valore deve essere considerato come il percorso o l'URL di un file o il contenuto di un file con codifica base64. ",
+    "Voice channel": "Canale vocale",
+    "Voice disconnect": "Disconnessione vocale",
+    "Voice self deafen": "Voce autosordante",
+    "Voice server deafen": "Server vocale assordante",
+    "Voice self mute": "Voce silenziata automaticamente",
+    "Voice server mute": "Disattivazione del server vocale",
+    "Observe user voice state": "Osservare lo stato della voce dell'utente",
+    "Observe voice state for all known users.": "Osserva lo stato della voce per tutti gli utenti conosciuti."
 }

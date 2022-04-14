@@ -115,5 +115,13 @@
     "Decimals": "Десятичные",
     "Decimals to round the value to.": "Десятичные числа, до которых округляется значение.",
     "Send as file": "Отправить как файл",
-    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "Значение следует рассматривать как путь или URL-адрес к файлу или содержимому файла в кодировке base64. "
+    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "Значение следует рассматривать как путь или URL-адрес к файлу или содержимому файла в кодировке base64. ",
+    "Voice channel": "Голосовой канал",
+    "Voice disconnect": "Голосовое отключение",
+    "Voice self deafen": "Голос самооглушается",
+    "Voice server deafen": "Голосовой сервер оглушить",
+    "Voice self mute": "Самоотключение голоса",
+    "Voice server mute": "Голосовой сервер отключен",
+    "Observe user voice state": "Наблюдайте за состоянием голоса пользователя",
+    "Observe voice state for all known users.": "Наблюдайте за состоянием голоса всех известных пользователей."
 }

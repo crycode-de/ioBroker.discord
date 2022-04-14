@@ -3,7 +3,14 @@ export const VALID_PRESENCE_STATUS_DATA = <const>['online', 'idle', 'dnd', 'invi
 export const VALID_ACTIVITY_TYPES = <const>['', 'PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'];
 export type ValidActivityType = typeof VALID_ACTIVITY_TYPES[number];
 
-import { Guild, NonThreadGuildBasedChannel, PresenceStatus, PresenceStatusData, Snowflake, User } from 'discord.js';
+import {
+  Guild,
+  NonThreadGuildBasedChannel,
+  PresenceStatus,
+  PresenceStatusData,
+  Snowflake,
+  User,
+} from 'discord.js';
 
 export interface SendTargetInfo {
   guild?: Guild;
@@ -27,9 +34,14 @@ export interface SetBotPresenceOptions {
 export interface JsonServersMembersObj {
   id: Snowflake;
   tag: string;
-  displayName: string,
-  roles: string[],
-  joined: number | null,
+  displayName: string;
+  roles: string[];
+  joined: number | null;
+  voiceChannel: string;
+  voiceSelfDeaf: boolean;
+  voiceServerDeaf: boolean;
+  voiceSelfMute: boolean;
+  voiceServerMute: boolean;
 }
 
 export interface JsonServersChannelsObj {

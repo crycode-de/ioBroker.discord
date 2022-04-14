@@ -97,7 +97,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         import_discord.Intents.FLAGS.GUILD_PRESENCES,
         import_discord.Intents.FLAGS.DIRECT_MESSAGES,
         import_discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
-        import_discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING
+        import_discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING,
+        import_discord.Intents.FLAGS.GUILD_VOICE_STATES
       ],
       partials: [
         "CHANNEL"
@@ -144,11 +145,17 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.updateUserPresence(newPresence.userId, newPresence);
       });
     }
+    if (this.config.observeUserVoiceState) {
+      this.client.on("voiceStateUpdate", this.onClientVoiceStateUpdate);
+    }
     this.discordSlashCommands.onReady();
     this.subscribeStates("*.send");
     this.subscribeStates("*.sendFile");
     this.subscribeStates("*.sendReply");
     this.subscribeStates("*.sendReaction");
+    this.subscribeStates("servers.*.members.*.voiceDisconnect");
+    this.subscribeStates("servers.*.members.*.voiceServerMute");
+    this.subscribeStates("servers.*.members.*.voiceServerDeaf");
     this.subscribeStates("bot.*");
     this.subscribeForeignObjects("*");
     this.log.debug("Get all objects with custom config ...");
@@ -204,7 +211,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     await this.updateGuilds();
   }
   async updateGuilds() {
-    var _a;
+    var _a, _b, _c;
     if (!((_a = this.client) == null ? void 0 : _a.user)) {
       throw new Error("Client not loaded");
     }
@@ -300,6 +307,85 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           native: {}
         });
         await this.setStateAsync(`servers.${guild.id}.members.${member.id}.joinedAt`, member.joinedTimestamp, true);
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceChannel`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Voice channel"),
+            role: "text",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceDisconnect`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Voice disconnect"),
+            role: "button",
+            type: "boolean",
+            read: false,
+            write: true,
+            def: false
+          },
+          native: {}
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Voice self deafen"),
+            role: "indicator",
+            type: "boolean",
+            read: true,
+            write: false,
+            def: false
+          },
+          native: {}
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Voice server deafen"),
+            role: "indicator",
+            type: "boolean",
+            read: true,
+            write: true,
+            def: false
+          },
+          native: {}
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Voice self mute"),
+            role: "indicator",
+            type: "boolean",
+            read: true,
+            write: false,
+            def: false
+          },
+          native: {}
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceServerMute`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Voice server mute"),
+            role: "indicator",
+            type: "boolean",
+            read: true,
+            write: true,
+            def: false
+          },
+          native: {}
+        });
+        await Promise.all([
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceChannel`, ((_b = member.voice.channel) == null ? void 0 : _b.name) || "", true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, !!member.voice.selfDeaf, true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, !!member.voice.serverDeaf, true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, !!member.voice.selfMute, true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceServerMute`, !!member.voice.serverMute, true)
+        ]);
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.json`, {
           type: "state",
           common: {
@@ -317,7 +403,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           id: member.id,
           displayName: member.displayName,
           roles: memberRoles,
-          joined: member.joinedTimestamp
+          joined: member.joinedTimestamp,
+          voiceChannel: ((_c = member.voice.channel) == null ? void 0 : _c.name) || "",
+          voiceSelfDeaf: !!member.voice.selfDeaf,
+          voiceServerDeaf: !!member.voice.serverDeaf,
+          voiceSelfMute: !!member.voice.selfMute,
+          voiceServerMute: !!member.voice.serverMute
         };
         if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.servers.${guild.id}.members.${member.id}.json`))) {
           await this.setStateAsync(`servers.${guild.id}.members.${member.id}.json`, JSON.stringify(json), true);
@@ -955,6 +1046,45 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       }
     }
   }
+  async onClientVoiceStateUpdate(oldState, newState) {
+    var _a, _b, _c;
+    if (!((_a = newState.member) == null ? void 0 : _a.id)) {
+      return;
+    }
+    const proms = [];
+    const json = __spreadValues({}, this.jsonStateCache.get(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`));
+    let update = false;
+    if (oldState.channelId !== newState.channelId) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, ((_b = newState.channel) == null ? void 0 : _b.name) || "", true));
+      json.voiceChannel = ((_c = newState.channel) == null ? void 0 : _c.name) || "";
+      update = true;
+    }
+    if (oldState.serverDeaf !== newState.serverDeaf) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerDeaf`, !!newState.serverDeaf, true));
+      json.voiceSelfDeaf = !!newState.selfDeaf;
+      update = true;
+    }
+    if (oldState.selfDeaf !== newState.selfDeaf) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfDeaf`, !!newState.selfDeaf, true));
+      json.voiceServerDeaf = !!newState.serverDeaf;
+      update = true;
+    }
+    if (oldState.serverMute !== newState.serverMute) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerMute`, !!newState.serverMute, true));
+      json.voiceSelfMute = !!newState.selfMute;
+      update = true;
+    }
+    if (oldState.selfMute !== newState.selfMute) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfMute`, !!newState.selfMute, true));
+      json.voiceServerMute = !!newState.serverMute;
+      update = true;
+    }
+    if (update) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.json`, JSON.stringify(json), true));
+      this.jsonStateCache.set(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`, json);
+    }
+    await Promise.all(proms);
+  }
   async setupObjCustom(objId, customCfg, objCommon) {
     if (objId.startsWith(`${this.namespace}.`) && objId.endsWith(".message")) {
       if ((customCfg == null ? void 0 : customCfg.enabled) && customCfg.enableText2command) {
@@ -1037,6 +1167,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         default:
           if (stateId.endsWith(".send") || stateId.endsWith(".sendFile") || stateId.endsWith(".sendReply") || stateId.endsWith(".sendReaction")) {
             setAck = await this.onSendStateChange(stateId, state);
+          } else if (stateId.endsWith(".voiceDisconnect") || stateId.endsWith(".voiceServerMute") || stateId.endsWith(".voiceServerDeaf")) {
+            setAck = await this.onVoiceStateChange(stateId, state);
           }
       }
     }
@@ -1184,6 +1316,46 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       return false;
     }
   }
+  async onVoiceStateChange(stateId, state) {
+    var _a;
+    const m = stateId.match(/^discord\.\d+\.servers\.(\d+)\.members\.(\d+)\.voice(Disconnect|ServerMute|ServerDeaf)$/);
+    if (!m) {
+      this.log.debug(`Voice state ${stateId} changed but could not get serverID and memberID!`);
+      return false;
+    }
+    const [, guildId, memberId, action] = m;
+    const guild = (_a = this.client) == null ? void 0 : _a.guilds.cache.get(guildId);
+    const member = guild == null ? void 0 : guild.members.cache.get(memberId);
+    if (!guild || !member) {
+      this.log.warn(`Voice state ${stateId} changed but could not get the server member!`);
+      return false;
+    }
+    try {
+      switch (action) {
+        case "Disconnect":
+          if (!state.val) {
+            return false;
+          }
+          await member.voice.disconnect();
+          this.log.debug(`Voice member ${member.user.tag} of server ${guild.name} disconnected.`);
+          break;
+        case "ServerDeaf":
+          await member.voice.setDeaf(!!state.val);
+          this.log.debug(`Voice server deafen of member ${member.user.tag} of server ${guild.name} set to ${!!state.val}.`);
+          break;
+        case "ServerMute":
+          await member.voice.setMute(!!state.val);
+          this.log.debug(`Voice server mute of member ${member.user.tag} of server ${guild.name} set to ${!!state.val}.`);
+          break;
+        default:
+          return false;
+      }
+      return true;
+    } catch (err) {
+      this.log.warn(`Voice server action of member ${member.user.tag} of server ${guild.name} can't be done! ${err}`);
+      return false;
+    }
+  }
   async onMessage(obj) {
     var _a;
     if (typeof obj !== "object")
@@ -1280,6 +1452,9 @@ __decorateClass([
 __decorateClass([
   import_autobind_decorator.boundMethod
 ], DiscordAdapter.prototype, "onClientMessageCreate", 1);
+__decorateClass([
+  import_autobind_decorator.boundMethod
+], DiscordAdapter.prototype, "onClientVoiceStateUpdate", 1);
 __decorateClass([
   import_autobind_decorator.boundMethod
 ], DiscordAdapter.prototype, "onObjectChange", 1);

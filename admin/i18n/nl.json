@@ -115,5 +115,13 @@
     "Decimals": "Decimalen",
     "Decimals to round the value to.": "Decimalen om de waarde op af te ronden.",
     "Send as file": "Verzenden als bestand",
-    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "Waarde moet worden behandeld als pad of url naar een bestand of base64-gecodeerde bestandsinhoud. "
+    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "Waarde moet worden behandeld als pad of url naar een bestand of base64-gecodeerde bestandsinhoud. ",
+    "Voice channel": "Spraakkanaal",
+    "Voice disconnect": "Spraakverbinding",
+    "Voice self deafen": "Stem zelfdoof",
+    "Voice server deafen": "Spraakserver doof",
+    "Voice self mute": "Stem zelf dempen",
+    "Voice server mute": "Spraakserver dempen",
+    "Observe user voice state": "Observeer de stemstatus van de gebruiker",
+    "Observe voice state for all known users.": "Observeer de spraakstatus van alle bekende gebruikers."
 }

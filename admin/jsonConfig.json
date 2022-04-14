@@ -54,6 +54,14 @@
           "lg": 4,
           "label": "Observe user presence",
           "help": "Observe presence status for all known users."
+        },
+        "observeUserVoiceState": {
+          "type": "checkbox",
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "label": "Observe user voice state",
+          "help": "Observe voice state for all known users."
         }
       }
     },

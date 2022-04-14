@@ -102,6 +102,7 @@
         "text2commandRespondWith": "reply",
         "dynamicServerUpdates": true,
         "observeUserPresence": false,
+        "observeUserVoiceState": false,
         "enableAuthorization": true,
         "authorizedUsers": [],
         "processMessagesFromUnauthorizedUsers": false,

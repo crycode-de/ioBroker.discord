@@ -115,5 +115,13 @@
     "Decimals": "Ułamki dziesiętne",
     "Decimals to round the value to.": "Ułamki dziesiętne do zaokrąglenia wartości.",
     "Send as file": "Wyślij jako plik",
-    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "Wartość należy traktować jako ścieżkę lub adres URL do pliku lub zawartość pliku zakodowaną w base64. "
+    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "Wartość należy traktować jako ścieżkę lub adres URL do pliku lub zawartość pliku zakodowaną w base64. ",
+    "Voice channel": "Kanał głosowy",
+    "Voice disconnect": "Rozłączenie głosu",
+    "Voice self deafen": "Głos samogłuszający",
+    "Voice server deafen": "Serwer głosowy głuchy",
+    "Voice self mute": "Samo wyciszenie głosu",
+    "Voice server mute": "Wyciszenie serwera głosowego",
+    "Observe user voice state": "Obserwuj stan głosu użytkownika",
+    "Observe voice state for all known users.": "Obserwuj stan głosu wszystkich znanych użytkowników."
 }

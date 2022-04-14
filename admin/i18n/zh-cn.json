@@ -115,5 +115,13 @@
     "Decimals": "小数点",
     "Decimals to round the value to.": "要将值四舍五入到的小数。",
     "Send as file": "作为文件发送",
-    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "值应被视为文件的路径或 url 或 base64 编码的文件内容。"
+    "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.": "值应被视为文件的路径或 url 或 base64 编码的文件内容。",
+    "Voice channel": "语音通道",
+    "Voice disconnect": "语音断开",
+    "Voice self deafen": "声音自聋",
+    "Voice server deafen": "语音服务器耳聋",
+    "Voice self mute": "语音自静音",
+    "Voice server mute": "语音服务器静音",
+    "Observe user voice state": "观察用户语音状态",
+    "Observe voice state for all known users.": "观察所有已知用户的语音状态。"
 }

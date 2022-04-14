@@ -21,6 +21,7 @@ import {
   PresenceStatusData,
   Snowflake,
   User,
+  VoiceState,
 } from 'discord.js';
 
 import {
@@ -158,6 +159,7 @@ class DiscordAdapter extends Adapter {
         Intents.FLAGS.DIRECT_MESSAGES,
         Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
         Intents.FLAGS.DIRECT_MESSAGE_TYPING,
+        Intents.FLAGS.GUILD_VOICE_STATES,
       ],
       partials: [
         'CHANNEL', // needed for DMs
@@ -213,6 +215,10 @@ class DiscordAdapter extends Adapter {
       this.client.on('presenceUpdate', (_oldPresence, newPresence) => { this.updateUserPresence(newPresence.userId, newPresence); });
     }
 
+    if (this.config.observeUserVoiceState) {
+      this.client.on('voiceStateUpdate', this.onClientVoiceStateUpdate);
+    }
+
     // init commands instance - need to be done after discord client setup
     this.discordSlashCommands.onReady();
 
@@ -221,6 +227,9 @@ class DiscordAdapter extends Adapter {
     this.subscribeStates('*.sendFile');
     this.subscribeStates('*.sendReply');
     this.subscribeStates('*.sendReaction');
+    this.subscribeStates('servers.*.members.*.voiceDisconnect');
+    this.subscribeStates('servers.*.members.*.voiceServerMute');
+    this.subscribeStates('servers.*.members.*.voiceServerDeaf');
     this.subscribeStates('bot.*');
     this.subscribeForeignObjects('*'); // needed to handle custom object configs
 
@@ -418,6 +427,86 @@ class DiscordAdapter extends Adapter {
         });
         await this.setStateAsync(`servers.${guild.id}.members.${member.id}.joinedAt`, member.joinedTimestamp, true);
 
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceChannel`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Voice channel'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceDisconnect`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Voice disconnect'),
+            role: 'button',
+            type: 'boolean',
+            read: false,
+            write: true,
+            def: false,
+          },
+          native: {},
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Voice self deafen'),
+            role: 'indicator',
+            type: 'boolean',
+            read: true,
+            write: false,
+            def: false,
+          },
+          native: {},
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Voice server deafen'),
+            role: 'indicator',
+            type: 'boolean',
+            read: true,
+            write: true,
+            def: false,
+          },
+          native: {},
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Voice self mute'),
+            role: 'indicator',
+            type: 'boolean',
+            read: true,
+            write: false,
+            def: false,
+          },
+          native: {},
+        });
+        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceServerMute`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Voice server mute'),
+            role: 'indicator',
+            type: 'boolean',
+            read: true,
+            write: true,
+            def: false,
+          },
+          native: {},
+        });
+        await Promise.all([
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceChannel`, member.voice.channel?.name || '', true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, !!member.voice.selfDeaf, true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, !!member.voice.serverDeaf, true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, !!member.voice.selfMute, true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceServerMute`, !!member.voice.serverMute, true),
+        ]);
+
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.json`, {
           type: 'state',
           common: {
@@ -437,6 +526,11 @@ class DiscordAdapter extends Adapter {
           displayName: member.displayName,
           roles: memberRoles,
           joined: member.joinedTimestamp,
+          voiceChannel: member.voice.channel?.name || '',
+          voiceSelfDeaf: !!member.voice.selfDeaf,
+          voiceServerDeaf: !!member.voice.serverDeaf,
+          voiceSelfMute: !!member.voice.selfMute,
+          voiceServerMute: !!member.voice.serverMute,
         };
         if (!isDeepStrictEqual(json, this.jsonStateCache.get(`${this.namespace}.servers.${guild.id}.members.${member.id}.json`))) {
           await this.setStateAsync(`servers.${guild.id}.members.${member.id}.json`, JSON.stringify(json), true);
@@ -1144,6 +1238,57 @@ class DiscordAdapter extends Adapter {
   }
 
   /**
+   * Handler for user voice state changes.
+   */
+  @boundMethod
+  private async onClientVoiceStateUpdate (oldState: VoiceState, newState: VoiceState): Promise<void> {
+    if (!newState.member?.id) {
+      return;
+    }
+
+    const proms: Promise<any>[] = [];
+    const json: JsonServersMembersObj = {
+      ...this.jsonStateCache.get(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`) as JsonServersMembersObj,
+    };
+
+    let update: boolean = false;
+
+    if (oldState.channelId !== newState.channelId) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, newState.channel?.name || '', true));
+      json.voiceChannel = newState.channel?.name || '';
+      update = true;
+    }
+    if (oldState.serverDeaf !== newState.serverDeaf) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerDeaf`, !!newState.serverDeaf, true));
+      json.voiceSelfDeaf = !!newState.selfDeaf;
+      update = true;
+    }
+    if (oldState.selfDeaf !== newState.selfDeaf) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfDeaf`, !!newState.selfDeaf, true));
+      json.voiceServerDeaf = !!newState.serverDeaf;
+      update = true;
+    }
+    if (oldState.serverMute !== newState.serverMute) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerMute`, !!newState.serverMute, true));
+      json.voiceSelfMute = !!newState.selfMute;
+      update = true;
+    }
+    if (oldState.selfMute !== newState.selfMute) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfMute`, !!newState.selfMute, true));
+      json.voiceServerMute = !!newState.serverMute;
+      update = true;
+    }
+
+    // json state update
+    if (update) {
+      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.json`, JSON.stringify(json), true));
+      this.jsonStateCache.set(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`, json);
+    }
+
+    await Promise.all(proms);
+  }
+
+  /**
    * Setup for objects custom config related to the adapter instance.
    * E.g. text2command enabled or state availability for commands.
    * @param objId The object ID.
@@ -1264,6 +1409,11 @@ class DiscordAdapter extends Adapter {
           // .send / .sendFile / .sendReply
           if (stateId.endsWith('.send') || stateId.endsWith('.sendFile') || stateId.endsWith('.sendReply') || stateId.endsWith('.sendReaction')) {
             setAck = await this.onSendStateChange(stateId, state);
+
+          // voice disconnect, mute/unmute, deafen/undeafen
+          } else if (stateId.endsWith('.voiceDisconnect') || stateId.endsWith('.voiceServerMute') || stateId.endsWith('.voiceServerDeaf')) {
+            setAck = await this.onVoiceStateChange(stateId, state);
+
           }
       }
 
@@ -1463,6 +1613,56 @@ class DiscordAdapter extends Adapter {
       return true;
     } catch (err) {
       this.log.warn(`Error sending value of ${stateId} to ${targetName}: ${err}`);
+      return false;
+    }
+  }
+
+  /**
+   * Handler for changes of own .voiceDisconnect, .voiceServerMute or .voiceServerDeaf states.
+   * @returns `true` if successfull.
+   */
+  private async onVoiceStateChange (stateId: string, state: ioBroker.State): Promise<boolean> {
+    const m = stateId.match(/^discord\.\d+\.servers\.(\d+)\.members\.(\d+)\.voice(Disconnect|ServerMute|ServerDeaf)$/);
+    if (!m) {
+      this.log.debug(`Voice state ${stateId} changed but could not get serverID and memberID!`);
+      return false;
+    }
+    const [, guildId, memberId, action] = m;
+
+    const guild = this.client?.guilds.cache.get(guildId);
+    const member = guild?.members.cache.get(memberId);
+    if (!guild || !member) {
+      this.log.warn(`Voice state ${stateId} changed but could not get the server member!`);
+      return false;
+    }
+
+    try {
+      switch (action) {
+        case 'Disconnect':
+          if (!state.val) {
+            return false;
+          }
+          await member.voice.disconnect();
+          this.log.debug(`Voice member ${member.user.tag} of server ${guild.name} disconnected.`);
+          break;
+
+        case 'ServerDeaf':
+          await member.voice.setDeaf(!!state.val);
+          this.log.debug(`Voice server deafen of member ${member.user.tag} of server ${guild.name} set to ${!!state.val}.`);
+          break;
+
+        case 'ServerMute':
+          await member.voice.setMute(!!state.val);
+          this.log.debug(`Voice server mute of member ${member.user.tag} of server ${guild.name} set to ${!!state.val}.`);
+          break;
+
+        default:
+          // should never happen...
+          return false;
+      }
+      return true;
+    } catch (err) {
+      this.log.warn(`Voice server action of member ${member.user.tag} of server ${guild.name} can't be done! ${err}`);
       return false;
     }
   }

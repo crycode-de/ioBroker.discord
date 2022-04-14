@@ -15,6 +15,7 @@ declare global {
       text2commandRespondWith: 'message' | 'reply' | 'none';
       dynamicServerUpdates: boolean;
       observeUserPresence: boolean;
+      observeUserVoiceState: boolean;
       enableAuthorization: boolean;
       authorizedUsers: AdapterConfigAuthorizedUser[];
       processMessagesFromUnauthorizedUsers: boolean;
