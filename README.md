@@ -28,10 +28,12 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 
 ## Features
 
-* ioBroker states for all servers and servers of the bot to receive and send messages
+* ioBroker states for all servers of the bot to receive and send messages
 * ioBroker states for all users seen by the bot to receive and send messages
 * Set the bot status including actions
-* Optional observe user status
+* Optional observe user presence status
+* Optional observe server member voice status
+* Server member voice actions (mute, deafen, disconnect)
 * Handle all messages or only messages with bot mentions on server channels
 * Handle direct messages
 * Optional automatic react with a emoji on mentions
