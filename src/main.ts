@@ -1057,8 +1057,8 @@ class DiscordAdapter extends Adapter {
       }
       await Promise.all([
         this.setStateAsync(`users.${userId}.status`, p.status , true),
-        this.setStateAsync(`users.${userId}.activityName`, p.activityType, true),
-        this.setStateAsync(`users.${userId}.activityType`, p.activityName, true),
+        this.setStateAsync(`users.${userId}.activityName`, p.activityName, true),
+        this.setStateAsync(`users.${userId}.activityType`, p.activityType, true),
         ...proms,
       ]);
       return p;
