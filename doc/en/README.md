@@ -112,6 +112,61 @@ To use the `voiceDisconnect`, `voiceServerDeaf` and `voiceServerMute` actions, t
 | `sendReaction` | Send a reaction (emoji) to a received message. |
 | `json` | JSON data of the channel information. |
 
-For the `status` and `activity*` states to be up to date, the option _Observe user presence_ in the instance configuration must be enabled.  
+For the `status` and `activity*` states to be up to date, the option _Observe user presence_ in the instance configuration must be enabled.
 
 For all `message*` and `send*` states see messages section below.
+
+## Authorization
+
+By default, authorization is enabled and only authorized users are able to
+interact with the adapter.
+
+The authorized users can be configured in the adapter configuration including
+some per-user permissions.  
+The users are identified by their internal user ID, so changes of the user tag
+don't affect the authorized users list.
+
+It's possible to disable the authorization, but this should be done only if any
+user on any server of the bot can be trusted!
+
+## Messages
+
+The adapter is able to receive and send messages from/to discord text channels and users.
+
+By default, in channels only messages with mentions of the bot are processed.
+To process messages without mentions too, the option _Process all messages in server channels_ needs to be enabled in the configuration.
+
+When a messages with a bot mention is received, the adapter will react to the message with an emoji.
+This can be customized in the adapter configuration.  
+If authorization is enabled, the bot will only react on mentions of authorized users.
+
+### Receiving messages
+
+Received messages will be stored in the `.message*` states of the channel object
+for server channel messages or of the user object for direct messages.
+
+If authorization is enabled, by default only messages from authorized users will be stored.
+This can be configured using the _Process messages from unauthorized users_ option
+in the adapter configuration to strore all received messages, even from unauthorized users.
+
+The last received message per channel/user is always stored in the `.message` state.
+The timestamp, author and ID of the last received message is stored in the appropriate states.  
+Additionally all these information are stored in json format in the `.messageJson` state.
+
+#### Using text2command
+
+To use text2command, a text2command instance must be selected in the adapter configuration.
+
+For each `.message` state the custom option _Enable text2command for this state_ can be activated.  
+When activated, each received message will be send to the selected text2command instance.
+
+The response from text2command is send as a reply, send as a normal message or
+not send, depending on the adapter configuration.
+
+### Sending messages
+
+_TODO_
+
+## Slash commands
+
+_TODO_
