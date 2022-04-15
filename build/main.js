@@ -55,7 +55,6 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }));
     this.infoConnected = false;
     this.client = null;
-    this.stateId2SendTargetInfo = /* @__PURE__ */ new Map();
     this.messageReceiveStates = /* @__PURE__ */ new Set();
     this.text2commandObjects = /* @__PURE__ */ new Set();
     this.extendObjectCache = new import_discord.Collection();
@@ -595,10 +594,6 @@ class DiscordAdapter extends import_adapter_core.Adapter {
               },
               native: {}
             });
-            this.stateId2SendTargetInfo.set(`${this.namespace}.${channelIdPrefix}`, {
-              guild,
-              channel
-            });
           }
           const members = [...channel.members.values()];
           const json = {
@@ -757,7 +752,6 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         },
         native: {}
       });
-      this.stateId2SendTargetInfo.set(`${this.namespace}.users.${user.id}`, { user });
       await this.extendObjectAsyncCached(`users.${user.id}.avatarUrl`, {
         type: "state",
         common: {
@@ -853,7 +847,6 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         if (!knownServersAndChannelsIds.has(item.id)) {
           this.log.debug(`Server/Channel ${idPath} "${item.value.common.name}" is no longer available - deleting objects`);
           this.messageReceiveStates.delete(`${this.namespace}.servers.${idPath}.message`);
-          this.stateId2SendTargetInfo.delete(`${this.namespace}.servers.${idPath}`);
           this.jsonStateCache.delete(`${this.namespace}.servers.${idPath}.json`);
           await this.delObjectAsyncCached(`servers.${idPath}`, { recursive: true });
         }
@@ -871,7 +864,6 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         if (!allServersUsers.has(userId)) {
           this.log.debug(`User ${userId} "${item.value.common.name}" is no longer available - deleting objects`);
           this.messageReceiveStates.delete(`${this.namespace}.users.${userId}.message`);
-          this.stateId2SendTargetInfo.delete(`${this.namespace}.users.${userId}`);
           this.jsonStateCache.delete(`${this.namespace}.users.${userId}.json`);
           await this.delObjectAsyncCached(`users.${userId}`, { recursive: true });
         }
@@ -1179,7 +1171,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onSendStateChange(stateId, state) {
-    var _a, _b, _c, _d;
+    var _a, _b, _c;
     if (!((_a = this.client) == null ? void 0 : _a.isReady())) {
       this.log.warn(`State ${stateId} changed but client is not ready!`);
       return false;
@@ -1192,26 +1184,42 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       this.log.debug(`State ${stateId} changed but value is empty`);
       return false;
     }
-    const stateIdChannel = stateId.replace(/^(.+)\.\w+$/, "$1");
-    const sendTargetInfo = this.stateId2SendTargetInfo.get(stateIdChannel);
+    let action;
     let target;
     let targetName = "";
-    if ((sendTargetInfo == null ? void 0 : sendTargetInfo.guild) && (sendTargetInfo == null ? void 0 : sendTargetInfo.channel)) {
-      if (!sendTargetInfo.channel.isText()) {
-        this.log.warn(`State ${stateId} changed but target is not a text channel!`);
+    let targetStateIdBase;
+    let m = stateId.match(/^(discord\.\d+\.servers\.(\d+)\.channels\.(\d+)(\.channels\.(\d+))?)\.(send|sendFile|sendReaction|sendReply)$/);
+    if (m) {
+      const guildId = m[2];
+      const channelId = m[5] || m[3];
+      targetStateIdBase = m[1];
+      action = m[6];
+      const channel = (_b = this.client.guilds.cache.get(guildId)) == null ? void 0 : _b.channels.cache.get(channelId);
+      if (!(channel == null ? void 0 : channel.isText()) || channel.isThread()) {
+        this.log.warn(`State ${stateId} changed but target is not a valid text channel!`);
         return false;
       }
-      target = sendTargetInfo.channel;
-      targetName = sendTargetInfo.channel.parent ? `${sendTargetInfo.guild.name}/${sendTargetInfo.channel.parent.name}/${sendTargetInfo.channel.name}` : `${sendTargetInfo.guild.name}/${sendTargetInfo.channel.name}`;
-    } else if (sendTargetInfo == null ? void 0 : sendTargetInfo.user) {
-      target = sendTargetInfo.user;
-      targetName = sendTargetInfo.user.tag;
+      target = channel;
+      targetName = channel.parent ? `${channel.guild.name}/${channel.parent.name}/${channel.name}` : `${channel.guild.name}/${channel.name}`;
     } else {
-      this.log.warn(`State ${stateId} changed but I don't know where to send this to!`);
-      return false;
+      m = stateId.match(/^(discord\.\d+\.users\.(\d+))\.(send|sendFile|sendReaction|sendReply)$/);
+      if (!m) {
+        this.log.warn(`State ${stateId} changed but could not determine target to send message to!`);
+        return false;
+      }
+      const userId = m[2];
+      targetStateIdBase = m[1];
+      action = m[3];
+      const user = this.client.users.cache.get(userId);
+      if (!user) {
+        this.log.warn(`State ${stateId} changed but target is not a valid user!`);
+        return false;
+      }
+      target = user;
+      targetName = user.tag;
     }
     let mo;
-    if (stateId.endsWith(".sendFile")) {
+    if (action === "sendFile") {
       const idx = state.val.indexOf("|");
       let file;
       let content = void 0;
@@ -1243,7 +1251,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           }]
         };
       }
-    } else if (stateId.endsWith(".sendReply") || stateId.endsWith(".sendReaction")) {
+    } else if (action === "sendReply" || action === "sendReaction") {
       const idx = state.val.indexOf("|");
       let messageReference;
       let content;
@@ -1251,11 +1259,11 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         messageReference = state.val.slice(0, idx);
         content = state.val.slice(idx + 1);
       } else {
-        this.log.debug(`Get reply message reference from last received message for ${stateIdChannel}`);
-        messageReference = (_b = await this.getForeignStateAsync(`${stateIdChannel}.messageId`)) == null ? void 0 : _b.val;
+        this.log.debug(`Get reply message reference from last received message for ${targetStateIdBase}`);
+        messageReference = (_c = await this.getForeignStateAsync(`${targetStateIdBase}.messageId`)) == null ? void 0 : _c.val;
         content = state.val;
       }
-      if (stateId.endsWith(".sendReply")) {
+      if (action === "sendReply") {
         if (!messageReference || !content) {
           this.log.warn(`No message reference or no content for reply for ${stateId}!`);
           return false;
@@ -1271,14 +1279,14 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.log.warn(`No message reference or no/invalid content for reaction for ${stateId}!`);
           return false;
         }
-        const channel = sendTargetInfo.channel || ((_c = sendTargetInfo.user) == null ? void 0 : _c.dmChannel) || await ((_d = sendTargetInfo.user) == null ? void 0 : _d.createDM());
+        const channel = target instanceof import_discord.User ? target.dmChannel || await target.createDM() : target;
         if (!channel || !channel.isText()) {
-          this.log.warn(`Could not determine target channel for reaction ${stateId}`);
+          this.log.warn(`Could not determine target channel for reaction ${stateId}!`);
           return false;
         }
         const message = channel.messages.cache.get(messageReference) || await channel.messages.fetch(messageReference);
         if (!message) {
-          this.log.warn(`Could not determine target message for reaction ${stateId}`);
+          this.log.warn(`Could not determine target message for reaction ${stateId}!`);
           return false;
         }
         try {

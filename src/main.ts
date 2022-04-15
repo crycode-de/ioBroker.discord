@@ -30,7 +30,6 @@ import {
 } from './commands';
 import {
   SetBotPresenceOptions,
-  StateId2SendTargetInfo,
   Text2commandMessagePayload,
   VALID_ACTIVITY_TYPES,
   VALID_PRESENCE_STATUS_DATA,
@@ -62,14 +61,6 @@ class DiscordAdapter extends Adapter {
    * Instance of the discord client.
    */
   public client: Client | null = null;
-
-  /**
-   * Mapping of state IDs to some information where to send messages to.
-   * The state ID is only used until the last channel ID, e.g.
-   * `discord.0.servers.813364154118963251.channels.813364154559102996.channels.813364154559102998`
-   * or `discord.0.users.490222742801481728`.
-   */
-  private stateId2SendTargetInfo: StateId2SendTargetInfo = new Map();
 
   /**
    * Set of state IDs where received discord messages will be stored to.
@@ -725,10 +716,6 @@ class DiscordAdapter extends Adapter {
               },
               native: {},
             });
-            this.stateId2SendTargetInfo.set(`${this.namespace}.${channelIdPrefix}`, {
-              guild: guild,
-              channel: channel,
-            });
           }
 
           const members = [...channel.members.values()];
@@ -897,7 +884,6 @@ class DiscordAdapter extends Adapter {
         },
         native: {},
       });
-      this.stateId2SendTargetInfo.set(`${this.namespace}.users.${user.id}`, { user });
 
       await this.extendObjectAsyncCached(`users.${user.id}.avatarUrl`, {
         type: 'state',
@@ -1003,7 +989,6 @@ class DiscordAdapter extends Adapter {
         if (!knownServersAndChannelsIds.has(item.id)) {
           this.log.debug(`Server/Channel ${idPath} "${item.value.common.name}" is no longer available - deleting objects`);
           this.messageReceiveStates.delete(`${this.namespace}.servers.${idPath}.message`);
-          this.stateId2SendTargetInfo.delete(`${this.namespace}.servers.${idPath}`);
           this.jsonStateCache.delete(`${this.namespace}.servers.${idPath}.json`);
           await this.delObjectAsyncCached(`servers.${idPath}`, { recursive: true });
         }
@@ -1025,7 +1010,6 @@ class DiscordAdapter extends Adapter {
         if (!allServersUsers.has(userId)) {
           this.log.debug(`User ${userId} "${item.value.common.name}" is no longer available - deleting objects`);
           this.messageReceiveStates.delete(`${this.namespace}.users.${userId}.message`);
-          this.stateId2SendTargetInfo.delete(`${this.namespace}.users.${userId}`);
           this.jsonStateCache.delete(`${this.namespace}.users.${userId}.json`);
           await this.delObjectAsyncCached(`users.${userId}`, { recursive: true });
         }
@@ -1450,24 +1434,46 @@ class DiscordAdapter extends Adapter {
       return false;
     }
 
-    const stateIdChannel = stateId.replace(/^(.+)\.\w+$/, '$1');
-    const sendTargetInfo = this.stateId2SendTargetInfo.get(stateIdChannel); // last part if the stateId is not needed here
-
+    let action: string;
     let target: NonThreadGuildBasedChannel | User;
     let targetName: string = '';
-    if (sendTargetInfo?.guild && sendTargetInfo?.channel) {
-      if (!sendTargetInfo.channel.isText()) {
-        this.log.warn(`State ${stateId} changed but target is not a text channel!`);
+    let targetStateIdBase: string;
+
+    // channel or user?
+    let m = stateId.match(/^(discord\.\d+\.servers\.(\d+)\.channels\.(\d+)(\.channels\.(\d+))?)\.(send|sendFile|sendReaction|sendReply)$/);
+    if (m) {
+      const guildId = m[2];
+      const channelId = m[5] || m[3];
+      targetStateIdBase = m[1];
+      action = m[6];
+
+      const channel = this.client.guilds.cache.get(guildId)?.channels.cache.get(channelId);
+      if (!channel?.isText() || channel.isThread()) {
+        this.log.warn(`State ${stateId} changed but target is not a valid text channel!`);
         return false;
       }
-      target = sendTargetInfo.channel;
-      targetName = sendTargetInfo.channel.parent ? `${sendTargetInfo.guild.name}/${sendTargetInfo.channel.parent.name}/${sendTargetInfo.channel.name}` : `${sendTargetInfo.guild.name}/${sendTargetInfo.channel.name}`;
-    } else if (sendTargetInfo?.user) {
-      target = sendTargetInfo.user;
-      targetName = sendTargetInfo.user.tag;
+
+      target = channel;
+      targetName = channel.parent ? `${channel.guild.name}/${channel.parent.name}/${channel.name}` : `${channel.guild.name}/${channel.name}`;
+
     } else {
-      this.log.warn(`State ${stateId} changed but I don't know where to send this to!`);
-      return false;
+      m = stateId.match(/^(discord\.\d+\.users\.(\d+))\.(send|sendFile|sendReaction|sendReply)$/);
+      if (!m) {
+        this.log.warn(`State ${stateId} changed but could not determine target to send message to!`);
+        return false;
+      }
+      const userId = m[2];
+      targetStateIdBase = m[1];
+      action = m[3];
+
+      const user = this.client.users.cache.get(userId);
+      if (!user) {
+        this.log.warn(`State ${stateId} changed but target is not a valid user!`);
+        return false;
+      }
+
+      target = user;
+      targetName = user.tag;
     }
 
     let mo: MessageOptions;
@@ -1475,7 +1481,7 @@ class DiscordAdapter extends Adapter {
     /*
      * Special case .sendFile state
      */
-    if (stateId.endsWith('.sendFile')) {
+    if (action === 'sendFile') {
       const idx = state.val.indexOf('|');
       let file: string;
       let content: string | undefined = undefined;
@@ -1520,7 +1526,7 @@ class DiscordAdapter extends Adapter {
     /*
       * Special case .sendReply state
       */
-    } else if (stateId.endsWith('.sendReply') || stateId.endsWith('.sendReaction')) {
+    } else if (action === 'sendReply' || action === 'sendReaction') {
       const idx = state.val.indexOf('|');
       let messageReference: string;
       let content: string;
@@ -1529,12 +1535,12 @@ class DiscordAdapter extends Adapter {
         content = state.val.slice(idx + 1);
       } else {
         // use id from last received message
-        this.log.debug(`Get reply message reference from last received message for ${stateIdChannel}`);
-        messageReference = (await this.getForeignStateAsync(`${stateIdChannel}.messageId`))?.val as string;
+        this.log.debug(`Get reply message reference from last received message for ${targetStateIdBase}`);
+        messageReference = (await this.getForeignStateAsync(`${targetStateIdBase}.messageId`))?.val as string;
         content = state.val;
       }
 
-      if (stateId.endsWith('.sendReply')) {
+      if (action === 'sendReply') {
         // reply
         if (!messageReference || !content) {
           this.log.warn(`No message reference or no content for reply for ${stateId}!`);
@@ -1555,16 +1561,16 @@ class DiscordAdapter extends Adapter {
           return false;
         }
 
-        const channel = sendTargetInfo.channel || sendTargetInfo.user?.dmChannel || await sendTargetInfo.user?.createDM();
+        const channel = target instanceof User ? target.dmChannel || await target.createDM() : target;
         if (!channel || !channel.isText()) {
-          this.log.warn(`Could not determine target channel for reaction ${stateId}`);
+          this.log.warn(`Could not determine target channel for reaction ${stateId}!`);
           return false;
         }
 
         // get the message from cache or try to fetch the message
         const message: Message<boolean> | undefined = channel.messages.cache.get(messageReference) || await channel.messages.fetch(messageReference);
         if (!message) {
-          this.log.warn(`Could not determine target message for reaction ${stateId}`);
+          this.log.warn(`Could not determine target message for reaction ${stateId}!`);
           return false;
         }
 

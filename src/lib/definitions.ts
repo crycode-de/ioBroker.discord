@@ -4,21 +4,10 @@ export const VALID_ACTIVITY_TYPES = <const>['', 'PLAYING', 'STREAMING', 'LISTENI
 export type ValidActivityType = typeof VALID_ACTIVITY_TYPES[number];
 
 import {
-  Guild,
-  NonThreadGuildBasedChannel,
   PresenceStatus,
   PresenceStatusData,
   Snowflake,
-  User,
 } from 'discord.js';
-
-export interface SendTargetInfo {
-  guild?: Guild;
-  channel?: NonThreadGuildBasedChannel;
-  user?: User;
-}
-
-export type StateId2SendTargetInfo = Map<string, SendTargetInfo>;
 
 export interface Text2commandMessagePayload {
   text: string;
