@@ -27,6 +27,7 @@ export interface JsonServersMembersObj {
   roles: string[];
   joined: number | null;
   voiceChannel: string;
+  voiceChannelId: Snowflake;
   voiceSelfDeaf: boolean;
   voiceServerDeaf: boolean;
   voiceSelfMute: boolean;

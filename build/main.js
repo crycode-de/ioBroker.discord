@@ -211,7 +211,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     await this.updateGuilds();
   }
   async updateGuilds() {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     if (!((_a = this.client) == null ? void 0 : _a.user)) {
       throw new Error("Client not loaded");
     }
@@ -419,6 +419,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           roles: memberRoles,
           joined: member.joinedTimestamp,
           voiceChannel: ((_c = member.voice.channel) == null ? void 0 : _c.name) || "",
+          voiceChannelId: ((_d = member.voice.channel) == null ? void 0 : _d.id) || "",
           voiceSelfDeaf: !!member.voice.selfDeaf,
           voiceServerDeaf: !!member.voice.serverDeaf,
           voiceSelfMute: !!member.voice.selfMute,

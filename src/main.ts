@@ -537,6 +537,7 @@ class DiscordAdapter extends Adapter {
           roles: memberRoles,
           joined: member.joinedTimestamp,
           voiceChannel: member.voice.channel?.name || '',
+          voiceChannelId: member.voice.channel?.id || '',
           voiceSelfDeaf: !!member.voice.selfDeaf,
           voiceServerDeaf: !!member.voice.serverDeaf,
           voiceSelfMute: !!member.voice.selfMute,
