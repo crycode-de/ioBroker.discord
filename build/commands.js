@@ -84,8 +84,8 @@ class DiscordAdapterSlashCommands {
     }
     const cmdGet = new import_builders.SlashCommandBuilder().setName(this.cmdGetStateName).setDescription(import_i18n.i18n.getString("Get an ioBroker state value"));
     const cmdSet = new import_builders.SlashCommandBuilder().setName(this.cmdSetStateName).setDescription(import_i18n.i18n.getString("Set an ioBroker state value"));
-    cmdGet.setDefaultPermission(!this.adapter.config.enableAuthorization);
-    cmdSet.setDefaultPermission(!this.adapter.config.enableAuthorization);
+    cmdGet.setDefaultPermission(!this.adapter.config.enableAuthorization || this.adapter.config.commandsGlobal);
+    cmdSet.setDefaultPermission(!this.adapter.config.enableAuthorization || this.adapter.config.commandsGlobal);
     cmdGet.addStringOption((opt) => {
       opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to get")).setRequired(true);
       for (const [, objCfg] of this.commandObjectConfig) {

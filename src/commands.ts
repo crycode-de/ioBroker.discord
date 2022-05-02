@@ -154,9 +154,9 @@ export class DiscordAdapterSlashCommands {
       .setName(this.cmdSetStateName)
       .setDescription(i18n.getString('Set an ioBroker state value'));
 
-    // set default permissions depending on authorization settings
-    cmdGet.setDefaultPermission(!this.adapter.config.enableAuthorization);
-    cmdSet.setDefaultPermission(!this.adapter.config.enableAuthorization);
+    // set default permissions depending on authorization settings - default persisson must be true for DM global commands
+    cmdGet.setDefaultPermission(!this.adapter.config.enableAuthorization || this.adapter.config.commandsGlobal);
+    cmdSet.setDefaultPermission(!this.adapter.config.enableAuthorization || this.adapter.config.commandsGlobal);
 
     // add options
     cmdGet.addStringOption((opt) => {
