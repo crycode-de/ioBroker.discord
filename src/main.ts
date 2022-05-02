@@ -16,6 +16,7 @@ import {
   Message,
   MessageOptions,
   NonThreadGuildBasedChannel,
+  Permissions,
   Presence,
   PresenceData,
   PresenceStatusData,
@@ -1741,6 +1742,32 @@ class DiscordAdapter extends Adapter {
         const users = this.client?.users.cache.map((u) => ({ label: u.tag, value: u.id })) || [];
         this.log.debug(`Users: ${users.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, users, obj.callback);
+        break;
+
+      case 'getAddToServerLink':
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if (this.client?.user?.id) {
+          const perms = new Permissions([
+            Permissions.FLAGS.CHANGE_NICKNAME,
+            Permissions.FLAGS.VIEW_CHANNEL,
+            Permissions.FLAGS.MODERATE_MEMBERS,
+            Permissions.FLAGS.SEND_MESSAGES,
+            Permissions.FLAGS.EMBED_LINKS,
+            Permissions.FLAGS.ATTACH_FILES,
+            Permissions.FLAGS.READ_MESSAGE_HISTORY,
+            Permissions.FLAGS.MENTION_EVERYONE,
+            Permissions.FLAGS.ADD_REACTIONS,
+            Permissions.FLAGS.MUTE_MEMBERS,
+            Permissions.FLAGS.DEAFEN_MEMBERS,
+            Permissions.FLAGS.MOVE_MEMBERS,
+          ]);
+          this.sendTo(obj.from, obj.command, `https://discord.com/api/oauth2/authorize?client_id=${this.client.user.id}&permissions=${perms.bitfield}&scope=bot%20applications.commands`, obj.callback);
+        } else {
+          this.sendTo(obj.from, obj.command, '- Error -', obj.callback);
+        }
         break;
     }
   }

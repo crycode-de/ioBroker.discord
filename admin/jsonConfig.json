@@ -284,6 +284,208 @@
           "placeholder": "iob-set"
         }
       }
+    },
+    "addToServerTab": {
+      "type": "panel",
+      "label": "Add bot to server",
+      "items": {
+        "_addToServerInfo1a": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "text": "Here you are able to get a link to add your bot to a discord server."
+        },
+        "_addToServerInfo1b": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "text": "To get the link, you need to insert your bot token in the main settings tab, save the configurations and start/restart the adapter instance."
+        },
+        "_addToServerInfo1c": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "_alive",
+          "text": "The adapter instance needs to be running to get the link!",
+          "style": {
+            "color": "red"
+          }
+        },
+        "_link": {
+          "type": "textSendTo",
+          "container": "text",
+          "newline": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "command": "getAddToServerLink",
+          "copyToClipboard": true,
+          "label": "Link",
+          "help": "Just copy the link and open it in a new browser tab to start adding the bot to a server."
+        },
+        "_addToServerInfo2a": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "The following bot permissions are required by the adapter and embedded into the link above:"
+        },
+        "_addToServerInfo2ChangeNickname": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Change Nickname",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2ViewChannels": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Read Messages/View Channels",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2ModerateMembers": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Moderate Members",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2SendMessages": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Send Messages",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2EmbedLinks": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Embed Links",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2AttachFiles": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Attach Files",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2ReadMessageHistory": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Read Message History",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2MentionEveryone": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Mention Everyone",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2AddReactions": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Add Reactions",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2MuteMembers": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Mute Members",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2DeafenMembers": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Deafen Members",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        },
+        "_addToServerInfo2MoveMembers": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!_alive",
+          "text": "Move Members",
+          "style": {
+            "display": "list-item",
+            "marginLeft": "3em",
+            "paddingTop": 0,
+            "paddingBottom": 0
+          }
+        }
+      }
     }
   }
 }

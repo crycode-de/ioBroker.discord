@@ -1390,7 +1390,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onMessage(obj) {
-    var _a;
+    var _a, _b, _c;
     if (typeof obj !== "object")
       return;
     this.log.debug(`Got message: ${JSON.stringify(obj)}`);
@@ -1422,6 +1422,31 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         const users = ((_a = this.client) == null ? void 0 : _a.users.cache.map((u) => ({ label: u.tag, value: u.id }))) || [];
         this.log.debug(`Users: ${users.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, users, obj.callback);
+        break;
+      case "getAddToServerLink":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if ((_c = (_b = this.client) == null ? void 0 : _b.user) == null ? void 0 : _c.id) {
+          const perms = new import_discord.Permissions([
+            import_discord.Permissions.FLAGS.CHANGE_NICKNAME,
+            import_discord.Permissions.FLAGS.VIEW_CHANNEL,
+            import_discord.Permissions.FLAGS.MODERATE_MEMBERS,
+            import_discord.Permissions.FLAGS.SEND_MESSAGES,
+            import_discord.Permissions.FLAGS.EMBED_LINKS,
+            import_discord.Permissions.FLAGS.ATTACH_FILES,
+            import_discord.Permissions.FLAGS.READ_MESSAGE_HISTORY,
+            import_discord.Permissions.FLAGS.MENTION_EVERYONE,
+            import_discord.Permissions.FLAGS.ADD_REACTIONS,
+            import_discord.Permissions.FLAGS.MUTE_MEMBERS,
+            import_discord.Permissions.FLAGS.DEAFEN_MEMBERS,
+            import_discord.Permissions.FLAGS.MOVE_MEMBERS
+          ]);
+          this.sendTo(obj.from, obj.command, `https://discord.com/api/oauth2/authorize?client_id=${this.client.user.id}&permissions=${perms.bitfield}&scope=bot%20applications.commands`, obj.callback);
+        } else {
+          this.sendTo(obj.from, obj.command, "- Error -", obj.callback);
+        }
         break;
     }
   }

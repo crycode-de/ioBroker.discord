@@ -29,6 +29,11 @@ Additionally the adapter can register discord slash commands to get and set ioBr
 
 Missing some feature? Feel free to submit a feature request on [GitHub](https://github.com/crycode-de/ioBroker.discord/issues/new/choose).
 
+## Adding the bot to a server
+
+To add the bot to a server, you need to go to the adapter instance configuration to the tab _Add bot to server_.
+There you get a link which you can use to add the bot to a server, while setting the correct scopes and permissions.
+
 ## States
 
 Each server, channel and user is identified by it's unique numeric ID.  
