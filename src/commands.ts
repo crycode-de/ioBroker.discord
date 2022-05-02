@@ -7,6 +7,7 @@ import {
   CacheType,
   Collection,
   CommandInteraction,
+  DiscordAPIError,
   Interaction,
   MessageOptions,
 } from 'discord.js';
@@ -129,20 +130,28 @@ export class DiscordAdapterSlashCommands {
       throw new Error('Discord client not available');
     }
 
+    if (this.adapter.unloaded) return;
+
     // check if commands are enabled and if not remove set commands
     if (!this.adapter.config.enableCommands) {
       this.adapter.log.debug('Commands not enabled');
 
       // check for commands and remove them all
       for (const [, guild] of this.adapter.client.guilds.cache) {
-        const guildCommands = await guild.commands.fetch();
-        if (guildCommands.size > 0) {
-          this.adapter.log.debug(`Currently ${guildCommands.size} commands registered for server ${guild.name}. Removing them...`);
-          try {
+        try {
+          const guildCommands = await guild.commands.fetch();
+          if (this.adapter.unloaded) return;
+
+          if (guildCommands.size > 0) {
+            this.adapter.log.debug(`Currently ${guildCommands.size} commands registered for server ${guild.name}. Removing them...`);
             await this.rest.put(Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: [] });
             this.adapter.log.info(`Removed commands for server ${guild.name} cause commands are not enabled`);
-          } catch (err) {
-            this.adapter.log.warn(`Error while removing registered commands for server ${guild.name}: ${err}`);
+          }
+        } catch (err) {
+          if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
+            this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}). Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
+          } else {
+            this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}): ${err}`);
           }
         }
       }
@@ -217,7 +226,9 @@ export class DiscordAdapterSlashCommands {
           await this.rest.put(Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: commandsJson });
 
           // fetch the current guild commands to be up to date
+          if (this.adapter.unloaded) return;
           const guildCommands = await guild.commands.fetch();
+          if (this.adapter.unloaded) return;
 
           // setup per user permissions is authorization is enabled
           if (this.adapter.config.enableAuthorization) {
@@ -244,7 +255,11 @@ export class DiscordAdapterSlashCommands {
 
           this.adapter.log.info(`Registered commands for server ${guild.name} (id:${guild.id}) (get: ${numGet}, set: ${numSet})`);
         } catch (err) {
-          this.adapter.log.warn(`Error registering commands for server ${guild.name} (id:${guild.id}): ${err}`);
+          if (err instanceof DiscordAPIError && err.message === 'Missing Access'){
+            this.adapter.log.warn(`Error registering commands for server ${guild.name} (id:${guild.id}). Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
+          } else {
+            this.adapter.log.warn(`Error registering commands for server ${guild.name} (id:${guild.id}): ${err}`);
+          }
         }
       }
 

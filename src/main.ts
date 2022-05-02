@@ -95,6 +95,12 @@ class DiscordAdapter extends Adapter {
    */
   public initialCustomObjectSetupDone: boolean = false;
 
+  /**
+   * Flag if the adapter is unloaded or is unloading.
+   * Used to check this in some async operations.
+   */
+  public unloaded: boolean = false;
+
   public constructor(options: Partial<AdapterOptions> = {}) {
     super({
       ...options,
@@ -316,9 +322,15 @@ class DiscordAdapter extends Adapter {
      */
     const knownServersAndChannelsIds: Set<string> = new Set();
 
+    if (this.unloaded) return;
     const guilds = await this.client.guilds.fetch();
+    if (this.unloaded) return;
+
     for (const [, guildBase] of guilds) {
+
+      if (this.unloaded) return;
       const guild = await guildBase.fetch();
+      if (this.unloaded) return;
 
       knownServersAndChannelsIds.add(`${this.namespace}.servers.${guild.id}`);
 
@@ -347,6 +359,8 @@ class DiscordAdapter extends Adapter {
 
       // add guild member objects
       const guildMembers = await guild.members.fetch();
+      if (this.unloaded) return;
+
       for (const [, member] of guildMembers) {
         // remember user if not the bot itself
         if (member.user.id !== this.client.user.id) {
@@ -531,7 +545,10 @@ class DiscordAdapter extends Adapter {
       }
 
       // guild channels
+      if (this.unloaded) return;
       const channels = await guild.channels.fetch();
+      if (this.unloaded) return;
+
       // loop over all channels twice to setup the parent channel objects first and afterwards the child channel objects
       for (const parents of [true, false]) {
         for (const [, channel] of channels) {
@@ -1797,6 +1814,8 @@ class DiscordAdapter extends Adapter {
   @boundMethod
   private async onUnload (callback: () => void): Promise<void> {
     try {
+      this.unloaded = true;
+
       await this.setInfoConnectionState(false, true);
 
       if (this.client) {

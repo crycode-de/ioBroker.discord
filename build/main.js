@@ -60,6 +60,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.extendObjectCache = new import_discord.Collection();
     this.jsonStateCache = new import_discord.Collection();
     this.initialCustomObjectSetupDone = false;
+    this.unloaded = false;
     this.discordSlashCommands = new import_commands.DiscordAdapterSlashCommands(this);
     this.on("ready", this.onReady);
     this.on("stateChange", this.onStateChange);
@@ -216,9 +217,17 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     const allServersUsers = new import_discord.Collection();
     const knownServersAndChannelsIds = /* @__PURE__ */ new Set();
+    if (this.unloaded)
+      return;
     const guilds = await this.client.guilds.fetch();
+    if (this.unloaded)
+      return;
     for (const [, guildBase] of guilds) {
+      if (this.unloaded)
+        return;
       const guild = await guildBase.fetch();
+      if (this.unloaded)
+        return;
       knownServersAndChannelsIds.add(`${this.namespace}.servers.${guild.id}`);
       await this.extendObjectAsyncCached(`servers.${guild.id}`, {
         type: "channel",
@@ -242,6 +251,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         native: {}
       });
       const guildMembers = await guild.members.fetch();
+      if (this.unloaded)
+        return;
       for (const [, member] of guildMembers) {
         if (member.user.id !== this.client.user.id) {
           allServersUsers.set(member.user.id, { user: member.user, presence: member.presence });
@@ -414,7 +425,11 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.jsonStateCache.set(`${this.namespace}.servers.${guild.id}.members.${member.id}.json`, json);
         }
       }
+      if (this.unloaded)
+        return;
       const channels = await guild.channels.fetch();
+      if (this.unloaded)
+        return;
       for (const parents of [true, false]) {
         for (const [, channel] of channels) {
           if (parents && channel.parentId || !parents && !channel.parentId) {
@@ -1441,6 +1456,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
   }
   async onUnload(callback) {
     try {
+      this.unloaded = true;
       await this.setInfoConnectionState(false, true);
       if (this.client) {
         this.client.destroy();
