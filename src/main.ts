@@ -335,27 +335,29 @@ class DiscordAdapter extends Adapter {
       knownServersAndChannelsIds.add(`${this.namespace}.servers.${guild.id}`);
 
       // create channel for this guild
-      await this.extendObjectAsyncCached(`servers.${guild.id}`, {
-        type: 'channel',
-        common: {
-          name: guild.name,
-        },
-        native: {},
-      });
-      await this.extendObjectAsyncCached(`servers.${guild.id}.members`, {
-        type: 'channel',
-        common: {
-          name: i18n.getStringOrTranslated('Members'),
-        },
-        native: {},
-      });
-      await this.extendObjectAsyncCached(`servers.${guild.id}.channels`, {
-        type: 'channel',
-        common: {
-          name: i18n.getStringOrTranslated('Channels'),
-        },
-        native: {},
-      });
+      await Promise.all([
+        this.extendObjectAsyncCached(`servers.${guild.id}`, {
+          type: 'channel',
+          common: {
+            name: guild.name,
+          },
+          native: {},
+        }),
+        this.extendObjectAsyncCached(`servers.${guild.id}.members`, {
+          type: 'channel',
+          common: {
+            name: i18n.getStringOrTranslated('Members'),
+          },
+          native: {},
+        }),
+        this.extendObjectAsyncCached(`servers.${guild.id}.channels`, {
+          type: 'channel',
+          common: {
+            name: i18n.getStringOrTranslated('Channels'),
+          },
+          native: {},
+        }),
+      ]);
 
       // add guild member objects
       const guildMembers = await guild.members.fetch();
@@ -375,155 +377,157 @@ class DiscordAdapter extends Adapter {
           native: {},
         });
 
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.roles`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('Roles'),
-            role: 'text',
-            type: 'string',
-            read: true,
-            write: false,
-            def: '',
-          },
-          native: {},
-        });
-        const memberRoles = member.roles.cache.map((role) => role.name);
-        await this.setStateAsync(`servers.${guild.id}.members.${member.id}.roles`, memberRoles.join(', '), true);
-
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.tag`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('User tag'),
-            role: 'text',
-            type: 'string',
-            read: true,
-            write: false,
-            def: '',
-          },
-          native: {},
-        });
-        await this.setStateAsync(`servers.${guild.id}.members.${member.id}.tag`, member.user.tag, true);
-
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.displayName`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('Display name'),
-            role: 'text',
-            type: 'string',
-            read: true,
-            write: false,
-            def: '',
-          },
-          native: {},
-        });
-        await this.setStateAsync(`servers.${guild.id}.members.${member.id}.displayName`, member.displayName, true);
-
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.joinedAt`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('Joined at'),
-            role: 'date',
-            type: 'number',
-            read: true,
-            write: false,
-            def: 0,
-          },
-          native: {},
-        });
-        await this.setStateAsync(`servers.${guild.id}.members.${member.id}.joinedAt`, member.joinedTimestamp, true);
-
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceChannel`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('Voice channel'),
-            role: 'text',
-            type: 'string',
-            read: true,
-            write: false,
-            def: '',
-          },
-          native: {},
-        });
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceDisconnect`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('Voice disconnect'),
-            role: 'button',
-            type: 'boolean',
-            read: false,
-            write: true,
-            def: false,
-          },
-          native: {},
-        });
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('Voice self deafen'),
-            role: 'indicator',
-            type: 'boolean',
-            read: true,
-            write: false,
-            def: false,
-          },
-          native: {},
-        });
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('Voice server deafen'),
-            role: 'indicator',
-            type: 'boolean',
-            read: true,
-            write: true,
-            def: false,
-          },
-          native: {},
-        });
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('Voice self mute'),
-            role: 'indicator',
-            type: 'boolean',
-            read: true,
-            write: false,
-            def: false,
-          },
-          native: {},
-        });
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceServerMute`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('Voice server mute'),
-            role: 'indicator',
-            type: 'boolean',
-            read: true,
-            write: true,
-            def: false,
-          },
-          native: {},
-        });
         await Promise.all([
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.tag`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('User tag'),
+              role: 'text',
+              type: 'string',
+              read: true,
+              write: false,
+              def: '',
+            },
+            native: {},
+          }),
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.displayName`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('Display name'),
+              role: 'text',
+              type: 'string',
+              read: true,
+              write: false,
+              def: '',
+            },
+            native: {},
+          }),
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.roles`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('Roles'),
+              role: 'text',
+              type: 'string',
+              read: true,
+              write: false,
+              def: '',
+            },
+            native: {},
+          }),
+
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.joinedAt`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('Joined at'),
+              role: 'date',
+              type: 'number',
+              read: true,
+              write: false,
+              def: 0,
+            },
+            native: {},
+          }),
+
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceChannel`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('Voice channel'),
+              role: 'text',
+              type: 'string',
+              read: true,
+              write: false,
+              def: '',
+            },
+            native: {},
+          }),
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceDisconnect`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('Voice disconnect'),
+              role: 'button',
+              type: 'boolean',
+              read: false,
+              write: true,
+              def: false,
+            },
+            native: {},
+          }),
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('Voice self deafen'),
+              role: 'indicator',
+              type: 'boolean',
+              read: true,
+              write: false,
+              def: false,
+            },
+            native: {},
+          }),
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('Voice server deafen'),
+              role: 'indicator',
+              type: 'boolean',
+              read: true,
+              write: true,
+              def: false,
+            },
+            native: {},
+          }),
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('Voice self mute'),
+              role: 'indicator',
+              type: 'boolean',
+              read: true,
+              write: false,
+              def: false,
+            },
+            native: {},
+          }),
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceServerMute`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('Voice server mute'),
+              role: 'indicator',
+              type: 'boolean',
+              read: true,
+              write: true,
+              def: false,
+            },
+            native: {},
+          }),
+
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.json`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('JSON data'),
+              role: 'json',
+              type: 'string',
+              read: true,
+              write: false,
+              def: '',
+            },
+            native: {},
+          }),
+        ]);
+
+
+        const memberRoles = member.roles.cache.map((role) => role.name);
+        await Promise.all([
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.tag`, member.user.tag, true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.displayName`, member.displayName, true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.roles`, memberRoles.join(', '), true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.joinedAt`, member.joinedTimestamp, true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceChannel`, member.voice.channel?.name || '', true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, !!member.voice.selfDeaf, true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, !!member.voice.serverDeaf, true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, !!member.voice.selfMute, true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceServerMute`, !!member.voice.serverMute, true),
         ]);
-
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.json`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('JSON data'),
-            role: 'json',
-            type: 'string',
-            read: true,
-            write: false,
-            def: '',
-          },
-          native: {},
-        });
 
         const json: JsonServersMembersObj = {
           tag: member.user.tag,
@@ -576,18 +580,6 @@ class DiscordAdapter extends Adapter {
               channelId: channel.id,
             },
           });
-          await this.extendObjectAsyncCached(`${channelIdPrefix}.json`, {
-            type: 'state',
-            common: {
-              name: i18n.getStringOrTranslated('JSON data'),
-              role: 'json',
-              type: 'string',
-              read: true,
-              write: false,
-              def: '',
-            },
-            native: {},
-          });
           if (channel.type === 'GUILD_CATEGORY') {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.channels`, {
               type: 'channel',
@@ -597,84 +589,12 @@ class DiscordAdapter extends Adapter {
               native: {},
             });
           }
-          await this.extendObjectAsyncCached(`${channelIdPrefix}.memberCount`, {
-            type: 'state',
-            common: {
-              name: i18n.getStringOrTranslated('Member count'),
-              role: 'value',
-              type: 'number',
-              read: true,
-              write: false,
-              def: 0,
-            },
-            native: {},
-          });
-          await this.extendObjectAsyncCached(`${channelIdPrefix}.members`, {
-            type: 'state',
-            common: {
-              name: i18n.getStringOrTranslated('Members'),
-              role: 'text',
-              type: 'string',
-              read: true,
-              write: false,
-              def: '',
-            },
-            native: {},
-          });
 
-          if (channel.isText()) {
-            await this.extendObjectAsyncCached(`${channelIdPrefix}.message`, {
+          await Promise.all([
+            this.extendObjectAsyncCached(`${channelIdPrefix}.json`, {
               type: 'state',
               common: {
-                name: i18n.getStringOrTranslated('Last message'),
-                role: 'text',
-                type: 'string',
-                read: true,
-                write: false,
-                def: '',
-              },
-              native: {},
-            });
-            await this.extendObjectAsyncCached(`${channelIdPrefix}.messageId`, {
-              type: 'state',
-              common: {
-                name: i18n.getStringOrTranslated('Last message ID'),
-                role: 'text',
-                type: 'string',
-                read: true,
-                write: false,
-                def: '',
-              },
-              native: {},
-            });
-            await this.extendObjectAsyncCached(`${channelIdPrefix}.messageAuthor`, {
-              type: 'state',
-              common: {
-                name: i18n.getStringOrTranslated('Last message author'),
-                role: 'text',
-                type: 'string',
-                read: true,
-                write: false,
-                def: '',
-              },
-              native: {},
-            });
-            await this.extendObjectAsyncCached(`${channelIdPrefix}.messageTimestamp`, {
-              type: 'state',
-              common: {
-                name: i18n.getStringOrTranslated('Last message timestamp'),
-                role: 'date',
-                type: 'number',
-                read: true,
-                write: false,
-                def: 0,
-              },
-              native: {},
-            });
-            await this.extendObjectAsyncCached(`${channelIdPrefix}.messageJson`, {
-              type: 'state',
-              common: {
-                name: i18n.getStringOrTranslated('Last message JSON data'),
+                name: i18n.getStringOrTranslated('JSON data'),
                 role: 'json',
                 type: 'string',
                 read: true,
@@ -682,57 +602,147 @@ class DiscordAdapter extends Adapter {
                 def: '',
               },
               native: {},
-            });
-            this.messageReceiveStates.add(`${this.namespace}.${channelIdPrefix}.message`);
+            }),
+            this.extendObjectAsyncCached(`${channelIdPrefix}.memberCount`, {
+              type: 'state',
+              common: {
+                name: i18n.getStringOrTranslated('Member count'),
+                role: 'value',
+                type: 'number',
+                read: true,
+                write: false,
+                def: 0,
+              },
+              native: {},
+            }),
+            this.extendObjectAsyncCached(`${channelIdPrefix}.members`, {
+              type: 'state',
+              common: {
+                name: i18n.getStringOrTranslated('Members'),
+                role: 'text',
+                type: 'string',
+                read: true,
+                write: false,
+                def: '',
+              },
+              native: {},
+            }),
+          ]);
 
-            await this.extendObjectAsyncCached(`${channelIdPrefix}.send`, {
-              type: 'state',
-              common: {
-                name: i18n.getStringOrTranslated('Send message'),
-                role: 'text',
-                type: 'string',
-                read: true,
-                write: true,
-                def: '',
-              },
-              native: {},
-            });
-            await this.extendObjectAsyncCached(`${channelIdPrefix}.sendFile`, {
-              type: 'state',
-              common: {
-                name: i18n.getStringOrTranslated('Send file'),
-                role: 'text',
-                type: 'string',
-                read: true,
-                write: true,
-                def: '',
-              },
-              native: {},
-            });
-            await this.extendObjectAsyncCached(`${channelIdPrefix}.sendReply`, {
-              type: 'state',
-              common: {
-                name: i18n.getStringOrTranslated('Send reply'),
-                role: 'text',
-                type: 'string',
-                read: true,
-                write: true,
-                def: '',
-              },
-              native: {},
-            });
-            await this.extendObjectAsyncCached(`${channelIdPrefix}.sendReaction`, {
-              type: 'state',
-              common: {
-                name: i18n.getStringOrTranslated('Send reaction'),
-                role: 'text',
-                type: 'string',
-                read: true,
-                write: true,
-                def: '',
-              },
-              native: {},
-            });
+          if (channel.isText()) {
+            await Promise.all([
+              this.extendObjectAsyncCached(`${channelIdPrefix}.message`, {
+                type: 'state',
+                common: {
+                  name: i18n.getStringOrTranslated('Last message'),
+                  role: 'text',
+                  type: 'string',
+                  read: true,
+                  write: false,
+                  def: '',
+                },
+                native: {},
+              }),
+              this.extendObjectAsyncCached(`${channelIdPrefix}.messageId`, {
+                type: 'state',
+                common: {
+                  name: i18n.getStringOrTranslated('Last message ID'),
+                  role: 'text',
+                  type: 'string',
+                  read: true,
+                  write: false,
+                  def: '',
+                },
+                native: {},
+              }),
+              this.extendObjectAsyncCached(`${channelIdPrefix}.messageAuthor`, {
+                type: 'state',
+                common: {
+                  name: i18n.getStringOrTranslated('Last message author'),
+                  role: 'text',
+                  type: 'string',
+                  read: true,
+                  write: false,
+                  def: '',
+                },
+                native: {},
+              }),
+              this.extendObjectAsyncCached(`${channelIdPrefix}.messageTimestamp`, {
+                type: 'state',
+                common: {
+                  name: i18n.getStringOrTranslated('Last message timestamp'),
+                  role: 'date',
+                  type: 'number',
+                  read: true,
+                  write: false,
+                  def: 0,
+                },
+                native: {},
+              }),
+              this.extendObjectAsyncCached(`${channelIdPrefix}.messageJson`, {
+                type: 'state',
+                common: {
+                  name: i18n.getStringOrTranslated('Last message JSON data'),
+                  role: 'json',
+                  type: 'string',
+                  read: true,
+                  write: false,
+                  def: '',
+                },
+                native: {},
+              }),
+
+              this.extendObjectAsyncCached(`${channelIdPrefix}.send`, {
+                type: 'state',
+                common: {
+                  name: i18n.getStringOrTranslated('Send message'),
+                  role: 'text',
+                  type: 'string',
+                  read: true,
+                  write: true,
+                  def: '',
+                },
+                native: {},
+              }),
+              this.extendObjectAsyncCached(`${channelIdPrefix}.sendFile`, {
+                type: 'state',
+                common: {
+                  name: i18n.getStringOrTranslated('Send file'),
+                  role: 'text',
+                  type: 'string',
+                  read: true,
+                  write: true,
+                  def: '',
+                },
+                native: {},
+              }),
+              this.extendObjectAsyncCached(`${channelIdPrefix}.sendReply`, {
+                type: 'state',
+                common: {
+                  name: i18n.getStringOrTranslated('Send reply'),
+                  role: 'text',
+                  type: 'string',
+                  read: true,
+                  write: true,
+                  def: '',
+                },
+                native: {},
+              }),
+              this.extendObjectAsyncCached(`${channelIdPrefix}.sendReaction`, {
+                type: 'state',
+                common: {
+                  name: i18n.getStringOrTranslated('Send reaction'),
+                  role: 'text',
+                  type: 'string',
+                  read: true,
+                  write: true,
+                  def: '',
+                },
+                native: {},
+              }),
+            ]);
+
+            this.messageReceiveStates.add(`${this.namespace}.${channelIdPrefix}.message`);
           }
 
           const members = [...channel.members.values()];
@@ -777,193 +787,196 @@ class DiscordAdapter extends Adapter {
         },
       });
 
-      await this.extendObjectAsyncCached(`users.${user.id}.json`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('JSON data'),
-          role: 'json',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      });
+      await Promise.all([
+        this.extendObjectAsyncCached(`users.${user.id}.json`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('JSON data'),
+            role: 'json',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
 
-      await this.extendObjectAsyncCached(`users.${user.id}.tag`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('User tag'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      });
+        this.extendObjectAsyncCached(`users.${user.id}.tag`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('User tag'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
 
-      await this.extendObjectAsyncCached(`users.${user.id}.message`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Last message'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      });
-      await this.extendObjectAsyncCached(`users.${user.id}.messageId`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Last message ID'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      });
-      await this.extendObjectAsyncCached(`users.${user.id}.messageTimestamp`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Last message timestamp'),
-          role: 'date',
-          type: 'number',
-          read: true,
-          write: false,
-          def: 0,
-        },
-        native: {},
-      });
-      await this.extendObjectAsyncCached(`users.${user.id}.messageJson`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Last message JSON data'),
-          role: 'json',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      });
+        this.extendObjectAsyncCached(`users.${user.id}.message`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Last message'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+        this.extendObjectAsyncCached(`users.${user.id}.messageId`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Last message ID'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+        this.extendObjectAsyncCached(`users.${user.id}.messageTimestamp`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Last message timestamp'),
+            role: 'date',
+            type: 'number',
+            read: true,
+            write: false,
+            def: 0,
+          },
+          native: {},
+        }),
+        this.extendObjectAsyncCached(`users.${user.id}.messageJson`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Last message JSON data'),
+            role: 'json',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+
+        this.extendObjectAsyncCached(`users.${user.id}.send`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Send message'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: true,
+            def: '',
+          },
+          native: {},
+        }),
+        this.extendObjectAsyncCached(`users.${user.id}.sendFile`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Send file'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: true,
+            def: '',
+          },
+          native: {},
+        }),
+        this.extendObjectAsyncCached(`users.${user.id}.sendReply`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Send reply'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: true,
+            def: '',
+          },
+          native: {},
+        }),
+        this.extendObjectAsyncCached(`users.${user.id}.sendReaction`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Send reaction'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: true,
+            def: '',
+          },
+          native: {},
+        }),
+
+        this.extendObjectAsyncCached(`users.${user.id}.avatarUrl`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Avatar'),
+            role: 'media.link',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+
+        this.extendObjectAsyncCached(`users.${user.id}.bot`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Bot'),
+            role: 'indicator',
+            type: 'boolean',
+            read: true,
+            write: false,
+            def: false,
+          },
+          native: {},
+        }),
+
+        this.extendObjectAsyncCached(`users.${user.id}.status`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Status'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+        this.extendObjectAsyncCached(`users.${user.id}.activityType`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Activity type'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+        this.extendObjectAsyncCached(`users.${user.id}.activityName`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Activity name'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+      ]);
+
       this.messageReceiveStates.add(`${this.namespace}.users.${user.id}.message`);
-
-      await this.extendObjectAsyncCached(`users.${user.id}.send`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Send message'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: true,
-          def: '',
-        },
-        native: {},
-      });
-      await this.extendObjectAsyncCached(`users.${user.id}.sendFile`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Send file'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: true,
-          def: '',
-        },
-        native: {},
-      });
-      await this.extendObjectAsyncCached(`users.${user.id}.sendReply`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Send reply'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: true,
-          def: '',
-        },
-        native: {},
-      });
-      await this.extendObjectAsyncCached(`users.${user.id}.sendReaction`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Send reaction'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: true,
-          def: '',
-        },
-        native: {},
-      });
-
-      await this.extendObjectAsyncCached(`users.${user.id}.avatarUrl`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Avatar'),
-          role: 'media.link',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      });
-
-      await this.extendObjectAsyncCached(`users.${user.id}.bot`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Bot'),
-          role: 'indicator',
-          type: 'boolean',
-          read: true,
-          write: false,
-          def: false,
-        },
-        native: {},
-      });
-
-      await this.extendObjectAsyncCached(`users.${user.id}.status`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Status'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      });
-      await this.extendObjectAsyncCached(`users.${user.id}.activityType`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Activity type'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      });
-      await this.extendObjectAsyncCached(`users.${user.id}.activityName`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Activity name'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      });
 
       const ps = await this.updateUserPresence(user.id, presence, true);
 
