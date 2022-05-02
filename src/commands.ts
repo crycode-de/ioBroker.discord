@@ -178,7 +178,10 @@ export class DiscordAdapterSlashCommands {
         .setRequired(true);
       for (const [, objCfg] of this.commandObjectConfig) {
         if (objCfg.get) {
-          opt.addChoice(objCfg.name, objCfg.alias);
+          opt.addChoices({
+            name: objCfg.name,
+            value: objCfg.alias,
+          });
         }
       }
       return opt;
@@ -190,7 +193,10 @@ export class DiscordAdapterSlashCommands {
         .setRequired(true);
       for (const [, objCfg] of this.commandObjectConfig) {
         if (objCfg.set) {
-          opt.addChoice(objCfg.name, objCfg.alias);
+          opt.addChoices({
+            name: objCfg.name,
+            value: objCfg.alias,
+          });
         }
       }
       return opt;

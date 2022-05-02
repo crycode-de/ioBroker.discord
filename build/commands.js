@@ -104,7 +104,10 @@ class DiscordAdapterSlashCommands {
       opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to get")).setRequired(true);
       for (const [, objCfg] of this.commandObjectConfig) {
         if (objCfg.get) {
-          opt.addChoice(objCfg.name, objCfg.alias);
+          opt.addChoices({
+            name: objCfg.name,
+            value: objCfg.alias
+          });
         }
       }
       return opt;
@@ -113,7 +116,10 @@ class DiscordAdapterSlashCommands {
       opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to set")).setRequired(true);
       for (const [, objCfg] of this.commandObjectConfig) {
         if (objCfg.set) {
-          opt.addChoice(objCfg.name, objCfg.alias);
+          opt.addChoices({
+            name: objCfg.name,
+            value: objCfg.alias
+          });
         }
       }
       return opt;
