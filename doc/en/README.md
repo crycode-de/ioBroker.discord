@@ -34,6 +34,28 @@ Missing some feature? Feel free to submit a feature request on [GitHub](https://
 To add the bot to a server, you need to go to the adapter instance configuration to the tab _Add bot to server_.
 There you get a link which you can use to add the bot to a server, while setting the correct scopes and permissions.
 
+The following bot permissions are required:
+
+* Change Nickname
+* Read Messages/View Channels
+* Moderate Members
+* Send Messages
+* Embed Links
+* Attach Files
+* Read Message History
+* Mention Everyone
+* Add Reactions
+* Mute Members
+* Deafen Members
+* Move Members
+
+Also the following scopes are required:
+
+* bot
+* applications.commands
+
+If some of the above permissions or scopes are missing, some features of the adapter might not work.
+
 ## States
 
 Each server, channel and user is identified by it's unique numeric ID.  
