@@ -13,7 +13,7 @@ import {
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
-import { Routes } from 'discord-api-types/v9';
+import { Routes } from 'discord-api-types/v10';
 
 import type { DiscordAdapter } from './main';
 import { i18n } from './lib/i18n';

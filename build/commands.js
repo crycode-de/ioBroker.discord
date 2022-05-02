@@ -34,7 +34,7 @@ var import_autobind_decorator = require("autobind-decorator");
 var import_discord = require("discord.js");
 var import_builders = require("@discordjs/builders");
 var import_rest = require("@discordjs/rest");
-var import_v9 = require("discord-api-types/v9");
+var import_v10 = require("discord-api-types/v10");
 var import_i18n = require("./lib/i18n");
 var import_utils = require("./lib/utils");
 class DiscordAdapterSlashCommands {
@@ -83,7 +83,7 @@ class DiscordAdapterSlashCommands {
             return;
           if (guildCommands.size > 0) {
             this.adapter.log.debug(`Currently ${guildCommands.size} commands registered for server ${guild.name}. Removing them...`);
-            await this.rest.put(import_v9.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: [] });
+            await this.rest.put(import_v10.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: [] });
             this.adapter.log.info(`Removed commands for server ${guild.name} cause commands are not enabled`);
           }
         } catch (err) {
@@ -141,7 +141,7 @@ class DiscordAdapterSlashCommands {
       const numSet = this.commandObjectConfig.filter((c) => c.set === true).size;
       for (const [, guild] of this.adapter.client.guilds.cache) {
         try {
-          await this.rest.put(import_v9.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: commandsJson });
+          await this.rest.put(import_v10.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: commandsJson });
           if (this.adapter.unloaded)
             return;
           const guildCommands = await guild.commands.fetch();
