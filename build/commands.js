@@ -77,23 +77,9 @@ class DiscordAdapterSlashCommands {
     if (!this.adapter.config.enableCommands) {
       this.adapter.log.debug("Commands not enabled");
       for (const [, guild] of this.adapter.client.guilds.cache) {
-        try {
-          const guildCommands = await guild.commands.fetch();
-          if (this.adapter.unloaded)
-            return;
-          if (guildCommands.size > 0) {
-            this.adapter.log.debug(`Currently ${guildCommands.size} commands registered for server ${guild.name}. Removing them...`);
-            await this.rest.put(import_v10.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: [] });
-            this.adapter.log.info(`Removed commands for server ${guild.name} cause commands are not enabled`);
-          }
-        } catch (err) {
-          if (err instanceof import_discord.DiscordAPIError && err.message === "Missing Access") {
-            this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}). Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
-          } else {
-            this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}): ${err}`);
-          }
-        }
+        await this.removeGuildCommands(guild);
       }
+      await this.removeGlobalCommands();
       return;
     }
     const cmdGet = new import_builders.SlashCommandBuilder().setName(this.cmdGetStateName).setDescription(import_i18n.i18n.getString("Get an ioBroker state value"));
@@ -141,32 +127,12 @@ class DiscordAdapterSlashCommands {
       const numSet = this.commandObjectConfig.filter((c) => c.set === true).size;
       for (const [, guild] of this.adapter.client.guilds.cache) {
         try {
-          await this.rest.put(import_v10.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: commandsJson });
-          if (this.adapter.unloaded)
-            return;
-          const guildCommands = await guild.commands.fetch();
-          if (this.adapter.unloaded)
-            return;
-          if (this.adapter.config.enableAuthorization) {
-            for (const [, gCmd] of guildCommands) {
-              try {
-                const permissions = [];
-                for (const au of this.adapter.config.authorizedUsers) {
-                  if (gCmd.name === this.cmdGetStateName && au.getStates || gCmd.name === this.cmdSetStateName && au.setStates) {
-                    permissions.push({
-                      id: au.userId,
-                      type: "USER",
-                      permission: true
-                    });
-                  }
-                }
-                await gCmd.permissions.set({ permissions });
-              } catch (err) {
-                this.adapter.log.warn(`Error while setting command permissions for server ${guild.name} command ${gCmd.name}: ${err}`);
-              }
-            }
+          if (this.adapter.config.commandsGlobal) {
+            await this.removeGuildCommands(guild);
+          } else {
+            await this.rest.put(import_v10.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: commandsJson });
+            this.adapter.log.info(`Registered commands for server ${guild.name} (id:${guild.id}) (get: ${numGet}, set: ${numSet})`);
           }
-          this.adapter.log.info(`Registered commands for server ${guild.name} (id:${guild.id}) (get: ${numGet}, set: ${numSet})`);
         } catch (err) {
           if (err instanceof import_discord.DiscordAPIError && err.message === "Missing Access") {
             this.adapter.log.warn(`Error registering commands for server ${guild.name} (id:${guild.id}). Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
@@ -175,11 +141,69 @@ class DiscordAdapterSlashCommands {
           }
         }
       }
+      try {
+        if (this.adapter.config.commandsGlobal) {
+          await this.rest.put(import_v10.Routes.applicationCommands(this.adapter.client.user.id), { body: commandsJson });
+          this.adapter.log.info(`Registered global command (get: ${numGet}, set: ${numSet})`);
+        } else {
+          await this.removeGlobalCommands();
+        }
+      } catch (err) {
+        if (err instanceof import_discord.DiscordAPIError && err.message === "Missing Access") {
+          this.adapter.log.warn(`Error registering global commands. Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
+        } else {
+          this.adapter.log.warn(`Error registering global commands: ${err}`);
+        }
+      }
       this.lastCommandsJson = commandsJson;
     } else {
       this.adapter.log.debug("Commands seams to be up to date");
     }
     this.registerCommandsDone = true;
+  }
+  async removeGlobalCommands() {
+    var _a, _b;
+    if (!((_a = this.adapter.client) == null ? void 0 : _a.user)) {
+      throw new Error("Discord client not available");
+    }
+    try {
+      const globalCommands = await ((_b = this.adapter.client.application) == null ? void 0 : _b.commands.fetch());
+      if (this.adapter.unloaded)
+        return;
+      if (globalCommands && globalCommands.size > 0) {
+        this.adapter.log.debug(`Currently ${globalCommands.size} global commands registered. Removing them...`);
+        await this.rest.put(import_v10.Routes.applicationCommands(this.adapter.client.user.id), { body: [] });
+        this.adapter.log.info(`Removed global commands cause commands they are not used anymore.`);
+      }
+    } catch (err) {
+      if (err instanceof import_discord.DiscordAPIError && err.message === "Missing Access") {
+        this.adapter.log.warn(`Error while removing registered global commands. Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
+      } else {
+        this.adapter.log.warn(`Error while removing registered global commands: ${err}`);
+      }
+    }
+  }
+  async removeGuildCommands(guild) {
+    var _a;
+    if (!((_a = this.adapter.client) == null ? void 0 : _a.user)) {
+      throw new Error("Discord client not available");
+    }
+    try {
+      const guildCommands = await guild.commands.fetch();
+      if (this.adapter.unloaded)
+        return;
+      if (guildCommands.size > 0) {
+        this.adapter.log.debug(`Currently ${guildCommands.size} commands registered for server ${guild.name}. Removing them...`);
+        await this.rest.put(import_v10.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: [] });
+        this.adapter.log.info(`Removed commands for server ${guild.name} cause commands theay are not used anymore.`);
+      }
+    } catch (err) {
+      if (err instanceof import_discord.DiscordAPIError && err.message === "Missing Access") {
+        this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}). Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
+      } else {
+        this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}): ${err}`);
+      }
+    }
   }
   setupCommandObject(objId, cfg) {
     if (cfg) {

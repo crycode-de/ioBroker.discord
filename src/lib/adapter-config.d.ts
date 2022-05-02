@@ -21,6 +21,7 @@ declare global {
       processMessagesFromUnauthorizedUsers: boolean;
 
       enableCommands: boolean;
+      commandsGlobal: boolean;
       cmdGetStateName: string;
       cmdSetStateName: string;
     }

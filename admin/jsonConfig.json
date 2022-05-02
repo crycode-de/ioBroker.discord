@@ -215,6 +215,16 @@
           ]
         },
 
+        "_permissionsInfo": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "text": "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.",
+          "style": {
+            "fontWeight": "bold"
+          }
+        },
+
         "processMessagesFromUnauthorizedUsers": {
           "type": "checkbox",
           "newLine": true,
@@ -240,6 +250,16 @@
           "lg": 4,
           "label": "Enable commands",
           "help": "If checked, the bot will register discord slash commands to get and set ioBroker states."
+        },
+
+        "commandsGlobal": {
+          "type": "checkbox",
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "hidden": "!data.enableCommands",
+          "label": "Use global commands",
+          "help": "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply."
         },
 
         "cmdGetStateName": {

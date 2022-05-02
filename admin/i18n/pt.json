@@ -123,5 +123,8 @@
     "Voice self mute": "Auto mudo de voz",
     "Voice server mute": "Servidor de voz mudo",
     "Observe user voice state": "Observar o estado de voz do usuário",
-    "Observe voice state for all known users.": "Observe o estado de voz de todos os usuários conhecidos."
+    "Observe voice state for all known users.": "Observe o estado de voz de todos os usuários conhecidos.",
+    "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.": "Importante: Você também precisa permitir que os usuários usem os comandos nas configurações de integração do servidor. ",
+    "Use global commands": "Usar comandos globais",
+    "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.": "Se marcado, os comandos de barra serão registrados globalmente. "
 }

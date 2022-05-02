@@ -123,5 +123,8 @@
     "Voice self mute": "语音自静音",
     "Voice server mute": "语音服务器静音",
     "Observe user voice state": "观察用户语音状态",
-    "Observe voice state for all known users.": "观察所有已知用户的语音状态。"
+    "Observe voice state for all known users.": "观察所有已知用户的语音状态。",
+    "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.": "重要提示：您还需要允许用户使用服务器集成设置中的命令。",
+    "Use global commands": "使用全局命令",
+    "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.": "如果选中，斜杠命令将被全局注册。"
 }

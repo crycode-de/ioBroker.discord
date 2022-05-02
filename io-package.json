@@ -107,6 +107,7 @@
         "authorizedUsers": [],
         "processMessagesFromUnauthorizedUsers": false,
         "enableCommands": false,
+        "commandsGlobal": false,
         "cmdGetStateName": "",
         "cmdSetStateName": ""
     },

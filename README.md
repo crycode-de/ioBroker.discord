@@ -47,21 +47,11 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 
 See [GitHub issue](https://github.com/crycode-de/ioBroker.discord/issues/1).
 
-## Limitations
-
-### Slash commands can be used on servers only and not in direct messages
-
-_Background:_  
-Generally it's possible to register slash commands globally which would make them available in direct messages too,
-but this currently leaks of support for setting correct per user permissions.  
-As a consequence the commands would be shown to any user.
-This may be a potential security risk and therefor it's not implemented.
-
 ## Changelog
 
-### 0.0.1
+### 0.0.x
 
-* (crycode-de) development release
+* (crycode-de) development
 
 ## License
 

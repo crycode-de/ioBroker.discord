@@ -123,5 +123,8 @@
     "Voice self mute": "Stem zelf dempen",
     "Voice server mute": "Spraakserver dempen",
     "Observe user voice state": "Observeer de stemstatus van de gebruiker",
-    "Observe voice state for all known users.": "Observeer de spraakstatus van alle bekende gebruikers."
+    "Observe voice state for all known users.": "Observeer de spraakstatus van alle bekende gebruikers.",
+    "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.": "Belangrijk: je moet de gebruikers ook toestaan ​​om de commando's te gebruiken in de integratie-instellingen van de server. ",
+    "Use global commands": "Algemene opdrachten gebruiken",
+    "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.": "Indien aangevinkt, worden de slash-commando's globaal geregistreerd. "
 }
