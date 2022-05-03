@@ -29,6 +29,29 @@ Additionally the adapter can register discord slash commands to get and set ioBr
 
 Missing some feature? Feel free to submit a feature request on [GitHub](https://github.com/crycode-de/ioBroker.discord/issues/new/choose).
 
+## Creating a Discord bot
+
+To use this adapter, you need to create a Discord bot application.
+
+1. Got to the [Discord Developer Portal](https://discord.com/developers/applications) and login with your Discord account if not already logged in.
+2. In the _Applications_ view, click the button _New Application_ in the top right.  
+[![New Application](./media/bot-creation-1.png)](./media/bot-creation-1.png)
+3. Choose a name for your application (this will be the name of your bot) and click _Create_.  
+[![Application Name](./media/bot-creation-2.png)](./media/bot-creation-2.png)
+4. (Optional) Upload an _App Icon_, edit the _Name_, edit the _Description_, add some _Tags_ and _Save Changes_.  
+[![Application Settings](./media/bot-creation-3.png)](./media/bot-creation-3.png)
+5. Navigate to _Bot_ in the left menu and click the _Add Bot_ button.  
+[![Add Bot](./media/bot-creation-4.png)](./media/bot-creation-4.png)  
+In the following dialog click _Yes, do it!_ to confirm the bot creation.
+6. When the bot is created, you need to click the _Reset Token_ button once to get you bot token.  
+[![Reset Token](./media/bot-creation-5.png)](./media/bot-creation-5.png)  
+Since this will invalidate any former token, you need to confirm this by clicking the _Yes, do it!_ button in the dialog popping up.  
+After this, your token is displayed **once** and you should copy it to a secure place (e.g. the adapter instance configuration).
+7. Scroll down a bit at the _Bot_ page to the _Privileged Gateway Intents_ and enable _Presence Intent_, _Server Members Intent_ and _Message Content Intent_. Don't forget to click _Save Changes_.  
+[![Privileged Gateway Intents](./media/bot-creation-6.png)](./media/bot-creation-6.png)  
+Note: Once your bot reaches 100 or more servers, the intents will require verification and approval.
+8. Now you are ready to start the adapter instance and add the bot to a Discord server.
+
 ## Adding the bot to a server
 
 To add the bot to a server, you need to go to the adapter instance configuration to the tab _Add bot to server_.
