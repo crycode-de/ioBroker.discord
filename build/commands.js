@@ -456,6 +456,13 @@ class DiscordAdapterSlashCommands {
     }
     await interaction.editReply(`${cfg.name}: ${valueReply}${unit}`);
   }
+  logConfiguredCommandObjects() {
+    this.adapter.log.info("Configured state objects for discord slash commands:");
+    for (const [, cmdObjCfg] of this.commandObjectConfig) {
+      this.adapter.log.info(` |- ${cmdObjCfg.id} - alias:${cmdObjCfg.alias}, name:${cmdObjCfg.name}, get:${cmdObjCfg.get}, set:${cmdObjCfg.set}`);
+    }
+    this.adapter.log.info("---");
+  }
 }
 __decorateClass([
   import_autobind_decorator.boundMethod

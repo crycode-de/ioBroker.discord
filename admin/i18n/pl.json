@@ -145,5 +145,10 @@
     "Add Reactions": "Dodaj reakcje",
     "Mute Members": "Wycisz członków",
     "Deafen Members": "Głusi Członkowie",
-    "Move Members": "Przenieś członków"
+    "Move Members": "Przenieś członków",
+    "To get an overview about all state objects where you have commands enabled, just click the button below and see the log output.": "Aby uzyskać przegląd wszystkich obiektów stanu, w których masz włączone polecenia, po prostu kliknij przycisk poniżej i zobacz dane wyjściowe dziennika.",
+    "Log state objects configured for commands": "Obiekty stanu dziennika skonfigurowane dla poleceń",
+    "See log output": "Zobacz dane wyjściowe dziennika",
+    "The adapter instance needs to be running to use this feature!": "Aby korzystać z tej funkcji, instancja adaptera musi być uruchomiona!",
+    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Wskazówka: polecenia Discord muszą być włączone dla każdego stanu w ustawieniach niestandardowych obiektów stanu."
 }

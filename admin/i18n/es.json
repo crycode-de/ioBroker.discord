@@ -145,5 +145,10 @@
     "Add Reactions": "Añadir reacciones",
     "Mute Members": "Silenciar miembros",
     "Deafen Members": "Miembros sordos",
-    "Move Members": "Mover miembros"
+    "Move Members": "Mover miembros",
+    "To get an overview about all state objects where you have commands enabled, just click the button below and see the log output.": "Para obtener una descripción general de todos los objetos de estado donde tiene comandos habilitados, simplemente haga clic en el botón a continuación y vea la salida del registro.",
+    "Log state objects configured for commands": "Objetos de estado de registro configurados para comandos",
+    "See log output": "Ver salida de registro",
+    "The adapter instance needs to be running to use this feature!": "¡La instancia del adaptador debe estar ejecutándose para usar esta función!",
+    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Sugerencia: los comandos de Discord deben habilitarse por estado en la configuración personalizada de los objetos de estado."
 }

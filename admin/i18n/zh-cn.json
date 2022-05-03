@@ -145,5 +145,10 @@
     "Add Reactions": "添加反应",
     "Mute Members": "静音成员",
     "Deafen Members": "聋人成员",
-    "Move Members": "移动成员"
+    "Move Members": "移动成员",
+    "To get an overview about all state objects where you have commands enabled, just click the button below and see the log output.": "要获得启用命令的所有状态对象的概览，只需单击下面的按钮并查看日志输出。",
+    "Log state objects configured for commands": "为命令配置的日志状态对象",
+    "See log output": "查看日志输出",
+    "The adapter instance needs to be running to use this feature!": "适配器实例需要运行才能使用此功能！",
+    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "提示：Discord 命令需要在状态对象的自定义设置中为每个状态启用。"
 }

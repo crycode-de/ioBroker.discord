@@ -65,6 +65,7 @@
         }
       }
     },
+
     "messagesTab": {
       "type": "panel",
       "label": "Messages",
@@ -282,9 +283,54 @@
           "label": "Custom set state command name",
           "help": "Custom name for the set state command. Defaults to 'iob-get'.",
           "placeholder": "iob-set"
+        },
+
+        "_cmdObjectsConfigHint": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!data.enableCommands",
+          "text": "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.",
+          "style": {
+            "paddingTop": 50,
+            "fontWeight": "bold"
+          }
+        },
+
+        "_logConfiguredCommandObjectsInfo": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!data.enableCommands",
+          "text": "To get an overview about all state objects where you have commands enabled, just click the button below and see the log output."
+        },
+        "_logConfiguredCommandObjects": {
+          "type": "sendTo",
+          "newLine": true,
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "hidden": "!data.enableCommands || !_alive",
+          "command": "logConfiguredCommandObjects",
+          "label": "Log state objects configured for commands",
+          "variant": "outlined",
+          "result": {
+            "ok": "See log output"
+          }
+        },
+        "_logConfiguredCommandObjectsAliveHint": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!data.enableCommands || _alive",
+          "text": "The adapter instance needs to be running to use this feature!",
+          "style": {
+            "color": "red"
+          }
         }
       }
     },
+
     "addToServerTab": {
       "type": "panel",
       "label": "Add bot to server",

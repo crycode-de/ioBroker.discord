@@ -145,5 +145,10 @@
     "Add Reactions": "Reacties toevoegen",
     "Mute Members": "Leden dempen",
     "Deafen Members": "Dove leden",
-    "Move Members": "Leden verplaatsen"
+    "Move Members": "Leden verplaatsen",
+    "To get an overview about all state objects where you have commands enabled, just click the button below and see the log output.": "Om een ​​overzicht te krijgen van alle statusobjecten waarvoor u opdrachten hebt ingeschakeld, klikt u op de onderstaande knop en ziet u de loguitvoer.",
+    "Log state objects configured for commands": "Logstatusobjecten geconfigureerd voor opdrachten",
+    "See log output": "Zie logoutput",
+    "The adapter instance needs to be running to use this feature!": "De adapterinstantie moet actief zijn om deze functie te gebruiken!",
+    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Hint: Discord-commando's moeten per staat worden ingeschakeld in de aangepaste instellingen van de staatsobjecten."
 }

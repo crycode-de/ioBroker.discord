@@ -1449,6 +1449,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendTo(obj.from, obj.command, "- Error -", obj.callback);
         }
         break;
+      case "logConfiguredCommandObjects":
+        this.discordSlashCommands.logConfiguredCommandObjects();
+        if (obj.callback) {
+          this.sendTo(obj.from, obj.command, { result: "ok" }, obj.callback);
+        }
+        break;
     }
   }
   checkUserAuthorization(userId, required) {

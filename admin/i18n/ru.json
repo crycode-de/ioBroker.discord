@@ -145,5 +145,10 @@
     "Add Reactions": "Добавить реакции",
     "Mute Members": "Заглушить участников",
     "Deafen Members": "Оглушить участников",
-    "Move Members": "Переместить участников"
+    "Move Members": "Переместить участников",
+    "To get an overview about all state objects where you have commands enabled, just click the button below and see the log output.": "Чтобы получить обзор всех объектов состояния, для которых у вас включены команды, просто нажмите кнопку ниже и просмотрите вывод журнала.",
+    "Log state objects configured for commands": "Объекты состояния журнала, настроенные для команд",
+    "See log output": "См. вывод журнала",
+    "The adapter instance needs to be running to use this feature!": "Экземпляр адаптера должен быть запущен, чтобы использовать эту функцию!",
+    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Подсказка: команды Discord должны быть включены для каждого состояния в пользовательских настройках объектов состояния."
 }

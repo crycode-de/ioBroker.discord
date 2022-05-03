@@ -401,3 +401,9 @@ For `number` type states, the provided value will be parsed as float number.
 If your ioBroker is configured to use a comma in float numbers, you may provide
 the number with a comma or dot as float separator. Otherwise only a dot is allowed.  
 If `min` and `max` values are defined in the state object, they are also checked.
+
+### Get an overview about states configured for slash commands
+
+To get an overview about all states where slash commands are enabled, you can
+simply click the button _Log state objects configured for commands_ in the adapter
+instance configuration and see the log output.

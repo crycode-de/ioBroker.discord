@@ -266,6 +266,9 @@ export class DiscordAdapterSlashCommands {
   }
 
 
+  /**
+   * Remove registered global commands if any.
+   */
   private async removeGlobalCommands (): Promise<void> {
     if (!this.adapter.client?.user) {
       throw new Error('Discord client not available');
@@ -289,6 +292,10 @@ export class DiscordAdapterSlashCommands {
     }
   }
 
+  /**
+   * Remove registered guild commands if any.
+   * @param guild The guild.
+   */
   private async removeGuildCommands (guild: Guild): Promise<void> {
     if (!this.adapter.client?.user) {
       throw new Error('Discord client not available');
@@ -311,6 +318,7 @@ export class DiscordAdapterSlashCommands {
       }
     }
   }
+
   /**
    * Setup an ioBroker object for discord slash commands.
    * @param objId ID of the ioBroker object to set up.
@@ -686,5 +694,16 @@ export class DiscordAdapterSlashCommands {
 
     // send reply
     await interaction.editReply(`${cfg.name}: ${valueReply}${unit}`);
+  }
+
+  /**
+   * Write a summay of all currently for commands configured objects to the log.
+   */
+  public logConfiguredCommandObjects (): void {
+    this.adapter.log.info('Configured state objects for discord slash commands:');
+    for (const [, cmdObjCfg] of this.commandObjectConfig) {
+      this.adapter.log.info(` |- ${cmdObjCfg.id} - alias:${cmdObjCfg.alias}, name:${cmdObjCfg.name}, get:${cmdObjCfg.get}, set:${cmdObjCfg.set}`);
+    }
+    this.adapter.log.info('---');
   }
 }
