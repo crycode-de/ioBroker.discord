@@ -58,6 +58,10 @@
         "enabled": true,
         "extIcon": "https://raw.githubusercontent.com/crycode-de/ioBroker.discord/main/admin/discord.png",
         "readme": "https://github.com/crycode-de/ioBroker.discord/blob/main/README.md",
+        "docs": {
+            "en": "docs/en/README.md",
+            "de": "docs/de/README.md"
+        },
         "loglevel": "info",
         "mode": "daemon",
         "type": "messaging",
