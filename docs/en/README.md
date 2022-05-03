@@ -57,6 +57,8 @@ Note: Once your bot reaches 100 or more servers, the intents will require verifi
 To add the bot to a server, you need to go to the adapter instance configuration to the tab _Add bot to server_.
 There you get a link which you can use to add the bot to a server, while setting the correct scopes and permissions.
 
+[![Add bot to server](./media/add-bot-to-server.png)](./media/add-bot-to-server.png)
+
 The following bot permissions are required:
 
 * Change Nickname
@@ -215,8 +217,183 @@ not send, depending on the adapter configuration.
 
 ### Sending messages
 
-_TODO_
+To send a message, you can write contents to the `.send*` states of a channel or a user.
+
+#### Sending simple texts
+
+To send a simple text, just write the text into the `.send` state of your target.  
+You may use [Markdown](https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline-) for text formatting like in your Discord client.
+
+To mention a user you can use the user ID in the form `<@user-id>`.  
+For group mentions use `<@&group-id>` and for channel mentions use `<#channel-id>`.
+
+Examples: `This is my message.`, `This is _my_ **formatted** message.`, `Hey <@490222742801481728>!`
+
+#### Sending files
+
+To send a file as an attachment, you can write the file location into the `.sendFile` state of your target.
+
+The file location may be a …
+
+* Absolute or relative link to a local file.  
+  Relative links are relative to the adapter directory of your ioBroker installation.  
+  The link may optionally be prepended by `file://`.
+  Examples: `/home/user/image.png`, `../../iobroker-data/files/myfile.txt`, `file:///tmp/image.jpg`
+
+* URL to a remote file.  
+  Example: `https://www.iobroker.dev/images/iobroker.png`
+
+* Base64 encoded file content.  
+  Example: `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACzklEQVQ4y3WTy2tcdRTHP+d3753HncncmbaJiYvEhZrU+ii2urJgFCyCLnykpbQrsbR/gRQaXPUPUHBlH4ogUsRSqq7qLtlZrQpKg6Uu1OCkSWZ65859zfzucTExsYLf3Tl8zznf85JHZ5+cVuGcMebg0YXXHN/3UVVAqfk1VJV+HCMiAKRpyuXPr1hrixsCZ10VzgEnXMeRF+afJwgaFIUC0Go1UYVOp4OYUYIoivjiyjWszecUMMaYAyXPk7m5R8jznCjqk2YpjuMQhj1AcT2XLM3oR30GgyFB0KDkeWKMOeAeP7ZgDh16jizNeO/9Dwh7PR7ft5ejRxa49tXXvPnG6yRJzNWrX/LDjz8xMTHOu4tnKJXLLC0tG1OtViVoNKhWK9wLQ9pr6yRJwtTUJC/Oz3P9+jckccrk5APcXd+g3V6jUqkwiqmKKwKIMBrbCKpw585vvHNmkT17dvHQzAylUhkjZocnggi4I0+BAML9sEXBX+27XLj0MXGSMLR2h6cFKLh+zSdoNlHYXtW/oaq019a3bRGhPlYnaDbxaz5GVflHV7lcYlcrYJRH+V9s8VUVN4r6bG5ugginT52k2+ny/c2bADjGMDG+m073HlmWbyvq9XoURUEU9TGO4+C4DsPBgI31DZIkwVqLAs8+8zQnjh/j1Vdevq84Iriei+M4GABByLKMTz+7zMWPPuHBqSkGgwGdbpeZ6WmiXu+/g9nu0E2SRMMwJMty6rUa+596gsOHX+L8hUvEcUyp5PH7H38yMb4bgMbYGFmWE4YhSZKozO3b/7PruI/Nzj7MybffotVqYYwhjmPq9TpBo8Hq6iqFjkpmWcaH5y+ysnKboR3+4lpbfGdtvvfWrV+lUi5T8jyKoqBeq9FqBqiC7/sYM7qAnggrK7fJ8lyBG67AWQWstQeXlpd33lmhVt96535/60aENE0YWmuBbwUW/wZQx0cNXLu4ygAAAABJRU5ErkJggg==`
+
+Additionally you may add a text message to the file. To do so, just write the file
+location, followed by a pipe character `|` and your message into the `.sendFile` state.  
+Examples: `/tmp/image.png|This is my file`, `https://www.iobroker.dev/images/iobroker.png|The ioBroker logo`
+
+#### Sending reactions
+
+Using the `.sendReaction` state you can react to a previous message with an emoji.
+To do so, just write the emoji into the state.
+
+By default the reaction will be send for the message which is currently in the
+corresponding `.messageId` state.
+
+If you want to react to a specific message, you can write the message ID, followed
+by pipe character `|` and the emoji into the `.sendReaction` state.
+
+Examples: `👍`, `971032590515568660|👍`
+
+#### Sending replies
+
+Using the `.sendReply` state you can send a reply to a previous message.
+To do so, just write the reply message into the state.
+
+By default the reply will be send for the message which is currently in the
+corresponding `.messageId` state.
+
+If you want to reply to a specific message, you can write the message ID, followed
+by pipe character `|` and the reply message into the `.sendReply` state.
+
+Examples: `This is a reply.`, `971032590515568660|This is a reply.`
+
+#### Sending special custom messages
+
+You can send special custom messages writing a stringified JSON message object
+into the `.send` state.
+
+The JSON object must of type `MessageOptions`.
+For more information read the [discord.js MessageOptions documentation](https://discord.js.org/#/docs/discord.js/stable/typedef/MessageOptions).
+
+Examples:
+
+```json
+{
+  "files": [
+    {
+      "attachment": "/tmp/image.jpg",
+      "name": "image.jpg",
+      "description": "My super image"
+    }
+  ]
+}
+```
+
+```json
+{
+  "content": "Use this:",
+  "embeds": [
+    {
+      "title": "ioBorker.discord",
+      "description": "Discord adapter for ioBroker",
+      "color": "#5865f2",
+      "url": "https://github.com/crycode-de/ioBroker.discord",
+      "author": {
+        "name": "Peter Müller",
+        "url": "https://github.com/crycode-de"
+      },
+      "image": {
+        "url": "https://github.com/crycode-de/ioBroker.discord/raw/main/admin/discord.png"
+      },
+      "footer": {
+        "text": "❤👍"
+      }
+    }
+  ]
+}
+```
 
 ## Slash commands
 
-_TODO_
+If enabled in the adapter instance configuration, the adapter is able to handle
+Discord slash commands. These commands can be used to get or set ioBroker states.
+
+**Note:** You need to configure the states individually, which you want to be
+available for Discord slash commands. See below.
+
+Discord slash commands can be registered as server commands (default) or as
+global commands by the adapter instance. This can be configured in the adapter
+instance configuration.  
+Using server commands has the benefit, that changes to the commands (e.g. added states)
+are applied instant without any delay. But server commands can't be used in
+direct messages between a user and the bot.  
+Global commands can be used in direct messages too, but any change to the commands
+may take up to one hour to apply. This is a limitation from Discord and not the adapter.
+
+The default used slash commands are `/iob-get` and `/iob-set`. The command names
+and descriptions can be configured in the adapter configuration.
+
+### Configure states for slash commands
+
+For each state which should be available for Discord slash commands, you need to
+enable this in the custom settings of the state.
+To do so, just click the _Custom settings_ gear icon in the _Objects_ view in
+admin, enable the settings for your adapter instance and activate
+_Enable discord commands for this state_.
+
+[![Enable discord commands](./media/slash-commands-config-1.png)](./media/slash-commands-config-1.png)
+
+[![Enable discord commands](./media/slash-commands-config-2.png)](./media/slash-commands-config-2.png)
+
+You can define a _Name_ and an _Alias_ for each state to be used in Discord.
+The _Name_ will be shown in autocomplete options for the commands and the
+_Alias_ is used as an internal identifier. Both must not exceed 100 characters.
+
+For each state you can define individually if it should be available for set
+and/or get commands.  
+Also you can enable to show an information on get commands if the state is not
+acknowledged and to set a state with ack flag.
+
+For `string` type state objects you may choose to treat the value as a file (file location).  
+If this is enabled, the state value will be send like in the `.sendFile` states.  
+Using this you can request images via get commands, for example.
+
+For `number` type state objects you can define the number of decimals to round a value to on get commands.
+
+For `boolean` type state objects you can define custom values for `true` and `false` values to show on get commands.
+
+### Get states
+
+To get a state just call `/iob-get state-alias` in your Discord client.  
+For the `state-alias` an autocomplete will be shown while entering the command.
+
+Any value will be formated as configured in the state object and the custom
+state settings. Optionally an information about a missing ack flag can be added.
+
+### Set states
+
+To set a state just call `/iob-set state-alias new-value` in your Discord client.  
+For the `state-alias` an autocomplete will be shown while entering the command.  
+The `new-value` will be parsed by the adapter, if the state type is `boolean` or
+`boolean`.
+
+You may configure per state, if the value should be set with or without ack flag.
+
+For `boolean` type states, the values `true`, `on`, `yes`, `1` and their corresponding
+translations of your language, as well as your per state configured _True value_
+will be treated as `true`.
+Any other value would be treated as `false`.
+
+For `number` type states, the provided value will be parsed as float number.  
+If your ioBroker is configured to use a comma in float numbers, you may provide
+the number with a comma or dot as float separator. Otherwise only a dot is allowed.  
+If `min` and `max` values are defined in the state object, they are also checked.
