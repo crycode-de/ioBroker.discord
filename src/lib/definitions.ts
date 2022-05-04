@@ -4,6 +4,7 @@ export const VALID_ACTIVITY_TYPES = <const>['', 'PLAYING', 'STREAMING', 'LISTENI
 export type ValidActivityType = typeof VALID_ACTIVITY_TYPES[number];
 
 import {
+  MessageOptions,
   PresenceStatus,
   PresenceStatusData,
   Snowflake,
@@ -91,4 +92,32 @@ export interface CheckAuthorizationOpts {
   getStates?: boolean;
   setStates?: boolean;
   useText2command?: boolean;
+}
+
+/**
+ * Payload for a `sentTo(...)` `sendMessage` action.
+ */
+export interface SendToActionSendPayload {
+  serverId?: Snowflake;
+  channelId?: Snowflake;
+
+  userId?: Snowflake;
+  userTag?: Snowflake;
+
+  content: string | MessageOptions;
+}
+
+/**
+ * Payload for a `sentTo(...)` `editMessage` action.
+ */
+export interface SendToActionEditMessagePayload {
+  serverId?: Snowflake;
+  channelId?: Snowflake;
+
+  userId?: Snowflake;
+  userTag?: Snowflake;
+
+  messageId: Snowflake;
+
+  content: string | MessageOptions;
 }
