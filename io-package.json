@@ -1,19 +1,19 @@
 {
     "common": {
         "name": "discord",
-        "version": "0.0.3",
+        "version": "0.0.4",
         "news": {
-            "0.0.1": {
-                "en": "initial release",
-                "de": "Erstveröffentlichung",
-                "ru": "Начальная версия",
-                "pt": "lançamento inicial",
-                "nl": "Eerste uitgave",
-                "fr": "Première version",
-                "it": "Versione iniziale",
-                "es": "Versión inicial",
-                "pl": "Pierwsze wydanie",
-                "zh-cn": "首次出版"
+            "0.0.4": {
+                "en": "development version",
+                "de": "Entwicklungsversion",
+                "ru": "версия разработки",
+                "pt": "versão de desenvolvimento",
+                "nl": "ontwikkelingsversie",
+                "fr": "version de développement",
+                "it": "versione di sviluppo",
+                "es": "versión de desarrollo",
+                "pl": "wersja rozwojowa",
+                "zh-cn": "开发版"
             }
         },
         "title": "Discord",
