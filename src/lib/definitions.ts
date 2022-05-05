@@ -95,29 +95,45 @@ export interface CheckAuthorizationOpts {
 }
 
 /**
- * Payload for a `sentTo(...)` `sendMessage` action.
+ * Parameters needed to identify a message target.
+ * One of the following is needed:
+ * - `userId`
+ * - `userTag`
+ * - `serverId` and `channelId`
  */
-export interface SendToActionSendPayload {
+export interface MessageTargetIdentifier {
   serverId?: Snowflake;
   channelId?: Snowflake;
 
   userId?: Snowflake;
   userTag?: Snowflake;
+}
 
+/**
+ * Parameters needed to identify a message.
+ */
+export interface MessageIdentifier extends MessageTargetIdentifier {
+  messageId: Snowflake;
+}
+
+/**
+ * Payload for a `sentTo(...)` `sendMessage` action.
+ */
+export interface SendToActionSendPayload extends MessageTargetIdentifier {
   content: string | MessageOptions;
 }
 
 /**
  * Payload for a `sentTo(...)` `editMessage` action.
  */
-export interface SendToActionEditMessagePayload {
-  serverId?: Snowflake;
-  channelId?: Snowflake;
-
-  userId?: Snowflake;
-  userTag?: Snowflake;
-
-  messageId: Snowflake;
-
+export interface SendToActionEditMessagePayload extends MessageIdentifier {
   content: string | MessageOptions;
+}
+
+/**
+ * Payload for a `sentTo(...)` `awaitMessageReaction` action.
+ */
+export interface SendToActionAwaitMessageReactionPayload extends MessageIdentifier {
+  timeout: number;
+  max?: number;
 }

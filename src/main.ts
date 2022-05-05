@@ -43,6 +43,8 @@ import {
   CheckAuthorizationOpts,
   SendToActionSendPayload,
   SendToActionEditMessagePayload,
+  MessageIdentifier,
+  SendToActionAwaitMessageReactionPayload,
 } from './lib/definitions';
 import { i18n } from './lib/i18n';
 import {
@@ -1715,6 +1717,9 @@ class DiscordAdapter extends Adapter {
     if (typeof obj !== 'object') return;
     this.log.debug(`Got message: ${JSON.stringify(obj)}`);
 
+    // msg is needed in some switch cases...
+    let msg: Message<boolean>;
+
     switch (obj.command) {
       case 'getText2commandInstances':
         if (!obj.callback) {
@@ -1791,7 +1796,7 @@ class DiscordAdapter extends Adapter {
         }
 
         if (typeof obj.message !== 'object') {
-          this.sendTo(obj.from, obj.command, { err: 'sendTo message needs to be an object' }, obj.callback);
+          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
           return;
         }
 
@@ -1799,7 +1804,7 @@ class DiscordAdapter extends Adapter {
 
         // check payload
         if (!sendPayload.content || (typeof sendPayload.content !== 'string' && typeof sendPayload.content !== 'object')) {
-          this.sendTo(obj.from, obj.command, { err: 'content needs to be a string or a MessageOptions object' }, obj.callback);
+          this.sendTo(obj.from, obj.command, { error: 'content needs to be a string or a MessageOptions object', ...sendPayload }, obj.callback);
           return;
         }
 
@@ -1810,41 +1815,41 @@ class DiscordAdapter extends Adapter {
             // by userId
             user = this.client?.users.cache.get(sendPayload.userId);
             if (!user) {
-              this.sendTo(obj.from, obj.command, { err: `No user with userId ${sendPayload.userId} found` }, obj.callback);
+              this.sendTo(obj.from, obj.command, { error: `No user with userId ${sendPayload.userId} found`, ...sendPayload }, obj.callback);
               return;
             }
           } else {
             // by userTag
             user = this.client?.users.cache.find((u) => u.tag === sendPayload.userTag);
             if (!user) {
-              this.sendTo(obj.from, obj.command, { err: `No user with userTag ${sendPayload.userTag} found` }, obj.callback);
+              this.sendTo(obj.from, obj.command, { error: `No user with userTag ${sendPayload.userTag} found`, ...sendPayload }, obj.callback);
               return;
             }
           }
           try {
-            const msg = await user.send(sendPayload.content);
-            this.sendTo(obj.from, obj.command, { result: `Message sent to user ${user.tag}`, messageId: msg.id }, obj.callback);
+            msg = await user.send(sendPayload.content);
+            this.sendTo(obj.from, obj.command, { result: `Message sent to user ${user.tag}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
-            this.sendTo(obj.from, obj.command, { err: `Error sending message to user ${user.tag}: ${err}` }, obj.callback);
+            this.sendTo(obj.from, obj.command, { error: `Error sending message to user ${user.tag}: ${err}`, ...sendPayload }, obj.callback);
           }
 
         } else if (sendPayload.serverId && sendPayload.channelId) {
           // send to a channel
           const channel = this.client?.guilds.cache.get(sendPayload.serverId)?.channels.cache.get(sendPayload.channelId);
           if (!channel?.isText()) {
-            this.sendTo(obj.from, obj.command, { err: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found` }, obj.callback);
+            this.sendTo(obj.from, obj.command, { error: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found`, ...sendPayload }, obj.callback);
             return;
           }
           try {
-            const msg = await channel.send(sendPayload.content);
-            this.sendTo(obj.from, obj.command, { result: `Message sent to channel ${channel.name}`, messageId: msg.id }, obj.callback);
+            msg = await channel.send(sendPayload.content);
+            this.sendTo(obj.from, obj.command, { result: `Message sent to channel ${channel.name}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
-            this.sendTo(obj.from, obj.command, { err: `Error sending message to channel ${channel.name}: ${err}` }, obj.callback);
+            this.sendTo(obj.from, obj.command, { error: `Error sending message to channel ${channel.name}: ${err}`, ...sendPayload }, obj.callback);
           }
 
         } else {
           // missing arguments
-          this.sendTo(obj.from, obj.command, { err: 'userId, userTag or serverId and channelId needs to be set' }, obj.callback);
+          this.sendTo(obj.from, obj.command, { error: 'userId, userTag or serverId and channelId needs to be set', ...sendPayload }, obj.callback);
         }
 
         break; // send / sendMessage
@@ -1859,7 +1864,7 @@ class DiscordAdapter extends Adapter {
         }
 
         if (typeof obj.message !== 'object') {
-          this.sendTo(obj.from, obj.command, { err: 'sendTo message needs to be an object' }, obj.callback);
+          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
           return;
         }
 
@@ -1867,81 +1872,146 @@ class DiscordAdapter extends Adapter {
 
         // check payload
         if (!editMessagePayload.content || (typeof editMessagePayload.content !== 'string' && typeof editMessagePayload.content !== 'object')) {
-          this.sendTo(obj.from, obj.command, { err: 'content needs to be a string or a MessageOptions object' }, obj.callback);
+          this.sendTo(obj.from, obj.command, { error: 'content needs to be a string or a MessageOptions object', ...editMessagePayload }, obj.callback);
           return;
         }
 
-        if (!editMessagePayload.messageId) {
-          this.sendTo(obj.from, obj.command, { err: 'messageId needs to be set' }, obj.callback);
-          return;
-        }
-
-        if (editMessagePayload.userId || editMessagePayload.userTag) {
-          // send to a user
-          let user: User | undefined;
-          if (editMessagePayload.userId) {
-            // by userId
-            user = this.client?.users.cache.get(editMessagePayload.userId);
-            if (!user) {
-              this.sendTo(obj.from, obj.command, { err: `No user with userId ${editMessagePayload.userId} found` }, obj.callback);
-              return;
-            }
+        // try to get the message
+        try {
+          msg = await this.getPreviousMessage(editMessagePayload);
+        } catch (err) {
+          if (err instanceof Error && err.message) {
+            this.sendTo(obj.from, obj.command, { error: err.message, ...editMessagePayload }, obj.callback);
           } else {
-            // by userTag
-            user = this.client?.users.cache.find((u) => u.tag === editMessagePayload.userTag);
-            if (!user) {
-              this.sendTo(obj.from, obj.command, { err: `No user with userTag ${editMessagePayload.userTag} found` }, obj.callback);
-              return;
-            }
+            this.sendTo(obj.from, obj.command, { error: err, ...editMessagePayload }, obj.callback);
           }
-          try {
-            if (!user.dmChannel) {
-              await user.createDM();
-            }
-            const msg = user.dmChannel?.messages.cache.get(editMessagePayload.messageId) || await user.dmChannel?.messages.fetch(editMessagePayload.messageId);
-            if (!msg) {
-              this.sendTo(obj.from, obj.command, { err: `No message with messageId ${editMessagePayload.messageId} for user ${user.tag} found` }, obj.callback);
-              return;
-            }
-            if (!msg.editable) {
-              this.sendTo(obj.from, obj.command, { err: `Message with messageId ${editMessagePayload.messageId} for user ${user.tag} is not editable` }, obj.callback);
-              return;
-            }
-            await msg.edit(editMessagePayload.content);
-            this.sendTo(obj.from, obj.command, { result: `Message to user ${user.tag} edited`, messageId: msg.id }, obj.callback);
-          } catch (err) {
-            this.sendTo(obj.from, obj.command, { err: `Error editing message to user ${user.tag}: ${err}` }, obj.callback);
-          }
+          return;
+        }
 
-        } else if (editMessagePayload.serverId && editMessagePayload.channelId) {
-          // send to a channel
-          const channel = this.client?.guilds.cache.get(editMessagePayload.serverId)?.channels.cache.get(editMessagePayload.channelId);
-          if (!channel?.isText()) {
-            this.sendTo(obj.from, obj.command, { err: `No text channel with channelId ${editMessagePayload.channelId} on server ${editMessagePayload.serverId} found` }, obj.callback);
+        // try to edit the message
+        try {
+          if (!msg.editable) {
+            this.sendTo(obj.from, obj.command, { error: `Message with messageId ${editMessagePayload.messageId} is not editable`, ...editMessagePayload }, obj.callback);
             return;
           }
-          try {
-            const msg = channel.messages.cache.get(editMessagePayload.messageId) || await channel.messages.fetch(editMessagePayload.messageId);
-            if (!msg) {
-              this.sendTo(obj.from, obj.command, { err: `No message with messageId ${editMessagePayload.messageId} for channel ${channel.name} found` }, obj.callback);
-              return;
-            }
-            if (!msg.editable) {
-              this.sendTo(obj.from, obj.command, { err: `Message with messageId ${editMessagePayload.messageId} for channel ${channel.name} is not editable` }, obj.callback);
-              return;
-            }
-            await msg.edit(editMessagePayload.content);
-            this.sendTo(obj.from, obj.command, { result: `Message to channel ${channel.name} edited`, messageId: msg.id }, obj.callback);
-          } catch (err) {
-            this.sendTo(obj.from, obj.command, { err: `Error editing message to channel ${channel.name}: ${err}` }, obj.callback);
-          }
-
-        } else {
-          // missing arguments
-          this.sendTo(obj.from, obj.command, { err: 'userId, userTag or serverId and channelId needs to be set' }, obj.callback);
+          await msg.edit(editMessagePayload.content);
+          this.sendTo(obj.from, obj.command, { result: `Message edited`, ...editMessagePayload }, obj.callback);
+        } catch (err) {
+          this.sendTo(obj.from, obj.command, { error: `Error editing message: ${err}`, ...editMessagePayload }, obj.callback);
         }
 
         break; // editMessage
+
+      case 'awaitMessageReaction':
+        /*
+         * wait for a message reaction
+         */
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+
+        if (typeof obj.message !== 'object') {
+          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
+          return;
+        }
+
+        const awaitMessageReactionPayload = obj.message as SendToActionAwaitMessageReactionPayload;
+
+        // check payload
+        if (typeof awaitMessageReactionPayload.timeout !== 'number' || awaitMessageReactionPayload.timeout < 100 || awaitMessageReactionPayload.timeout > 60000) {
+          this.sendTo(obj.from, obj.command, { error: 'timeout needs to be a number between 100 and 60000', ...awaitMessageReactionPayload }, obj.callback);
+          return;
+        }
+        if (typeof awaitMessageReactionPayload.max !== 'number' || awaitMessageReactionPayload.max < 1) {
+          awaitMessageReactionPayload.max = 1;
+        }
+
+        // try to get the message
+        try {
+          msg = await this.getPreviousMessage(awaitMessageReactionPayload);
+        } catch (err) {
+          if (err instanceof Error && err.message) {
+            this.sendTo(obj.from, obj.command, { error: err.message, ...awaitMessageReactionPayload }, obj.callback);
+          } else {
+            this.sendTo(obj.from, obj.command, { error: err, ...awaitMessageReactionPayload }, obj.callback);
+          }
+          return;
+        }
+
+        // collect reactions
+        const reactionCollector = msg.createReactionCollector({
+          filter: (_reaction, user) => user.id !== this.client?.user?.id,
+          max: awaitMessageReactionPayload.max,
+          time: awaitMessageReactionPayload.timeout,
+        });
+        reactionCollector.on('end', (collected) => {
+          const reactions = collected.map((r) => ({ emoji: r.emoji.name, emojiId: r.emoji.id, users: r.users.cache.map((u) => ({ id: u.id, tag: u.tag })) }));
+          this.sendTo(obj.from, obj.command, { reactions, ...awaitMessageReactionPayload }, obj.callback);
+        });
+
+        break; // awaitMessageReaction
+    }
+  }
+
+  /**
+   * Find a previous message from/to a user or in a server text channel.
+   * @param identifier Parameters to find the message.
+   * @throws An error if some parameters are missing or the message could not be found.
+   */
+  private async getPreviousMessage (identifier: MessageIdentifier): Promise<Message<boolean>> {
+    if (!identifier.messageId) {
+      throw new Error('messageId needs to be set');
+    }
+
+    if (identifier.userId || identifier.userTag) {
+      // a user
+      let user: User | undefined;
+      if (identifier.userId) {
+        // by userId
+        user = this.client?.users.cache.get(identifier.userId);
+        if (!user) {
+          throw new Error(`No user with userId ${identifier.userId} found`);
+        }
+      } else {
+        // by userTag
+        user = this.client?.users.cache.find((u) => u.tag === identifier.userTag);
+        if (!user) {
+          throw new Error(`No user with userTag ${identifier.userTag} found`);
+        }
+      }
+      try {
+        if (!user.dmChannel) {
+          await user.createDM();
+        }
+        const msg = user.dmChannel?.messages.cache.get(identifier.messageId) || await user.dmChannel?.messages.fetch(identifier.messageId);
+        if (!msg) {
+          throw new Error(`No message with messageId ${identifier.messageId} for user ${user.tag} found`);
+        }
+        return msg;
+      } catch (err) {
+        throw new Error(`Error finding message for user ${user.tag}: ${err}`);
+      }
+
+    } else if (identifier.serverId && identifier.channelId) {
+      // a channel
+      const channel = this.client?.guilds.cache.get(identifier.serverId)?.channels.cache.get(identifier.channelId);
+      if (!channel?.isText()) {
+        throw new Error(`No text channel with channelId ${identifier.channelId} on server ${identifier.serverId} found`);
+      }
+      try {
+        const msg = channel.messages.cache.get(identifier.messageId) || await channel.messages.fetch(identifier.messageId);
+        if (!msg) {
+          throw new Error(`No message with messageId ${identifier.messageId} for channel ${channel.name} found`);
+        }
+        return msg;
+      } catch (err) {
+        throw new Error(`Error finding message in channel ${channel.name}: ${err}`);
+      }
+
+    } else {
+      // missing arguments
+      throw new Error('userId, userTag or serverId and channelId needs to be set');
     }
   }
 
