@@ -477,6 +477,20 @@ sendTo('discord.0', 'sendMessage', {
   log(`Message sent with ID ${ret.messageId}`);
 });
 
+// send a reply message to a user
+sendTo('discord.0', 'sendMessage', {
+  userId: '490222742801481728',
+  content: {
+    content: 'Ok!',
+    reply: {
+      messageReference: '971779972052160552', // ID of the message you want to reply to
+    },
+  },
+}, (ret) => {
+  log(ret);
+  // {'result':'Message sent to user cryCode#9911','userId':'490222742801481728','content':{'content':'Ok!','reply':{'messageReference':'971779972052160552'}},'messageId':'971786369401761832'}
+});
+
 // send a file to a server channel
 sendTo('discord.0', 'sendMessage', {
   serverId: '813364154118963251',
@@ -488,8 +502,8 @@ sendTo('discord.0', 'sendMessage', {
         attachment: "/tmp/image.jpg",
         name: "image.jpg",
         description: "My super image"
-      }
-    ]
+      },
+    ],
   },
 }, (ret) => {
   log(ret);
