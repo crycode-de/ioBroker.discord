@@ -49,6 +49,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 * List server and channel members including member roles
 * Support for discord slash commands to get and set state values
 * Support for [text2command](https://github.com/ioBroker/ioBroker.text2command) (has to enabled for each `.message` state where it should be used)
+* Send and edit messages and await message reactions using Scripts
 
 ## Planned features
 

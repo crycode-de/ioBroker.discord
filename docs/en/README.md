@@ -6,9 +6,38 @@ This ioBroker adapter integrates a discord bot into ioBroker.
 
 The adapter will create an object tree including objects and states for server and channel where the bot is on.
 Also an object tree with all users seen by the bot will be created.  
-Using this states it's possible to receive and send messages and files on discord.
+Using this states, it's possible to receive and send messages and files on discord.
 
-Additionally the adapter can register discord slash commands to get and set ioBroker state values.
+Additionally, the adapter can register discord slash commands to get and set ioBroker state values.
+
+* [Features](#features)
+* [Creating a Discord bot](#creating-a-discord-bot)
+* [Adding the bot to a server](#adding-the-bot-to-a-server)
+* [States](#states)
+  * [discord.0.bot.*](#discord0bot)
+  * [discord.0.servers.\<server-id\>.*](#discord0serversserver-id)
+  * [discord.0.servers.\<server-id\>.channels.\<channel-id\>.*](#discord0serversserver-idchannelschannel-id)
+  * [discord.0.servers.\<server-id\>.members.\<user-id\>.*](#discord0serversserver-idmembersuser-id)
+  * [discord.0.users.\<user-id\>.*](#discord0usersuser-id)
+* [Authorization](#authorization)
+* [Messages](#messages)
+  * [Receiving messages](#receiving-messages)
+    * [Using text2command](#using-text2command)
+  * [Sending messages](#sending-messages)
+    * [Sending simple texts](#sending-simple-texts)
+    * [Sending files](#sending-files)
+    * [Sending reactions](#sending-reactions)
+    * [Sending replies](#sending-replies)
+    * [Sending special custom messages](#sending-special-custom-messages)
+* [Slash commands](#slash-commands)
+  * [Configure states for slash commands](#configure-states-for-slash-commands)
+  * [Get states](#get-states)
+  * [Set states](#set-states)
+  * [Get an overview about states configured for slash commands](#get-an-overview-about-states-configured-for-slash-commands)
+* [Usage in scripts](#usage-in-scripts)
+  * [Send a message from a script](#send-a-message-from-a-script)
+  * [Edit a message from a script](#edit-a-message-from-a-script)
+  * [Await reactions to a message in a script](#await-reactions-to-a-message-in-a-script)
 
 ## Features
 
@@ -25,15 +54,16 @@ Additionally the adapter can register discord slash commands to get and set ioBr
 * Send messages, send files, send reactions (emojis), send reply messages, or send custom json-formated message contents
 * List server and channel members including member roles
 * Support for discord slash commands to get and set state values
-* Support for [text2command](https://github.com/ioBroker/ioBroker.text2command) (has to enabled for each `.message` state where it should be used)
+* Support for [text2command] (has to enabled for each `.message` state where it should be used)
+* Send and edit messages and await message reactions using Scripts
 
-Missing some feature? Feel free to submit a feature request on [GitHub](https://github.com/crycode-de/ioBroker.discord/issues/new/choose).
+Missing some feature? Feel free to submit a feature request on [GitHub][GitHub New Issue].
 
 ## Creating a Discord bot
 
 To use this adapter, you need to create a Discord bot application.
 
-1. Got to the [Discord Developer Portal](https://discord.com/developers/applications) and login with your Discord account if not already logged in.
+1. Got to the [Discord Developer Portal] and login with your Discord account if not already logged in.
 2. In the _Applications_ view, click the button _New Application_ in the top right.  
 [![New Application](./media/bot-creation-1.png)](./media/bot-creation-1.png)
 3. Choose a name for your application (this will be the name of your bot) and click _Create_.  
@@ -83,10 +113,10 @@ If some of the above permissions or scopes are missing, some features of the ada
 
 ## States
 
-Each server, channel and user is identified by it's unique numeric ID.  
+Each server, channel and user is identified by its unique numeric ID.  
 Because names may change, the object tree created by the adapter uses these IDs to create a reliable structure.
 
-The whole object tree is build from what bot can see. So it is possible, for example, that a server has more channels as displayed.
+The whole object tree is built from what bot can see. So it is possible, for example, that a server has more channels as displayed.
 
 ### discord.0.bot.*
 
@@ -183,7 +213,7 @@ user on any server of the bot can be trusted!
 
 **Note:** Event with authorization enabled any unauthorized user may see the
 configured Discord slash commands and the corresponding configured state names
-and aliases. This is be design of Discord and not related to the adapter.
+and aliases. This is by design of Discord and not related to the adapter.
 
 ## Messages
 
@@ -203,7 +233,7 @@ for server channel messages or of the user object for direct messages.
 
 If authorization is enabled, by default only messages from authorized users will be stored.
 This can be configured using the _Process messages from unauthorized users_ option
-in the adapter configuration to strore all received messages, even from unauthorized users.
+in the adapter configuration to store all received messages, even from unauthorized users.
 
 The last received message per channel/user is always stored in the `.message` state.
 The timestamp, author and ID of the last received message is stored in the appropriate states.  
@@ -226,9 +256,9 @@ To send a message, you can write contents to the `.send*` states of a channel or
 #### Sending simple texts
 
 To send a simple text, just write the text into the `.send` state of your target.  
-You may use [Markdown](https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline-) for text formatting like in your Discord client.
+You may use [Discord Markdown] for text formatting like in your Discord client.
 
-To mention a user you can use the user ID in the form `<@user-id>`.  
+To mention a user, you can use the user ID in the form `<@user-id>`.  
 For group mentions use `<@&group-id>` and for channel mentions use `<#channel-id>`.
 
 Examples: `This is my message.`, `This is _my_ **formatted** message.`, `Hey <@490222742801481728>!`
@@ -250,7 +280,7 @@ The file location may be a …
 * Base64 encoded file content.  
   Example: `data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACzklEQVQ4y3WTy2tcdRTHP+d3753HncncmbaJiYvEhZrU+ii2urJgFCyCLnykpbQrsbR/gRQaXPUPUHBlH4ogUsRSqq7qLtlZrQpKg6Uu1OCkSWZ65859zfzucTExsYLf3Tl8zznf85JHZ5+cVuGcMebg0YXXHN/3UVVAqfk1VJV+HCMiAKRpyuXPr1hrixsCZ10VzgEnXMeRF+afJwgaFIUC0Go1UYVOp4OYUYIoivjiyjWszecUMMaYAyXPk7m5R8jznCjqk2YpjuMQhj1AcT2XLM3oR30GgyFB0KDkeWKMOeAeP7ZgDh16jizNeO/9Dwh7PR7ft5ejRxa49tXXvPnG6yRJzNWrX/LDjz8xMTHOu4tnKJXLLC0tG1OtViVoNKhWK9wLQ9pr6yRJwtTUJC/Oz3P9+jckccrk5APcXd+g3V6jUqkwiqmKKwKIMBrbCKpw585vvHNmkT17dvHQzAylUhkjZocnggi4I0+BAML9sEXBX+27XLj0MXGSMLR2h6cFKLh+zSdoNlHYXtW/oaq019a3bRGhPlYnaDbxaz5GVflHV7lcYlcrYJRH+V9s8VUVN4r6bG5ugginT52k2+ny/c2bADjGMDG+m073HlmWbyvq9XoURUEU9TGO4+C4DsPBgI31DZIkwVqLAs8+8zQnjh/j1Vdevq84Iriei+M4GABByLKMTz+7zMWPPuHBqSkGgwGdbpeZ6WmiXu+/g9nu0E2SRMMwJMty6rUa+596gsOHX+L8hUvEcUyp5PH7H38yMb4bgMbYGFmWE4YhSZKozO3b/7PruI/Nzj7MybffotVqYYwhjmPq9TpBo8Hq6iqFjkpmWcaH5y+ysnKboR3+4lpbfGdtvvfWrV+lUi5T8jyKoqBeq9FqBqiC7/sYM7qAnggrK7fJ8lyBG67AWQWstQeXlpd33lmhVt96535/60aENE0YWmuBbwUW/wZQx0cNXLu4ygAAAABJRU5ErkJggg==`
 
-Additionally you may add a text message to the file. To do so, just write the file
+Additionally, you may add a text message to the file. To do so, just write the file
 location, followed by a pipe character `|` and your message into the `.sendFile` state.  
 Examples: `/tmp/image.png|This is my file`, `https://www.iobroker.dev/images/iobroker.png|The ioBroker logo`
 
@@ -259,7 +289,7 @@ Examples: `/tmp/image.png|This is my file`, `https://www.iobroker.dev/images/iob
 Using the `.sendReaction` state you can react to a previous message with an emoji.
 To do so, just write the emoji into the state.
 
-By default the reaction will be send for the message which is currently in the
+By default, the reaction will be send for the message which is currently in the
 corresponding `.messageId` state.
 
 If you want to react to a specific message, you can write the message ID, followed
@@ -272,7 +302,7 @@ Examples: `👍`, `971032590515568660|👍`
 Using the `.sendReply` state you can send a reply to a previous message.
 To do so, just write the reply message into the state.
 
-By default the reply will be send for the message which is currently in the
+By default, the reply will be send for the message which is currently in the
 corresponding `.messageId` state.
 
 If you want to reply to a specific message, you can write the message ID, followed
@@ -286,7 +316,7 @@ You can send special custom messages writing a stringified JSON message object
 into the `.send` state.
 
 The JSON object must of type `MessageOptions`.
-For more information read the [discord.js MessageOptions documentation](https://discord.js.org/#/docs/discord.js/stable/typedef/MessageOptions).
+For more information read the [discord.js MessageOptions documentation][MessageOptions].
 
 Examples:
 
@@ -407,3 +437,147 @@ If `min` and `max` values are defined in the state object, they are also checked
 To get an overview about all states where slash commands are enabled, you can
 simply click the button _Log state objects configured for commands_ in the adapter
 instance configuration and see the log output.
+
+## Usage in scripts
+
+You may use the `sendTo(...)` function in scripts to interact with the adapter instance.
+
+_Note:_ All used IDs are strings.
+
+### Send a message from a script
+
+To send a message you can use the `send` or `sendMessage` command. They are the same.
+
+The `message` part of `sendTo(...)` needs to be an object with the `content` to
+send and one of the following parameters to identify the target:
+
+* `userId`
+* `userTag`
+* `serverId` and `channelId`
+
+The `content` may be a simple string, or a [MessageOptions] object.
+
+The return value in the `sendTo(...)` callback is an object containing your message parameters and a `result` string and the `messageId` of the sent discord message on success or an `error` message if there was an error.
+
+Examples:
+
+```js
+// send to user
+sendTo('discord.0', 'sendMessage', {
+  userTag: 'cryCode#9911',
+  content: 'Hi!',
+}, (ret) => {
+  log(ret);
+  // {'result':'Message sent to user cryCode#9911','userTag':'cryCode#9911','content':'Hi!','messageId':'971779972052160552'}
+
+  if (ret.error) {
+    log(ret.error, 'error');
+    return;
+  }
+  log(`Message sent with ID ${ret.messageId}`);
+});
+
+// send a file to a server channel
+sendTo('discord.0', 'sendMessage', {
+  serverId: '813364154118963251',
+  channelId: '813364154559102998',
+  content: {
+    content: 'Look at this:',
+    files: [
+      {
+        attachment: "/tmp/image.jpg",
+        name: "image.jpg",
+        description: "My super image"
+      }
+    ]
+  },
+}, (ret) => {
+  log(ret);
+  // {'result':'Message sent to channel Allgemein','serverId':'813364154118963251','channelId':'813364154559102998','content':{'content':'Look at this:','files':[{'attachment':'/tmp/image.jpg','name':'image.jpg','description':'My super image'}]},'messageId':'971780152759558234'}
+});
+```
+
+### Edit a message from a script
+
+Using the `editMessage` command, you are able to edit a previous message.  
+Of course, you can only edit messages send by the bot.
+
+The `message` part of `sendTo(...)` is the same as for `sendMessage` (see above)
+with the `messageId` of the message you want to edit as additional parameter.
+
+The return value is the same as for `sendMessage`.
+
+Examples:
+
+```js
+// edit a message
+sendTo('discord.0', 'editMessage', {
+  userTag: 'cryCode#9911',
+  content: 'Hello!',
+  messageId: '971495175367049276',
+}, (ret) => {
+  log(ret);
+  // {'result':'Message edited','userTag':'cryCode#9911','content':'Hello!','messageId':'971495175367049276'}
+});
+
+// send a message and edit it after five seconds
+sendTo('discord.0', 'sendMessage', {
+    userTag: 'cryCode#9911',
+    content: 'Now: ' + new Date().toLocaleString(),
+}, (ret) => {
+  if (ret.error) {
+    log(ret.error, 'error');
+    return;
+  }
+  setTimeout(() => {
+    sendTo('discord.0', 'editMessage', {
+      userTag: 'cryCode#9911',
+      content:  'Now: ' + new Date().toLocaleString(),
+      messageId: ret.messageId,
+    }, (ret2) => {
+      log(ret2);
+      // {'result':'Message edited','userTag':'cryCode#9911','content':'Now: 5.5.2022, 16:25:38','messageId':'971779692166266920'}
+    });
+  }, 5000);
+});
+```
+
+### Await reactions to a message in a script
+
+You are able to await reactions (emojis) to a previous message.
+
+The `message` part of `sendTo(...)` is the same as for `editMessage` (see above)
+without the `content` parameter but with `timeout` and `max` number as
+additional parameters.
+
+The `timeout` is the maximum wait time to collect the reactions in a range from 100 to 60000 ms.
+
+The `max` parameter defines the maximum number of reactions to collect.
+Default is 1 if not provided.
+
+The callback of `sendTo(...)` will be called if either the timeout is reached or
+the specified number of reactions is collected.  
+The return value is an object containing your message parameters and a
+`reactions` array. Each reaction is an object of `emoji`, `emojiId` and `users`,
+where `users` is an array of objects with `id` and `tag`.  
+If a reaction is simple emoji, the `emojiId` will be `null`. For custom emojis,
+`emoji` will be the emoji name and `emojiId` will be set.
+
+```js
+sendTo('discord.0', 'awaitMessageReaction', {
+  serverId: '813364154118963251',
+  channelId: '813364154559102998',
+  messageId: '970754574879162458',
+  timeout: 10000,
+  max: 3,
+}, (ret) => {
+  log(ret);
+  // {'reactions':[{'emoji':'👍','emojiId':null,'users':[{'id':'490222742801481728','tag':'cryCode#9911'}]}],'serverId':'813364154118963251','channelId':'813364154559102998','messageId':'970754574879162458','timeout':10000,'max':3}
+});
+```
+
+[text2command]: https://github.com/ioBroker/ioBroker.text2command
+[GitHub New Issue]: https://github.com/crycode-de/ioBroker.discord/issues/new/choose
+[Discord Developer Portal]: https://discord.com/developers/applications
+[Discord Markdown]: https://support.discord.com/hc/en-us/articles/210298617-Markdown-Text-101-Chat-Formatting-Bold-Italic-Underline-
+[MessageOptions]: https://discord.js.org/#/docs/discord.js/stable/typedef/MessageOptions
