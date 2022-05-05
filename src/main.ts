@@ -45,6 +45,7 @@ import {
   SendToActionEditMessagePayload,
   MessageIdentifier,
   SendToActionAwaitMessageReactionPayload,
+  SendToActionAddReactionPayload,
 } from './lib/definitions';
 import { i18n } from './lib/i18n';
 import {
@@ -1902,6 +1903,92 @@ class DiscordAdapter extends Adapter {
 
         break; // editMessage
 
+      case 'deleteMessage':
+        /*
+         * delete a message
+         */
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+
+        if (typeof obj.message !== 'object') {
+          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
+          return;
+        }
+
+        const deleteMessagePayload = obj.message as MessageIdentifier;
+
+        // try to get the message
+        try {
+          msg = await this.getPreviousMessage(deleteMessagePayload);
+        } catch (err) {
+          if (err instanceof Error && err.message) {
+            this.sendTo(obj.from, obj.command, { error: err.message, ...deleteMessagePayload }, obj.callback);
+          } else {
+            this.sendTo(obj.from, obj.command, { error: err, ...deleteMessagePayload }, obj.callback);
+          }
+          return;
+        }
+
+        // try to delete the message
+        try {
+          if (!msg.deletable) {
+            this.sendTo(obj.from, obj.command, { error: `Message with messageId ${deleteMessagePayload.messageId} is not deletable`, ...deleteMessagePayload }, obj.callback);
+            return;
+          }
+          await msg.delete();
+          this.sendTo(obj.from, obj.command, { result: `Message deleted`, ...deleteMessagePayload }, obj.callback);
+        } catch (err) {
+          this.sendTo(obj.from, obj.command, { error: `Error deleting message: ${err}`, ...deleteMessagePayload }, obj.callback);
+        }
+
+        break; // deleteMessage
+
+      case 'addReaction':
+        /*
+         * add a reaction emoji to a message
+         */
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+
+        if (typeof obj.message !== 'object') {
+          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
+          return;
+        }
+
+        const addReactionPayload = obj.message as SendToActionAddReactionPayload;
+
+        // check payload
+        if (typeof addReactionPayload.emoji !== 'string') {
+          this.sendTo(obj.from, obj.command, { error: 'emoji needs to be a string', ...addReactionPayload }, obj.callback);
+          return;
+        }
+
+        // try to get the message
+        try {
+          msg = await this.getPreviousMessage(addReactionPayload);
+        } catch (err) {
+          if (err instanceof Error && err.message) {
+            this.sendTo(obj.from, obj.command, { error: err.message, ...addReactionPayload }, obj.callback);
+          } else {
+            this.sendTo(obj.from, obj.command, { error: err, ...addReactionPayload }, obj.callback);
+          }
+          return;
+        }
+
+        // try to add the reaction to the message
+        try {
+          await msg.react(addReactionPayload.emoji);
+          this.sendTo(obj.from, obj.command, { result: `Reaction added to message`, ...addReactionPayload }, obj.callback);
+        } catch (err) {
+          this.sendTo(obj.from, obj.command, { error: `Error adding reaction to message: ${err}`, ...addReactionPayload }, obj.callback);
+        }
+
+        break; // addReaction
+
       case 'awaitMessageReaction':
         /*
          * wait for a message reaction
@@ -1951,6 +2038,16 @@ class DiscordAdapter extends Adapter {
         });
 
         break; // awaitMessageReaction
+
+      default:
+        /*
+         * unknown command
+         */
+        this.log.warn(`Got message with unknown command: ${obj.command}`);
+        if (obj.callback) {
+          this.sendTo(obj.from, obj.command, { error: `Unknown command: ${obj.command}` }, obj.callback);
+        }
+
     }
   }
 

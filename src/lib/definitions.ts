@@ -137,3 +137,10 @@ export interface SendToActionAwaitMessageReactionPayload extends MessageIdentifi
   timeout: number;
   max?: number;
 }
+
+/**
+ * Payload for a `sentTo(...)` `addReaction` action.
+ */
+export interface SendToActionAddReactionPayload extends MessageIdentifier {
+  emoji: string;
+}

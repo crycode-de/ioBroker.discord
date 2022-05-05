@@ -1543,6 +1543,68 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendTo(obj.from, obj.command, __spreadValues({ error: `Error editing message: ${err}` }, editMessagePayload), obj.callback);
         }
         break;
+      case "deleteMessage":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if (typeof obj.message !== "object") {
+          this.sendTo(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
+          return;
+        }
+        const deleteMessagePayload = obj.message;
+        try {
+          msg = await this.getPreviousMessage(deleteMessagePayload);
+        } catch (err) {
+          if (err instanceof Error && err.message) {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: err.message }, deleteMessagePayload), obj.callback);
+          } else {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: err }, deleteMessagePayload), obj.callback);
+          }
+          return;
+        }
+        try {
+          if (!msg.deletable) {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: `Message with messageId ${deleteMessagePayload.messageId} is not deletable` }, deleteMessagePayload), obj.callback);
+            return;
+          }
+          await msg.delete();
+          this.sendTo(obj.from, obj.command, __spreadValues({ result: `Message deleted` }, deleteMessagePayload), obj.callback);
+        } catch (err) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: `Error deleting message: ${err}` }, deleteMessagePayload), obj.callback);
+        }
+        break;
+      case "addReaction":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if (typeof obj.message !== "object") {
+          this.sendTo(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
+          return;
+        }
+        const addReactionPayload = obj.message;
+        if (typeof addReactionPayload.emoji !== "string") {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: "emoji needs to be a string" }, addReactionPayload), obj.callback);
+          return;
+        }
+        try {
+          msg = await this.getPreviousMessage(addReactionPayload);
+        } catch (err) {
+          if (err instanceof Error && err.message) {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: err.message }, addReactionPayload), obj.callback);
+          } else {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: err }, addReactionPayload), obj.callback);
+          }
+          return;
+        }
+        try {
+          await msg.react(addReactionPayload.emoji);
+          this.sendTo(obj.from, obj.command, __spreadValues({ result: `Reaction added to message` }, addReactionPayload), obj.callback);
+        } catch (err) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: `Error adding reaction to message: ${err}` }, addReactionPayload), obj.callback);
+        }
+        break;
       case "awaitMessageReaction":
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -1583,6 +1645,11 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendTo(obj.from, obj.command, __spreadValues({ reactions }, awaitMessageReactionPayload), obj.callback);
         });
         break;
+      default:
+        this.log.warn(`Got message with unknown command: ${obj.command}`);
+        if (obj.callback) {
+          this.sendTo(obj.from, obj.command, { error: `Unknown command: ${obj.command}` }, obj.callback);
+        }
     }
   }
   async getPreviousMessage(identifier) {

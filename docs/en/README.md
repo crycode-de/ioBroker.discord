@@ -37,6 +37,8 @@ Additionally, the adapter can register discord slash commands to get and set ioB
 * [Usage in scripts](#usage-in-scripts)
   * [Send a message from a script](#send-a-message-from-a-script)
   * [Edit a message from a script](#edit-a-message-from-a-script)
+  * [Delete a message from a script](#delete-a-message-from-a-script)
+  * [Add a reaction emoji to a message from a script](#add-a-reaction-emoji-to-a-message-from-a-script)
   * [Await reactions to a message in a script](#await-reactions-to-a-message-in-a-script)
 
 ## Features
@@ -55,7 +57,7 @@ Additionally, the adapter can register discord slash commands to get and set ioB
 * List server and channel members including member roles
 * Support for discord slash commands to get and set state values
 * Support for [text2command] (has to enabled for each `.message` state where it should be used)
-* Send and edit messages and await message reactions using Scripts
+* Send, edit and delete messages, add and await message reactions using Scripts
 
 Missing some feature? Feel free to submit a feature request on [GitHub][GitHub New Issue].
 
@@ -553,6 +555,55 @@ sendTo('discord.0', 'sendMessage', {
       // {'result':'Message edited','userTag':'cryCode#9911','content':'Now: 5.5.2022, 16:25:38','messageId':'971779692166266920'}
     });
   }, 5000);
+});
+```
+
+### Delete a message from a script
+
+Using the `delteMessage` command, you are able to delete a previous message.  
+Of course, you can only delete messages send by the bot.
+
+The `message` part of `sendTo(...)` is the same as for `sendMessage` (see above)
+without the `content` but with the `messageId` of the message you want to delete
+as additional parameter.
+
+The return value is the same as for `sendMessage`.
+
+Examples:
+
+```js
+// delete a message
+sendTo('discord.0', 'deleteMessage', {
+  userTag: 'cryCode#9911',
+  messageId: '971495175367049276',
+}, (ret) => {
+  log(ret);
+  // {'result':'Message deleted','userTag':'cryCode#9911','messageId':'971495175367049276'}
+});
+```
+
+### Add a reaction emoji to a message from a script
+
+Using the `addReaction` command, you are able to add a reaction emoji to a
+previous message.
+
+The `message` part of `sendTo(...)` is the same as for `sendMessage` (see above)
+without the `content` but with the `messageId` of the message you want react to
+and the `emoji` as additional parameters.
+
+The return value is the same as for `sendMessage`.
+
+Examples:
+
+```js
+// add a reaction to a message
+sendTo('discord.0', 'addReaction', {
+  userTag: 'cryCode#9911',
+  messageId: '971786369401761832',
+  emoji: '😎',
+}, (ret) => {
+  log(ret);
+  // {'result':'Reaction added to message','userTag':'cryCode#9911','messageId':'971786369401761832','emoji':'😎'}
 });
 ```
 
