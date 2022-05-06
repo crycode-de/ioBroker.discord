@@ -43,7 +43,7 @@ export class DiscordAdapterSlashCommands {
   /**
    * Discord REST api interface.
    */
-  private rest: REST = new REST({ version: '9' });
+  private rest: REST = new REST({ version: '10' });
 
   /**
    * Command name for the get state command.
@@ -308,7 +308,7 @@ export class DiscordAdapterSlashCommands {
       if (guildCommands.size > 0) {
         this.adapter.log.debug(`Currently ${guildCommands.size} commands registered for server ${guild.name}. Removing them...`);
         await this.rest.put(Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: [] });
-        this.adapter.log.info(`Removed commands for server ${guild.name} cause commands theay are not used anymore.`);
+        this.adapter.log.info(`Removed commands for server ${guild.name} cause commands they are not used anymore.`);
       }
     } catch (err) {
       if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
@@ -387,7 +387,7 @@ export class DiscordAdapterSlashCommands {
     // raw states enabled?
     if (this.adapter.config.enableRawStates) {
       // set raw state... not async here since it should not block!
-      this.adapter.setState('raw.interactionJson', JSON.stringify(interaction.toJSON()), true);
+      this.adapter.setState('raw.interactionJson', JSON.stringify(interaction.toJSON(), (_key, value) => typeof value === 'bigint' ? value.toString() : value), true);
     }
 
     // is it a command?

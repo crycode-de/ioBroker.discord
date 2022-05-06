@@ -39,7 +39,7 @@ var import_i18n = require("./lib/i18n");
 var import_utils = require("./lib/utils");
 class DiscordAdapterSlashCommands {
   constructor(adapter) {
-    this.rest = new import_rest.REST({ version: "9" });
+    this.rest = new import_rest.REST({ version: "10" });
     this.cmdGetStateName = "iob-get";
     this.cmdSetStateName = "iob-set";
     this.registerCommandsDone = false;
@@ -195,7 +195,7 @@ class DiscordAdapterSlashCommands {
       if (guildCommands.size > 0) {
         this.adapter.log.debug(`Currently ${guildCommands.size} commands registered for server ${guild.name}. Removing them...`);
         await this.rest.put(import_v10.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: [] });
-        this.adapter.log.info(`Removed commands for server ${guild.name} cause commands theay are not used anymore.`);
+        this.adapter.log.info(`Removed commands for server ${guild.name} cause commands they are not used anymore.`);
       }
     } catch (err) {
       if (err instanceof import_discord.DiscordAPIError && err.message === "Missing Access") {
@@ -241,7 +241,7 @@ class DiscordAdapterSlashCommands {
   }
   async onInteractionCreate(interaction) {
     if (this.adapter.config.enableRawStates) {
-      this.adapter.setState("raw.interactionJson", JSON.stringify(interaction.toJSON()), true);
+      this.adapter.setState("raw.interactionJson", JSON.stringify(interaction.toJSON(), (_key, value) => typeof value === "bigint" ? value.toString() : value), true);
     }
     if (!interaction.isCommand())
       return;

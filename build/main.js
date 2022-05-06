@@ -144,7 +144,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.client.on("ready", this.onClientReady);
     this.client.on("warn", (message) => this.log.warn(`Discord client warning: ${message}`));
     this.client.on("error", (err) => this.log.error(`Discord client error: ${err.toString()}`));
-    this.client.on("rateLimit", (rateLimitData) => this.log.warn(`Discord client rate limit hit: ${JSON.stringify(rateLimitData)}`));
+    this.client.on("rateLimit", (rateLimitData) => this.log.debug(`Discord client rate limit hit: ${JSON.stringify(rateLimitData)}`));
     this.client.on("invalidRequestWarning", (invalidRequestWarningData) => this.log.warn(`Discord client invalid request warning: ${JSON.stringify(invalidRequestWarningData)}`));
     this.client.on("invalidated", () => {
       this.log.warn("Discord client session invalidated");
@@ -245,7 +245,11 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.log.debug("Bot name is up to date");
       }
     }
-    await this.updateGuilds();
+    try {
+      await this.updateGuilds();
+    } catch (err) {
+      this.log.error(`Error while updating server information: ${err}`);
+    }
   }
   async updateGuilds() {
     var _a, _b, _c, _d;
@@ -1006,7 +1010,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     var _a, _b, _c, _d, _e;
     this.log.debug(`Discord message: mId:${message.id} cId:${message.channelId} uId: ${message.author.id} - ${message.content}`);
     if (this.config.enableRawStates) {
-      this.setState("raw.messageJson", JSON.stringify(message.toJSON()), true);
+      this.setState("raw.messageJson", JSON.stringify(message.toJSON(), (_key, value) => typeof value === "bigint" ? value.toString() : value), true);
     }
     if (!((_b = (_a = this.client) == null ? void 0 : _a.user) == null ? void 0 : _b.id))
       return;

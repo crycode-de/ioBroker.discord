@@ -213,7 +213,7 @@ class DiscordAdapter extends Adapter {
 
     this.client.on('warn', (message) => this.log.warn(`Discord client warning: ${message}`));
     this.client.on('error', (err) => this.log.error(`Discord client error: ${err.toString()}`));
-    this.client.on('rateLimit', (rateLimitData) => this.log.warn(`Discord client rate limit hit: ${JSON.stringify(rateLimitData)}`)); // rate limit event is just a warning - discord.js handels rate limits
+    this.client.on('rateLimit', (rateLimitData) => this.log.debug(`Discord client rate limit hit: ${JSON.stringify(rateLimitData)}`)); // rate limit event is just a information - discord.js handels rate limits
     this.client.on('invalidRequestWarning', (invalidRequestWarningData) => this.log.warn(`Discord client invalid request warning: ${JSON.stringify(invalidRequestWarningData)}`));
 
     this.client.on('invalidated', () => {
@@ -344,7 +344,11 @@ class DiscordAdapter extends Adapter {
       }
     }
 
-    await this.updateGuilds();
+    try {
+      await this.updateGuilds();
+    } catch (err) {
+      this.log.error(`Error while updating server information: ${err}`);
+    }
   }
 
   /**
@@ -1094,6 +1098,12 @@ class DiscordAdapter extends Adapter {
     }
   }
 
+  /**
+   * Update the presence states of a user.
+   * @param userId ID of the user.
+   * @param presence The user presence.
+   * @param skipJsonStateUpdate If the json state of the user should not be updated.
+   */
   private async updateUserPresence (userId: Snowflake, presence: Presence | null, skipJsonStateUpdate: boolean = false): Promise<UpdateUserPresenceResult> {
     if (!this.config.observeUserPresence) {
       return { activityName: '', activityType: '', status: '' };
@@ -1182,7 +1192,7 @@ class DiscordAdapter extends Adapter {
     // raw states enabled?
     if (this.config.enableRawStates) {
       // set raw state... not async here since it should not block!
-      this.setState('raw.messageJson', JSON.stringify(message.toJSON()), true);
+      this.setState('raw.messageJson', JSON.stringify(message.toJSON(), (_key, value) => typeof value === 'bigint' ? value.toString() : value), true);
     }
 
     if (!this.client?.user?.id) return;
