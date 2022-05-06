@@ -144,7 +144,7 @@ class DiscordAdapterSlashCommands {
       try {
         if (this.adapter.config.commandsGlobal) {
           await this.rest.put(import_v10.Routes.applicationCommands(this.adapter.client.user.id), { body: commandsJson });
-          this.adapter.log.info(`Registered global command (get: ${numGet}, set: ${numSet})`);
+          this.adapter.log.info(`Registered global commands (get: ${numGet}, set: ${numSet})`);
         } else {
           await this.removeGlobalCommands();
         }

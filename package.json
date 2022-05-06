@@ -60,7 +60,6 @@
     "admin{,/!(src)/**}/!(tsconfig|tsconfig.*).json",
     "admin{,/!(src)/**}/*.{html,css,png,svg,jpg,js}",
     "build/",
-    "www/",
     "io-package.json",
     "LICENSE"
   ],

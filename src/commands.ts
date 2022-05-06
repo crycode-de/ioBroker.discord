@@ -240,7 +240,7 @@ export class DiscordAdapterSlashCommands {
         if (this.adapter.config.commandsGlobal) {
           // global commands enabled
           await this.rest.put(Routes.applicationCommands(this.adapter.client.user.id), { body: commandsJson });
-          this.adapter.log.info(`Registered global command (get: ${numGet}, set: ${numSet})`);
+          this.adapter.log.info(`Registered global commands (get: ${numGet}, set: ${numSet})`);
 
         } else {
           // global command disabled
