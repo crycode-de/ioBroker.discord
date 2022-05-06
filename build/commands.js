@@ -240,6 +240,9 @@ class DiscordAdapterSlashCommands {
     }, 5e3);
   }
   async onInteractionCreate(interaction) {
+    if (this.adapter.config.enableRawStates) {
+      this.adapter.setState("raw.interactionJson", JSON.stringify(interaction.toJSON()), true);
+    }
     if (!interaction.isCommand())
       return;
     const { commandName, user } = interaction;

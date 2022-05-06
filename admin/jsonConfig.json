@@ -14,7 +14,7 @@
           "label": "Token",
           "help": "Your bot token from the discord developers portal",
           "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxx.yyyyyy.zzzzzzzzzzzzzzzzzzzzzzzzzzz",
-          "validator": "data.token.match(/^[0-9a-zA-Z-_]{24}\\.[0-9a-zA-Z-_]{6}\\.[0-9a-zA-Z-_]{27-38}$/)",
+          "validator": "data.token.match(/^[0-9a-zA-Z-_]{24}\\.[0-9a-zA-Z-_]{6}\\.[0-9a-zA-Z-_]{27,38}$/)",
           "validatorNoSaveOnError": true
         },
         "_devPortalLink": {
@@ -62,6 +62,16 @@
           "lg": 4,
           "label": "Observe user voice state",
           "help": "Observe voice state for all known users."
+        },
+
+        "enableRawStates": {
+          "type": "checkbox",
+          "newLine": true,
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "label": "Enable raw states",
+          "help": "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example."
         }
       }
     },

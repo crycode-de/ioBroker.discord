@@ -16,6 +16,7 @@ declare global {
       dynamicServerUpdates: boolean;
       observeUserPresence: boolean;
       observeUserVoiceState: boolean;
+      enableRawStates: boolean;
       enableAuthorization: boolean;
       authorizedUsers: AdapterConfigAuthorizedUser[];
       processMessagesFromUnauthorizedUsers: boolean;

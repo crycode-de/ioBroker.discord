@@ -150,5 +150,9 @@
     "Log state objects configured for commands": "Объекты состояния журнала, настроенные для команд",
     "See log output": "См. вывод журнала",
     "The adapter instance needs to be running to use this feature!": "Экземпляр адаптера должен быть запущен, чтобы использовать эту функцию!",
-    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Подсказка: команды Discord должны быть включены для каждого состояния в пользовательских настройках объектов состояния."
+    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Подсказка: команды Discord должны быть включены для каждого состояния в пользовательских настройках объектов состояния.",
+    "Last interaction JSON data": "Данные JSON о последнем взаимодействии",
+    "Raw data": "Необработанные данные",
+    "Enable raw states": "Включить необработанные состояния",
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Если включено, любое полученное сообщение будет сохранено в необработанном состоянии json, поэтому его можно будет использовать, например, в пользовательских сценариях."
 }

@@ -19,6 +19,7 @@ Additionally, the adapter can register discord slash commands to get and set ioB
   * [discord.0.servers.\<server-id\>.channels.\<channel-id\>.*](#discord0serversserver-idchannelschannel-id)
   * [discord.0.servers.\<server-id\>.members.\<user-id\>.*](#discord0serversserver-idmembersuser-id)
   * [discord.0.users.\<user-id\>.*](#discord0usersuser-id)
+  * [discord.0.raw.*](#discord0raw)
 * [Authorization](#authorization)
 * [Messages](#messages)
   * [Receiving messages](#receiving-messages)
@@ -58,6 +59,7 @@ Additionally, the adapter can register discord slash commands to get and set ioB
 * Support for discord slash commands to get and set state values
 * Support for [text2command] (has to enabled for each `.message` state where it should be used)
 * Send, edit and delete messages, add and await message reactions using Scripts
+* Optional raw states to allow more flexibility in custom scripts
 
 Missing some feature? Feel free to submit a feature request on [GitHub][GitHub New Issue].
 
@@ -200,6 +202,20 @@ For the `status` and `activity*` states to be up to date, the option _Observe us
 
 For all `message*` and `send*` states see messages section below.
 
+### discord.0.raw.*
+
+If raw states are enabled in the adapter instance configuration, the following
+states will be present.
+
+**Note:** These states contain raw data without any checks, filters or
+modifications by the adapter.
+A server will be named guild.
+
+| Name | Description |
+|---|---|
+| `messageJson` | Raw JSON data of the last received message. |
+| `interactionJson` | Raw JSON data of the last received interaction. |
+
 ## Authorization
 
 By default, authorization is enabled and only authorized users are able to
@@ -322,6 +338,8 @@ For more information read the [discord.js MessageOptions documentation][MessageO
 
 Examples:
 
+Send an image:
+
 ```json
 {
   "files": [
@@ -333,6 +351,8 @@ Examples:
   ]
 }
 ```
+
+Send embedded content:
 
 ```json
 {
@@ -353,6 +373,29 @@ Examples:
       "footer": {
         "text": "❤👍"
       }
+    }
+  ]
+}
+```
+
+Send embedded image from local source:
+
+```json
+{
+  "embeds": [
+    {
+      "title": "IP-Cam Alert",
+      "description": "Look at this:",
+      "color": "#ff0000",
+      "image": {
+        "url": "attachment://cam.jpg"
+      }
+    }
+  ],
+  "files": [
+    {
+      "attachment": "http://192.168.1.50:8080/ip-cam.jpg",
+      "name": "cam.jpg"
     }
   ]
 }

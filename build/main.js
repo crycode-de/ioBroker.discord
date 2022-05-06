@@ -74,7 +74,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     const systemConfig = await this.getForeignObjectAsync("system.config");
     import_i18n.i18n.language = (systemConfig == null ? void 0 : systemConfig.common.language) || "en";
     import_i18n.i18n.isFloatComma = (systemConfig == null ? void 0 : systemConfig.common.isFloatComma) || false;
-    if (typeof this.config.token !== "string" || !this.config.token.match(/^[0-9a-zA-Z-_]{24}\.[0-9a-zA-Z-_]{6}\.[0-9a-zA-Z-_]{27-38}$/)) {
+    if (typeof this.config.token !== "string" || !this.config.token.match(/^[0-9a-zA-Z-_]{24}\.[0-9a-zA-Z-_]{6}\.[0-9a-zA-Z-_]{27,38}$/)) {
       this.log.error(`No or invalid token!`);
       return;
     }
@@ -86,6 +86,43 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     if (this.config.enableAuthorization && this.config.authorizedUsers.length === 0) {
       this.log.info("Authorization is enabled but no authorized users are defined!");
+    }
+    if (this.config.enableRawStates) {
+      await this.extendObjectAsync("raw", {
+        type: "channel",
+        common: {
+          name: import_i18n.i18n.getStringOrTranslated("Raw data")
+        },
+        native: {}
+      });
+      await Promise.all([
+        this.extendObjectAsync("raw.interactionJson", {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Last interaction JSON data"),
+            role: "json",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        }),
+        this.extendObjectAsync("raw.messageJson", {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Last message JSON data"),
+            role: "json",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        })
+      ]);
+    } else {
+      await this.delObjectAsync("raw", { recursive: true });
     }
     this.client = new import_discord.Client({
       intents: [
@@ -968,6 +1005,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
   async onClientMessageCreate(message) {
     var _a, _b, _c, _d, _e;
     this.log.debug(`Discord message: mId:${message.id} cId:${message.channelId} uId: ${message.author.id} - ${message.content}`);
+    if (this.config.enableRawStates) {
+      this.setState("raw.messageJson", JSON.stringify(message.toJSON()), true);
+    }
     if (!((_b = (_a = this.client) == null ? void 0 : _a.user) == null ? void 0 : _b.id))
       return;
     const { author, channel, content } = message;

@@ -150,5 +150,9 @@
     "Log state objects configured for commands": "Obiekty stanu dziennika skonfigurowane dla poleceń",
     "See log output": "Zobacz dane wyjściowe dziennika",
     "The adapter instance needs to be running to use this feature!": "Aby korzystać z tej funkcji, instancja adaptera musi być uruchomiona!",
-    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Wskazówka: polecenia Discord muszą być włączone dla każdego stanu w ustawieniach niestandardowych obiektów stanu."
+    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Wskazówka: polecenia Discord muszą być włączone dla każdego stanu w ustawieniach niestandardowych obiektów stanu.",
+    "Last interaction JSON data": "Dane JSON ostatniej interakcji",
+    "Raw data": "Surowe dane",
+    "Enable raw states": "Włącz stany surowe",
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Jeśli ta opcja jest włączona, każda otrzymana wiadomość będzie przechowywana w surowym stanie json, dzięki czemu może być używana na przykład w niestandardowych skryptach."
 }

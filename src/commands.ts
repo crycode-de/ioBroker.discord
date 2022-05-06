@@ -383,6 +383,13 @@ export class DiscordAdapterSlashCommands {
    */
   @boundMethod
   private async onInteractionCreate (interaction: Interaction<CacheType>): Promise<void> {
+
+    // raw states enabled?
+    if (this.adapter.config.enableRawStates) {
+      // set raw state... not async here since it should not block!
+      this.adapter.setState('raw.interactionJson', JSON.stringify(interaction.toJSON()), true);
+    }
+
     // is it a command?
     if (!interaction.isCommand()) return;
 

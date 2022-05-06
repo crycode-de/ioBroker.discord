@@ -107,6 +107,7 @@
         "dynamicServerUpdates": true,
         "observeUserPresence": false,
         "observeUserVoiceState": false,
+        "enableRawStates": false,
         "enableAuthorization": true,
         "authorizedUsers": [],
         "processMessagesFromUnauthorizedUsers": false,

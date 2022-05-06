@@ -137,7 +137,7 @@ class DiscordAdapter extends Adapter {
     i18n.isFloatComma = systemConfig?.common.isFloatComma || false;
 
     // validate config
-    if (typeof this.config.token !== 'string' || !this.config.token.match(/^[0-9a-zA-Z-_]{24}\.[0-9a-zA-Z-_]{6}\.[0-9a-zA-Z-_]{27-38}$/)) {
+    if (typeof this.config.token !== 'string' || !this.config.token.match(/^[0-9a-zA-Z-_]{24}\.[0-9a-zA-Z-_]{6}\.[0-9a-zA-Z-_]{27,38}$/)) {
       this.log.error(`No or invalid token!`);
       return;
     }
@@ -151,6 +151,46 @@ class DiscordAdapter extends Adapter {
       this.log.info('Authorization is enabled but no authorized users are defined!');
     }
 
+    // setup generic dynamic objects (most objects will be set up in `updateGuilds` method)
+    if (this.config.enableRawStates) {
+      await this.extendObjectAsync('raw', {
+        type: 'channel',
+        common: {
+          name: i18n.getStringOrTranslated('Raw data'),
+        },
+        native: {},
+      });
+      await Promise.all([
+        this.extendObjectAsync('raw.interactionJson', {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Last interaction JSON data'),
+            role: 'json',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+        this.extendObjectAsync('raw.messageJson', {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Last message JSON data'),
+            role: 'json',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+      ]);
+    } else {
+      await this.delObjectAsync('raw', { recursive: true });
+    }
+
+    // setup the discord client
     this.client = new Client({
       intents: [
         Intents.FLAGS.GUILDS,
@@ -1138,6 +1178,12 @@ class DiscordAdapter extends Adapter {
   @boundMethod
   private async onClientMessageCreate (message: Message<boolean>): Promise<void> {
     this.log.debug(`Discord message: mId:${message.id} cId:${message.channelId} uId: ${message.author.id} - ${message.content}`);
+
+    // raw states enabled?
+    if (this.config.enableRawStates) {
+      // set raw state... not async here since it should not block!
+      this.setState('raw.messageJson', JSON.stringify(message.toJSON()), true);
+    }
 
     if (!this.client?.user?.id) return;
 

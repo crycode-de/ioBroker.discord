@@ -150,5 +150,9 @@
     "To get an overview about all state objects where you have commands enabled, just click the button below and see the log output.": "Um einen Überblick über alle Zustandsobjekte zu erhalten, bei denen Befehle aktiviert sind, einfach auf die Schaltfläche unten klicken und dann die Protokollausgabe ansehen.",
     "Log state objects configured for commands": "Für Befehle konfigurierte Zustandsobjekte protokollieren",
     "See log output": "Siehe Protokollausgabe",
-    "The adapter instance needs to be running to use this feature!": "Die Adapterinstanz muss ausgeführt werden, um diese Funktion nutzen zu können!"
+    "The adapter instance needs to be running to use this feature!": "Die Adapterinstanz muss ausgeführt werden, um diese Funktion nutzen zu können!",
+    "Last interaction JSON data": "JSON-Daten der letzten Interaktion",
+    "Raw data": "Rohdaten",
+    "Enable raw states": "Rohdatenzustände aktivieren",
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Wenn diese Option aktiviert ist, wird jede empfangene Nachricht in einem roh-JSON-Zustand gespeichert, sodass diese beispielsweise in benutzerdefinierten Skripten verwendet werden können."
 }

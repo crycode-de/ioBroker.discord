@@ -150,5 +150,9 @@
     "Log state objects configured for commands": "Objets d'état du journal configurés pour les commandes",
     "See log output": "Voir la sortie du journal",
     "The adapter instance needs to be running to use this feature!": "L'instance de l'adaptateur doit être en cours d'exécution pour utiliser cette fonctionnalité !",
-    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Astuce : les commandes Discord doivent être activées par état dans les paramètres personnalisés des objets d'état."
+    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Astuce : les commandes Discord doivent être activées par état dans les paramètres personnalisés des objets d'état.",
+    "Last interaction JSON data": "Données JSON de la dernière interaction",
+    "Raw data": "Données brutes",
+    "Enable raw states": "Activer les états bruts",
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Si activé, tout message reçu sera stocké dans un état json brut, il pourra donc être utilisé dans des scripts personnalisés par exemple."
 }

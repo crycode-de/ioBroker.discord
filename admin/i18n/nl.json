@@ -150,5 +150,9 @@
     "Log state objects configured for commands": "Logstatusobjecten geconfigureerd voor opdrachten",
     "See log output": "Zie logoutput",
     "The adapter instance needs to be running to use this feature!": "De adapterinstantie moet actief zijn om deze functie te gebruiken!",
-    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Hint: Discord-commando's moeten per staat worden ingeschakeld in de aangepaste instellingen van de staatsobjecten."
+    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Hint: Discord-commando's moeten per staat worden ingeschakeld in de aangepaste instellingen van de staatsobjecten.",
+    "Last interaction JSON data": "JSON-gegevens laatste interactie",
+    "Raw data": "Ruwe data",
+    "Enable raw states": "Onbewerkte toestanden inschakelen",
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Indien ingeschakeld, wordt elk ontvangen bericht opgeslagen in een onbewerkte json-status, zodat het bijvoorbeeld in aangepaste scripts kan worden gebruikt."
 }

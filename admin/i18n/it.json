@@ -150,5 +150,9 @@
     "Log state objects configured for commands": "Registra gli oggetti di stato configurati per i comandi",
     "See log output": "Vedi l'output del registro",
     "The adapter instance needs to be running to use this feature!": "L'istanza dell'adattatore deve essere in esecuzione per utilizzare questa funzione!",
-    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Suggerimento: i comandi Discord devono essere abilitati per stato nelle impostazioni personalizzate degli oggetti stato."
+    "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.": "Suggerimento: i comandi Discord devono essere abilitati per stato nelle impostazioni personalizzate degli oggetti stato.",
+    "Last interaction JSON data": "Dati JSON dell'ultima interazione",
+    "Raw data": "Dati grezzi",
+    "Enable raw states": "Abilita stati grezzi",
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Se abilitato, qualsiasi messaggio ricevuto verrà archiviato in uno stato json non elaborato, quindi potrebbe essere utilizzato, ad esempio, in script personalizzati."
 }
