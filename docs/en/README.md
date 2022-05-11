@@ -2,13 +2,13 @@
 
 ![Logo](../../admin/discord.png)
 
-This ioBroker adapter integrates a discord bot into ioBroker.
+This [ioBroker] adapter integrates a [Discord] bot into ioBroker.
 
 The adapter will create an object tree including objects and states for server and channel where the bot is on.
 Also an object tree with all users seen by the bot will be created.  
-Using this states, it's possible to receive and send messages and files on discord.
+Using this states, it's possible to receive and send messages and files on Discord.
 
-Additionally, the adapter can register discord slash commands to get and set ioBroker state values.
+Additionally, the adapter can register Discord slash commands to get and set ioBroker state values.
 
 * [Features](#features)
 * [Creating a Discord bot](#creating-a-discord-bot)
@@ -45,7 +45,7 @@ Additionally, the adapter can register discord slash commands to get and set ioB
 ## Features
 
 * ioBroker states for all servers of the bot to receive and send messages
-* ioBroker states for all users seen by the bot to receive and send messages
+* ioBroker states for all users seen by the bot to receive and send direct messages
 * Set the bot status including actions
 * Optional observe user presence status
 * Optional observe server member voice status
@@ -54,10 +54,10 @@ Additionally, the adapter can register discord slash commands to get and set ioB
 * Handle direct messages
 * Optional automatic react with a emoji on mentions
 * `.json` states for channel, user and message data
-* Send messages, send files, send reactions (emojis), send reply messages, or send custom json-formated message contents
+* Send messages, files, reactions (emojis), reply messages, or custom json-formated message contents
 * List server and channel members including member roles
-* Support for discord slash commands to get and set state values
-* Support for [text2command] (has to enabled for each `.message` state where it should be used)
+* Support for Discord slash commands to get and set state values
+* Support for [text2command] (has to be enabled for each `.message` state where it should be used)
 * Send, edit and delete messages, add and await message reactions using Scripts
 * Optional raw states to allow more flexibility in custom scripts
 
@@ -88,8 +88,10 @@ Note: Once your bot reaches 100 or more servers, the intents will require verifi
 
 ## Adding the bot to a server
 
-To add the bot to a server, you need to go to the adapter instance configuration to the tab _Add bot to server_.
-There you get a link which you can use to add the bot to a server, while setting the correct scopes and permissions.
+To add the bot to a server, you need to go to the adapter instance configuration
+to the tab _Add bot to server_.
+There you get a link which you can use to add the bot to a server, while setting
+the correct scopes and permissions.
 
 [![Add bot to server](./media/add-bot-to-server.png)](./media/add-bot-to-server.png)
 
@@ -113,14 +115,17 @@ Also the following scopes are required:
 * bot
 * applications.commands
 
-If some of the above permissions or scopes are missing, some features of the adapter might not work.
+If some of the above permissions or scopes are missing, some features of the
+adapter might not work.
 
 ## States
 
 Each server, channel and user is identified by its unique numeric ID.  
-Because names may change, the object tree created by the adapter uses these IDs to create a reliable structure.
+Because names may change, the object tree created by the adapter uses these IDs
+to create a reliable structure.
 
-The whole object tree is built from what bot can see. So it is possible, for example, that a server has more channels as displayed.
+The whole object tree is built from what bot can see. So it is possible,
+for example, that a server has more channels as displayed.
 
 ### discord.0.bot.*
 
@@ -153,11 +158,11 @@ This is used to set the presence status and activity of the bot which should be 
 | `messageJson` | JSON data for the last received message. |
 | `send` | Send some text or JSON formated message. |
 | `sendFile` | Send a File. |
-| `sendReply` | Send a reply to a received message. |
-| `sendReaction` | Send a reaction (emoji) to a received message. |
+| `sendReply` | Send a reply to a message. |
+| `sendReaction` | Send a reaction (emoji) to a message. |
 | `json` | JSON data of the channel information. |
 
-For all `message*` and `send*` states see messages section below.
+For all `message*` and `send*` states see _Messages_ section below.
 
 ### discord.0.servers.\<server-id\>.members.\<user-id\>.*
 
@@ -196,7 +201,7 @@ To use the `voiceDisconnect`, `voiceServerDeaf` and `voiceServerMute` actions, t
 | `sendFile` | Send a File. |
 | `sendReply` | Send a reply to a received message. |
 | `sendReaction` | Send a reaction (emoji) to a received message. |
-| `json` | JSON data of the channel information. |
+| `json` | JSON data of the user information. |
 
 For the `status` and `activity*` states to be up to date, the option _Observe user presence_ in the instance configuration must be enabled.
 
@@ -213,23 +218,23 @@ A server will be named guild.
 
 | Name | Description |
 |---|---|
-| `messageJson` | Raw JSON data of the last received message. |
-| `interactionJson` | Raw JSON data of the last received interaction. |
+| `messageJson` | Raw JSON data of the last received message. (Channel messages and direct messages) |
+| `interactionJson` | Raw JSON data of the last received interaction. (e.g. slash commands) |
 
 ## Authorization
 
 By default, authorization is enabled and only authorized users are able to
 interact with the adapter.
 
-The authorized users can be configured in the adapter configuration including
-some per-user permissions.  
+The authorized users can be configured in the adapter instance configuration
+including some per-user permissions.  
 The users are identified by their internal user ID, so changes of the user tag
 don't affect the authorized users list.
 
 It's possible to disable the authorization, but this should be done only if any
 user on any server of the bot can be trusted!
 
-**Note:** Event with authorization enabled any unauthorized user may see the
+**Note:** Even with authorization enabled any unauthorized user may see the
 configured Discord slash commands and the corresponding configured state names
 and aliases. This is by design of Discord and not related to the adapter.
 
@@ -238,10 +243,11 @@ and aliases. This is by design of Discord and not related to the adapter.
 The adapter is able to receive and send messages from/to discord text channels and users.
 
 By default, in channels only messages with mentions of the bot are processed.
-To process messages without mentions too, the option _Process all messages in server channels_ needs to be enabled in the configuration.
+To process messages without mentions too, the option
+_Process all messages in server channels_ needs to be enabled in the instance configuration.
 
 When a messages with a bot mention is received, the adapter will react to the message with an emoji.
-This can be customized in the adapter configuration.  
+This can be customized in the adapter instance configuration.  
 If authorization is enabled, the bot will only react on mentions of authorized users.
 
 ### Receiving messages
@@ -250,8 +256,9 @@ Received messages will be stored in the `.message*` states of the channel object
 for server channel messages or of the user object for direct messages.
 
 If authorization is enabled, by default only messages from authorized users will be stored.
-This can be configured using the _Process messages from unauthorized users_ option
-in the adapter configuration to store all received messages, even from unauthorized users.
+This can be configured using the option _Process messages from unauthorized users_
+in the adapter instance configuration, so that all received messages, even from
+unauthorized users, will be stored.
 
 The last received message per channel/user is always stored in the `.message` state.
 The timestamp, author and ID of the last received message is stored in the appropriate states.  
@@ -259,13 +266,13 @@ Additionally all these information are stored in json format in the `.messageJso
 
 #### Using text2command
 
-To use text2command, a text2command instance must be selected in the adapter configuration.
+To use text2command, a text2command instance must be selected in the adapter instance configuration.
 
 For each `.message` state the custom option _Enable text2command for this state_ can be activated.  
 When activated, each received message will be send to the selected text2command instance.
 
 The response from text2command is send as a reply, send as a normal message or
-not send, depending on the adapter configuration.
+not send, depending on the adapter instance configuration.
 
 ### Sending messages
 
@@ -287,9 +294,9 @@ To send a file as an attachment, you can write the file location into the `.send
 
 The file location may be a …
 
-* Absolute or relative link to a local file.  
-  Relative links are relative to the adapter directory of your ioBroker installation.  
-  The link may optionally be prepended by `file://`.
+* Absolute or relative path to a local file.  
+  Relative paths are relative to the adapter directory of your ioBroker installation.  
+  The path may optionally be prepended by `file://`.
   Examples: `/home/user/image.png`, `../../iobroker-data/files/myfile.txt`, `file:///tmp/image.jpg`
 
 * URL to a remote file.  
@@ -410,7 +417,7 @@ Discord slash commands. These commands can be used to get or set ioBroker states
 available for Discord slash commands. See below.
 
 Discord slash commands can be registered as server commands (default) or as
-global commands by the adapter instance. This can be configured in the adapter
+global commands by the adapter. This can be configured in the adapter
 instance configuration.  
 Using server commands has the benefit, that changes to the commands (e.g. added states)
 are applied instant without any delay. But server commands can't be used in
@@ -463,7 +470,7 @@ state settings. Optionally an information about a missing ack flag can be added.
 To set a state just call `/iob-set state-alias new-value` in your Discord client.  
 For the `state-alias` an autocomplete will be shown while entering the command.  
 The `new-value` will be parsed by the adapter, if the state type is `boolean` or
-`boolean`.
+`number`.
 
 You may configure per state, if the value should be set with or without ack flag.
 
@@ -612,7 +619,7 @@ as additional parameter.
 
 The return value is the same as for `sendMessage`.
 
-Examples:
+Example:
 
 ```js
 // delete a message
@@ -636,7 +643,7 @@ and the `emoji` as additional parameters.
 
 The return value is the same as for `sendMessage`.
 
-Examples:
+Example:
 
 ```js
 // add a reaction to a message
@@ -684,6 +691,8 @@ sendTo('discord.0', 'awaitMessageReaction', {
 });
 ```
 
+[ioBroker]: https://www.iobroker.net
+[Discord]: https://discord.com
 [text2command]: https://github.com/ioBroker/ioBroker.text2command
 [GitHub New Issue]: https://github.com/crycode-de/ioBroker.discord/issues/new/choose
 [Discord Developer Portal]: https://discord.com/developers/applications

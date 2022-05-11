@@ -36,7 +36,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 ## Features
 
 * ioBroker states for all servers of the bot to receive and send messages
-* ioBroker states for all users seen by the bot to receive and send messages
+* ioBroker states for all users seen by the bot to receive and send direct messages
 * Set the bot status including actions
 * Optional observe user presence status
 * Optional observe server member voice status
@@ -45,10 +45,10 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 * Handle direct messages
 * Optional automatic react with a emoji on mentions
 * `.json` states for channel, user and message data
-* Send messages, send files, send reactions (emojis), send reply messages, or send custom json-formated message contents
+* Send messages, files, reactions (emojis), reply messages, or custom json-formated message contents
 * List server and channel members including member roles
-* Support for discord slash commands to get and set state values
-* Support for [text2command](https://github.com/ioBroker/ioBroker.text2command) (has to enabled for each `.message` state where it should be used)
+* Support for Discord slash commands to get and set state values
+* Support for [text2command] (has to be enabled for each `.message` state where it should be used)
 * Send, edit and delete messages, add and await message reactions using Scripts
 * Optional raw states to allow more flexibility in custom scripts
 
