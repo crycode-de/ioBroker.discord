@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "discord",
-        "version": "0.0.4",
+        "version": "0.0.5",
         "news": {
-            "0.0.4": {
+            "0.0.5": {
                 "en": "development version",
                 "de": "Entwicklungsversion",
                 "ru": "версия разработки",
@@ -30,16 +30,16 @@
             "zh-cn": "Discord"
         },
         "desc": {
-            "en": "ioBroker Discord bot integration",
-            "de": "ioBroker Discord-Bot-Integration",
-            "ru": "Интеграция с ботом ioBroker Discord",
-            "pt": "Integração do bot ioBroker Discord",
-            "nl": "ioBroker Discord-botintegratie",
-            "fr": "Intégration du robot ioBroker Discord",
-            "it": "ioBroker Integrazione del bot Discord",
-            "es": "Integración del bot Discord de ioBroker",
-            "pl": "Integracja z botem ioBroker Discord",
-            "zh-cn": "ioBroker Discord 机器人集成"
+            "en": "Discord bot integration",
+            "de": "Discord-Bot-Integration",
+            "ru": "Интеграция с дискорд-ботом",
+            "pt": "Integração de bot do Discord",
+            "nl": "Discord bot-integratie",
+            "fr": "Intégration du robot Discord",
+            "it": "Integrazione del bot Discord",
+            "es": "Integración de bots de discordia",
+            "pl": "Integracja z botem Discord",
+            "zh-cn": "Discord 机器人集成"
         },
         "authors": [
             "Peter Müller <peter@crycode.de>"
