@@ -51,10 +51,19 @@ class DiscordAdapterSlashCommands {
   }
   async onReady() {
     if (this.adapter.config.cmdGetStateName) {
-      this.cmdGetStateName = this.adapter.config.cmdGetStateName;
+      if (this.adapter.config.cmdGetStateName.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/)) {
+        this.cmdGetStateName = this.adapter.config.cmdGetStateName;
+      } else {
+        this.adapter.log.warn(`Invalid custom get state command name '${this.adapter.config.cmdGetStateName}' provied! Using default 'iob-get'.`);
+      }
     }
     if (this.adapter.config.cmdSetStateName) {
       this.cmdSetStateName = this.adapter.config.cmdSetStateName;
+      if (this.adapter.config.cmdSetStateName.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/)) {
+        this.cmdSetStateName = this.adapter.config.cmdSetStateName;
+      } else {
+        this.adapter.log.warn(`Invalid custom set state command name '${this.adapter.config.cmdSetStateName}' provied! Using default 'iob-set'.`);
+      }
     }
     this.rest.setToken(this.adapter.config.token);
     if (!this.adapter.config.enableCommands) {

@@ -282,7 +282,9 @@
           "hidden": "!data.enableCommands",
           "label": "Custom get state command name",
           "help": "Custom name for the get state command. Defaults to 'iob-get'.",
-          "placeholder": "iob-get"
+          "placeholder": "iob-get",
+          "validator": "data.cmdGetStateName.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/)",
+          "validatorNoSaveOnError": true
         },
         "cmdSetStateName": {
           "type": "text",
@@ -292,7 +294,9 @@
           "hidden": "!data.enableCommands",
           "label": "Custom set state command name",
           "help": "Custom name for the set state command. Defaults to 'iob-get'.",
-          "placeholder": "iob-set"
+          "placeholder": "iob-set",
+          "validator": "data.cmdGetStateName.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/)",
+          "validatorNoSaveOnError": true
         },
 
         "_cmdObjectsConfigHint": {
