@@ -124,7 +124,6 @@
     "Voice server mute": "Spraakserver dempen",
     "Observe user voice state": "Observeer de stemstatus van de gebruiker",
     "Observe voice state for all known users.": "Observeer de spraakstatus van alle bekende gebruikers.",
-    "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.": "Belangrijk: je moet de gebruikers ook toestaan ​​om de commando's te gebruiken in de integratie-instellingen van de server. ",
     "Use global commands": "Algemene opdrachten gebruiken",
     "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.": "Indien aangevinkt, worden de slash-commando's globaal geregistreerd. ",
     "Add bot to server": "Bot toevoegen aan server",
@@ -154,5 +153,8 @@
     "Last interaction JSON data": "JSON-gegevens laatste interactie",
     "Raw data": "Ruwe data",
     "Enable raw states": "Onbewerkte toestanden inschakelen",
-    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Indien ingeschakeld, wordt elk ontvangen bericht opgeslagen in een onbewerkte json-status, zodat het bijvoorbeeld in aangepaste scripts kan worden gebruikt."
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Indien ingeschakeld, wordt elk ontvangen bericht opgeslagen in een onbewerkte json-status, zodat het bijvoorbeeld in aangepaste scripts kan worden gebruikt.",
+    "Allowed server roles": "Toegestane serverrollen",
+    "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.": "Lijst met serverrollen die mogen communiceren met de bot. ",
+    "Server role": "Serverrol"
 }

@@ -205,7 +205,8 @@
               "width": "16%",
               "attr": "getStates",
               "filter": false,
-              "sort": false
+              "sort": false,
+              "default": false
             },
             {
               "type": "checkbox",
@@ -213,7 +214,8 @@
               "width": "16%",
               "attr": "setStates",
               "filter": false,
-              "sort": false
+              "sort": false,
+              "default": false
             },
             {
               "type": "checkbox",
@@ -221,19 +223,59 @@
               "width": "16%",
               "attr": "useText2command",
               "filter": false,
-              "sort": false
+              "sort": false,
+              "default": false
             }
           ]
         },
-
-        "_permissionsInfo": {
-          "type": "staticText",
+        "authorizedServerRoles": {
+          "type": "table",
           "newLine": true,
           "sm": 12,
-          "text": "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.",
-          "style": {
-            "fontWeight": "bold"
-          }
+          "hidden": "!data.enableAuthorization",
+          "label": "Allowed server roles",
+          "help": "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.",
+          "items": [
+            {
+              "type": "selectSendTo",
+              "title": "Server role",
+              "width": "50%",
+              "attr": "serverAndRoleId",
+              "filter": false,
+              "sort": false,
+              "command": "getServerRoles",
+              "defaultFunc": "data.serverAndRoleId || ''",
+              "validator": "data.serverAndRoleId && data.serverAndRoleId.match(/^\\d+\\|\\d+$/)",
+              "validatorNoSaveOnError": true
+            },
+            {
+              "type": "checkbox",
+              "title": "Get states",
+              "width": "16%",
+              "attr": "getStates",
+              "filter": false,
+              "sort": false,
+              "default": false
+            },
+            {
+              "type": "checkbox",
+              "title": "Set states",
+              "width": "16%",
+              "attr": "setStates",
+              "filter": false,
+              "sort": false,
+              "default": false
+            },
+            {
+              "type": "checkbox",
+              "title": "Use text2command",
+              "width": "16%",
+              "attr": "useText2command",
+              "filter": false,
+              "sort": false,
+              "default": false
+            }
+          ]
         },
 
         "processMessagesFromUnauthorizedUsers": {

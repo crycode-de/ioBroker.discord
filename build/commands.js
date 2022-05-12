@@ -254,32 +254,36 @@ class DiscordAdapterSlashCommands {
     }
     if (!interaction.isCommand())
       return;
+    if (!interaction.deferred) {
+      await interaction.deferReply();
+    }
     const { commandName, user } = interaction;
     if (!this.registerCommandsDone) {
       this.adapter.log.warn(`Got command ${commandName} but command registration is not done yet.`);
       return;
     }
     this.adapter.log.debug(`Got command ${commandName} ${interaction.toJSON()}`);
+    const authCheckTarget = interaction.member instanceof import_discord.GuildMember ? interaction.member : user;
     switch (commandName) {
       case this.cmdGetStateName:
-        if (this.adapter.checkUserAuthorization(user.id, { getStates: true })) {
+        if (this.adapter.checkUserAuthorization(authCheckTarget, { getStates: true })) {
           await this.handleCmdGetState(interaction);
         } else {
           this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          interaction.reply(import_i18n.i18n.getString("You are not authorized to call this command!"));
+          interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
         }
         break;
       case this.cmdSetStateName:
-        if (this.adapter.checkUserAuthorization(user.id, { setStates: true })) {
+        if (this.adapter.checkUserAuthorization(authCheckTarget, { setStates: true })) {
           await this.handleCmdSetState(interaction);
         } else {
           this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          interaction.reply(import_i18n.i18n.getString("You are not authorized to call this command!"));
+          interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
         }
         break;
       default:
         this.adapter.log.warn(`Got unknown command ${commandName}!`);
-        interaction.reply(import_i18n.i18n.getString("Unknown command!"));
+        interaction.editReply(import_i18n.i18n.getString("Unknown command!"));
     }
   }
   async getObjectAndCfgFromAlias(objAlias, interaction) {
@@ -301,7 +305,6 @@ class DiscordAdapterSlashCommands {
   }
   async handleCmdGetState(interaction) {
     var _a;
-    await interaction.deferReply();
     const objAlias = interaction.options.getString("state");
     const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
     if (!obj || !cfg) {
@@ -393,7 +396,6 @@ class DiscordAdapterSlashCommands {
   }
   async handleCmdSetState(interaction) {
     var _a, _b;
-    await interaction.deferReply();
     const objAlias = interaction.options.getString("state");
     const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
     if (!obj || !cfg) {

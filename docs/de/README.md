@@ -231,10 +231,16 @@ oder Modifizierung durch den Adapter. Server werden als Guild bezeichnet.
 Standardmäßig ist die Autorisierung aktiviert und nur autorisierte Benutzer
 werden in der Lage sein, mit dem Adapter zu interagieren.
 
-Die autorisierten Benutzer können in der Instanzkonfiguration des Adapters
-inklusive einer pro-Benutzer-Berechtigungen festgelegt werden.  
-Die Benutzer werden dabei über deren interne Benutzer-ID identifiziert, sodass
-selbst Änderungen des Benutzer-Tags die Autorisierung nicht beeinträchtigen.
+Die autorisierten Benutzer und Serverrollen können in der Instanzkonfiguration
+des Adapters inklusive pro-Benutzer/Rolle-Berechtigungen festgelegt werden.  
+Für Serverrollen werden die Berechtigungen nur auf dem jeweiligen Server
+angewendet und nicht auf anderen Servern und nicht in Direktnachrichten.  
+Wenn Berechtigungen pro Benutzer und Serverrolle vergeben wurden, dann werden
+diese für den entsprechenden Server zusammengeführt.
+
+Die Benutzer und Rollen werden dabei über deren interne ID identifiziert, sodass
+selbst Änderungen des Benutzer-Tags, des Benutzernamens oder des Rollennamens
+die Autorisierung nicht beeinträchtigen.
 
 Es ist auch möglich die Autorisierung zu deaktivieren. Dies sollte jedoch nur
 gemacht werden, wenn allen Benutzern auf allen Servern des Bots vertraut werden kann!

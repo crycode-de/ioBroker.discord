@@ -124,7 +124,6 @@
     "Voice server mute": "Servidor de voz mudo",
     "Observe user voice state": "Observar o estado de voz do usuário",
     "Observe voice state for all known users.": "Observe o estado de voz de todos os usuários conhecidos.",
-    "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.": "Importante: Você também precisa permitir que os usuários usem os comandos nas configurações de integração do servidor. ",
     "Use global commands": "Usar comandos globais",
     "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.": "Se marcado, os comandos de barra serão registrados globalmente. ",
     "Add bot to server": "Adicionar bot ao servidor",
@@ -154,5 +153,8 @@
     "Last interaction JSON data": "Dados JSON da última interação",
     "Raw data": "Dados não tratados",
     "Enable raw states": "Ativar estados brutos",
-    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Se ativado, qualquer mensagem recebida será armazenada em um estado json bruto, para que possa ser usada em scripts personalizados, por exemplo."
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Se ativado, qualquer mensagem recebida será armazenada em um estado json bruto, para que possa ser usada em scripts personalizados, por exemplo.",
+    "Allowed server roles": "Funções de servidor permitidas",
+    "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.": "Lista de funções de servidor com permissão para interagir com o bot. ",
+    "Server role": "Função do servidor"
 }

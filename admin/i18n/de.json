@@ -85,7 +85,6 @@
     "Get states": "Zustände abfragen",
     "Set states": "Zustände festlegen",
     "Use text2command": "text2command verwenden",
-    "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.": "Wichtig: Es müssen zusätzlich die Berechtigungen für die Benutzer in den Servereinstellungen unter dem Punkt Integrationen gesetzt werden. Siehe die Adapterdokumentation für eine Anleitung dazu.",
     "Process messages from unauthorized users": "Nachrichten von nicht autorisierten Benutzern verarbeiten",
     "If checked, messages from all users will be processed and stored into the .message states, but they will not trigger any adapter actions.": "Wenn diese Option aktiviert ist, werden Nachrichten von allen Benutzern verarbeitet und in den .message-Zuständen gespeichert, aber sie lösen keine Adapteraktionen aus.",
     "Commands": "Befehle",
@@ -154,5 +153,8 @@
     "Last interaction JSON data": "JSON-Daten der letzten Interaktion",
     "Raw data": "Rohdaten",
     "Enable raw states": "Rohdatenzustände aktivieren",
-    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Wenn diese Option aktiviert ist, wird jede empfangene Nachricht in einem roh-JSON-Zustand gespeichert, sodass diese beispielsweise in benutzerdefinierten Skripten verwendet werden können."
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Wenn diese Option aktiviert ist, wird jede empfangene Nachricht in einem roh-JSON-Zustand gespeichert, sodass diese beispielsweise in benutzerdefinierten Skripten verwendet werden können.",
+    "Allowed server roles": "Zugelassene Serverrollen",
+    "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.": "Liste der Serverrollen, die mit dem Bot interagieren dürfen. Diese sind Serverspezifisch und werden nur auf Kanäle des jeweiligen Servers angewendet.",
+    "Server role": "Serverrolle"
 }

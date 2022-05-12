@@ -12,6 +12,7 @@ import {
 import {
   Client,
   Collection,
+  GuildMember,
   Intents,
   Message,
   MessageOptions,
@@ -1197,6 +1198,11 @@ class DiscordAdapter extends Adapter {
 
     if (!this.client?.user?.id) return;
 
+    // don't process interactions here
+    if (message.interaction) {
+      return;
+    }
+
     const { author, channel, content } = message;
 
     // don't process own messages
@@ -1204,7 +1210,9 @@ class DiscordAdapter extends Adapter {
       return;
     }
 
-    const isAuthorAuthorized = this.checkUserAuthorization(author.id);
+    const authCheckTarget = message.member || author;
+
+    const isAuthorAuthorized = this.checkUserAuthorization(authCheckTarget);
 
     if (!this.config.processMessagesFromUnauthorizedUsers && !isAuthorAuthorized) {
       this.log.debug(`Ignore message from unauthorized user ${author.tag} (id:${author.id})`);
@@ -1275,7 +1283,7 @@ class DiscordAdapter extends Adapter {
     // handle text2command if enabled for this receiving state
     if (content && this.config.text2commandInstance && this.text2commandObjects.has(`${msgStateIdPrefix}.message`)) {
       // check user authorization to use text2command
-      if (this.checkUserAuthorization(author.id, { useText2command: true })) {
+      if (this.checkUserAuthorization(authCheckTarget, { useText2command: true })) {
         // authorization disabled or user is allowed to use text2command
         this.log.debug(`Sending "${content}" to ${this.config.text2commandInstance}`);
         // prepare message payload
@@ -1809,6 +1817,32 @@ class DiscordAdapter extends Adapter {
         this.sendTo(obj.from, obj.command, users, obj.callback);
         break;
 
+      case 'getServerRoles':
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+
+        if (!this.client) {
+          this.sendTo(obj.from, obj.command, [], obj.callback);
+          return;
+        }
+
+        const guildRolesWithLabel = [];
+        for (const [, guild] of this.client.guilds.cache) {
+          for (const [, role] of guild.roles.cache) {
+            guildRolesWithLabel.push({
+              label: `${guild.name} - ${role.name}`,
+              value: `${guild.id}|${role.id}`,
+            });
+          }
+        }
+
+        this.log.debug(`Server roles: ${guildRolesWithLabel.map((i) => i.value)}`);
+        this.sendTo(obj.from, obj.command, guildRolesWithLabel, obj.callback);
+
+        break;
+
       case 'getAddToServerLink':
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -2169,29 +2203,51 @@ class DiscordAdapter extends Adapter {
   }
 
   /**
-   * Check if a user is authorized to do something.
-   * @param userId ID of the user.
+   * Check if a user or guild member is authorized to do something.
+   * For guild members their roles will also be checked.
+   * @param user The User or GuildMember to check.
    * @param required Object containing the required flags. If not provided the check returns if the user in the list of authorized users.
    * @returns `true` if the user is authorized or authorization is not enabled, `false` otherwise
    */
-  public checkUserAuthorization (userId: Snowflake, required?: CheckAuthorizationOpts): boolean {
+  public checkUserAuthorization (user: User | GuildMember, required?: CheckAuthorizationOpts): boolean {
     if (!this.config.enableAuthorization) {
       return true;
     }
 
-    const user = this.config.authorizedUsers.find((au) => au.userId === userId);
-    // user found in authorized users?
-    if (!user) {
+    // get direct user flags
+    let given: ioBroker.AdapterConfigAuthorizedFlags | undefined = this.config.authorizedUsers.find((au) => au.userId === user.id);
+
+    // for guild members find role flags and merge them all together
+    if (this.config.authorizedServerRoles.length > 0 && user instanceof GuildMember) {
+      for (const [, role] of user.roles.cache) {
+        const roleGiven = this.config.authorizedServerRoles.find((ar) => ar.serverAndRoleId === `${user.guild.id}|${role.id}`);
+        if (roleGiven) {
+          if (!given) {
+            given = roleGiven;
+          } else {
+            given = {
+              getStates:  given.getStates || roleGiven.getStates,
+              setStates:  given.setStates || roleGiven.setStates,
+              useText2command:  given.useText2command || roleGiven.useText2command,
+            };
+          }
+        }
+      }
+    }
+
+    // nothing found?
+    if (!given) {
       return false;
     }
 
+    // if no required flags given just return true if something found
     if (!required) {
       return true;
     }
 
-    if ((required.getStates && !user.getStates)
-        || (required.setStates && !user.setStates)
-        || (required.useText2command && !user.useText2command)) {
+    if ((required.getStates && !given.getStates)
+        || (required.setStates && !given.setStates)
+        || (required.useText2command && !given.useText2command)) {
       return false;
     }
 

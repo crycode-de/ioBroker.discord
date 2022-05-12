@@ -226,10 +226,15 @@ A server will be named guild.
 By default, authorization is enabled and only authorized users are able to
 interact with the adapter.
 
-The authorized users can be configured in the adapter instance configuration
-including some per-user permissions.  
-The users are identified by their internal user ID, so changes of the user tag
-don't affect the authorized users list.
+The authorized users and server roles can be configured in the adapter instance
+configuration including some per user/role permissions.  
+For server roles, the permissions only apply to the specific
+server and not to other servers or direct messages.  
+If permissions are given per user and server role, they will be
+merged for the corresponding server.
+
+The users and roles are identified by their internal ID, so changes of the
+user tag, user name or role name don't affect the authorized users/roles lists.
 
 It's possible to disable the authorization, but this should be done only if any
 user on any server of the bot can be trusted!

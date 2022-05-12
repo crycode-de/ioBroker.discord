@@ -124,7 +124,6 @@
     "Voice server mute": "Wyciszenie serwera głosowego",
     "Observe user voice state": "Obserwuj stan głosu użytkownika",
     "Observe voice state for all known users.": "Obserwuj stan głosu wszystkich znanych użytkowników.",
-    "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.": "Ważne: Musisz również zezwolić użytkownikom na używanie komend w ustawieniach integracji serwera. ",
     "Use global commands": "Użyj poleceń globalnych",
     "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.": "Jeśli zaznaczone, polecenia ukośnika będą rejestrowane globalnie. ",
     "Add bot to server": "Dodaj bota do serwera",
@@ -154,5 +153,8 @@
     "Last interaction JSON data": "Dane JSON ostatniej interakcji",
     "Raw data": "Surowe dane",
     "Enable raw states": "Włącz stany surowe",
-    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Jeśli ta opcja jest włączona, każda otrzymana wiadomość będzie przechowywana w surowym stanie json, dzięki czemu może być używana na przykład w niestandardowych skryptach."
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Jeśli ta opcja jest włączona, każda otrzymana wiadomość będzie przechowywana w surowym stanie json, dzięki czemu może być używana na przykład w niestandardowych skryptach.",
+    "Allowed server roles": "Dozwolone role serwera",
+    "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.": "Lista ról serwera dozwolonych do interakcji z botem. ",
+    "Server role": "Rola serwera"
 }

@@ -1014,11 +1014,15 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     if (!((_b = (_a = this.client) == null ? void 0 : _a.user) == null ? void 0 : _b.id))
       return;
+    if (message.interaction) {
+      return;
+    }
     const { author, channel, content } = message;
     if (author.id === this.client.user.id) {
       return;
     }
-    const isAuthorAuthorized = this.checkUserAuthorization(author.id);
+    const authCheckTarget = message.member || author;
+    const isAuthorAuthorized = this.checkUserAuthorization(authCheckTarget);
     if (!this.config.processMessagesFromUnauthorizedUsers && !isAuthorAuthorized) {
       this.log.debug(`Ignore message from unauthorized user ${author.tag} (id:${author.id})`);
       return;
@@ -1077,7 +1081,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       ...proms
     ]);
     if (content && this.config.text2commandInstance && this.text2commandObjects.has(`${msgStateIdPrefix}.message`)) {
-      if (this.checkUserAuthorization(author.id, { useText2command: true })) {
+      if (this.checkUserAuthorization(authCheckTarget, { useText2command: true })) {
         this.log.debug(`Sending "${content}" to ${this.config.text2commandInstance}`);
         const payload = {
           text: content
@@ -1469,6 +1473,27 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.log.debug(`Users: ${users.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, users, obj.callback);
         break;
+      case "getServerRoles":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if (!this.client) {
+          this.sendTo(obj.from, obj.command, [], obj.callback);
+          return;
+        }
+        const guildRolesWithLabel = [];
+        for (const [, guild] of this.client.guilds.cache) {
+          for (const [, role] of guild.roles.cache) {
+            guildRolesWithLabel.push({
+              label: `${guild.name} - ${role.name}`,
+              value: `${guild.id}|${role.id}`
+            });
+          }
+        }
+        this.log.debug(`Server roles: ${guildRolesWithLabel.map((i) => i.value)}`);
+        this.sendTo(obj.from, obj.command, guildRolesWithLabel, obj.callback);
+        break;
       case "getAddToServerLink":
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -1744,18 +1769,34 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       throw new Error("userId, userTag or serverId and channelId needs to be set");
     }
   }
-  checkUserAuthorization(userId, required) {
+  checkUserAuthorization(user, required) {
     if (!this.config.enableAuthorization) {
       return true;
     }
-    const user = this.config.authorizedUsers.find((au) => au.userId === userId);
-    if (!user) {
+    let given = this.config.authorizedUsers.find((au) => au.userId === user.id);
+    if (this.config.authorizedServerRoles.length > 0 && user instanceof import_discord.GuildMember) {
+      for (const [, role] of user.roles.cache) {
+        const roleGiven = this.config.authorizedServerRoles.find((ar) => ar.serverAndRoleId === `${user.guild.id}|${role.id}`);
+        if (roleGiven) {
+          if (!given) {
+            given = roleGiven;
+          } else {
+            given = {
+              getStates: given.getStates || roleGiven.getStates,
+              setStates: given.setStates || roleGiven.setStates,
+              useText2command: given.useText2command || roleGiven.useText2command
+            };
+          }
+        }
+      }
+    }
+    if (!given) {
       return false;
     }
     if (!required) {
       return true;
     }
-    if (required.getStates && !user.getStates || required.setStates && !user.setStates || required.useText2command && !user.useText2command) {
+    if (required.getStates && !given.getStates || required.setStates && !given.setStates || required.useText2command && !given.useText2command) {
       return false;
     }
     return true;

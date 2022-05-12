@@ -8,6 +8,7 @@ import {
   CommandInteraction,
   DiscordAPIError,
   Guild,
+  GuildMember,
   Interaction,
   MessageOptions,
 } from 'discord.js';
@@ -402,6 +403,10 @@ export class DiscordAdapterSlashCommands {
     // is it a command?
     if (!interaction.isCommand()) return;
 
+    if (!interaction.deferred) {
+      await interaction.deferReply();
+    }
+
     const { commandName, user } = interaction;
 
     if (!this.registerCommandsDone) {
@@ -411,34 +416,36 @@ export class DiscordAdapterSlashCommands {
 
     this.adapter.log.debug(`Got command ${commandName} ${interaction.toJSON()}`);
 
+    const authCheckTarget = interaction.member instanceof GuildMember ? interaction.member : user;
+
     switch (commandName) {
       case this.cmdGetStateName:
         // check user authorization (user should only be able to call the command if authorized but check it nevertheless to be sure)
-        if (this.adapter.checkUserAuthorization(user.id, { getStates: true })) {
+        if (this.adapter.checkUserAuthorization(authCheckTarget, { getStates: true })) {
           // user authorized
           await this.handleCmdGetState(interaction);
         } else {
           // user not authorized
           this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          interaction.reply(i18n.getString('You are not authorized to call this command!'));
+          interaction.editReply(i18n.getString('You are not authorized to call this command!'));
         }
         break;
 
       case this.cmdSetStateName:
         // check user authorization (user should only be able to call the command if authorized but check it nevertheless to be sure)
-        if (this.adapter.checkUserAuthorization(user.id, { setStates: true })) {
+        if (this.adapter.checkUserAuthorization(authCheckTarget, { setStates: true })) {
           // user authorized
           await this.handleCmdSetState(interaction);
         } else {
           // user not authorized
           this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          interaction.reply(i18n.getString('You are not authorized to call this command!'));
+          interaction.editReply(i18n.getString('You are not authorized to call this command!'));
         }
         break;
 
       default:
         this.adapter.log.warn(`Got unknown command ${commandName}!`);
-        interaction.reply(i18n.getString('Unknown command!'));
+        interaction.editReply(i18n.getString('Unknown command!'));
     }
   }
 
@@ -476,8 +483,6 @@ export class DiscordAdapterSlashCommands {
    * @param interaction The interaction which triggered this.
    */
   private async handleCmdGetState (interaction: CommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply();
-
     const objAlias = interaction.options.getString('state');
 
     const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
@@ -608,8 +613,6 @@ export class DiscordAdapterSlashCommands {
    * @param interaction The interaction which triggered this.
    */
   private async handleCmdSetState (interaction: CommandInteraction<CacheType>): Promise<void> {
-    await interaction.deferReply();
-
     const objAlias = interaction.options.getString('state');
 
     const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);

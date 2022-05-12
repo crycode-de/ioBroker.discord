@@ -124,7 +124,6 @@
     "Voice server mute": "Голосовой сервер отключен",
     "Observe user voice state": "Наблюдайте за состоянием голоса пользователя",
     "Observe voice state for all known users.": "Наблюдайте за состоянием голоса всех известных пользователей.",
-    "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.": "Важно: Вам также необходимо разрешить пользователям использовать команды в настройках интеграции сервера. ",
     "Use global commands": "Используйте глобальные команды",
     "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.": "Если этот флажок установлен, слэш-команды будут зарегистрированы глобально. ",
     "Add bot to server": "Добавить бота на сервер",
@@ -154,5 +153,8 @@
     "Last interaction JSON data": "Данные JSON о последнем взаимодействии",
     "Raw data": "Необработанные данные",
     "Enable raw states": "Включить необработанные состояния",
-    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Если включено, любое полученное сообщение будет сохранено в необработанном состоянии json, поэтому его можно будет использовать, например, в пользовательских сценариях."
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Если включено, любое полученное сообщение будет сохранено в необработанном состоянии json, поэтому его можно будет использовать, например, в пользовательских сценариях.",
+    "Allowed server roles": "Разрешенные роли сервера",
+    "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.": "Список ролей сервера, которым разрешено взаимодействовать с ботом. ",
+    "Server role": "Роль сервера"
 }

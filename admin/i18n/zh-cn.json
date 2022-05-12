@@ -124,7 +124,6 @@
     "Voice server mute": "语音服务器静音",
     "Observe user voice state": "观察用户语音状态",
     "Observe voice state for all known users.": "观察所有已知用户的语音状态。",
-    "Important: You also need to allow the users to use the commands in the integration settings of the server. See adapter documentation for how to do this.": "重要提示：您还需要允许用户使用服务器集成设置中的命令。",
     "Use global commands": "使用全局命令",
     "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.": "如果选中，斜杠命令将被全局注册。",
     "Add bot to server": "将机器人添加到服务器",
@@ -154,5 +153,8 @@
     "Last interaction JSON data": "上次交互 JSON 数据",
     "Raw data": "原始数据",
     "Enable raw states": "启用原始状态",
-    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "如果启用，任何接收到的消息都将存储为原始 json 状态，因此可以在自定义脚本中使用它。"
+    "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "如果启用，任何接收到的消息都将存储为原始 json 状态，因此可以在自定义脚本中使用它。",
+    "Allowed server roles": "允许的服务器角色",
+    "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.": "允许与机器人交互的服务器角色列表。",
+    "Server role": "服务器角色"
 }

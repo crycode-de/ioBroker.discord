@@ -19,6 +19,7 @@ declare global {
       enableRawStates: boolean;
       enableAuthorization: boolean;
       authorizedUsers: AdapterConfigAuthorizedUser[];
+      authorizedServerRoles: AdapterConfigAuthorizedServerRoles[];
       processMessagesFromUnauthorizedUsers: boolean;
 
       enableCommands: boolean;
@@ -27,11 +28,18 @@ declare global {
       cmdSetStateName: string;
     }
 
-    interface AdapterConfigAuthorizedUser {
-      userId: Snowflake;
+    interface AdapterConfigAuthorizedFlags {
       getStates: boolean;
       setStates: boolean;
       useText2command: boolean;
+    }
+
+    interface AdapterConfigAuthorizedUser extends AdapterConfigAuthorizedFlags {
+      userId: Snowflake;
+    }
+
+    interface AdapterConfigAuthorizedServerRoles extends AdapterConfigAuthorizedFlags {
+      serverAndRoleId: `${Snowflake}|${Snowflake}`;
     }
 
     interface CustomConfig {
