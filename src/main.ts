@@ -145,6 +145,9 @@ class DiscordAdapter extends Adapter {
     if (!Array.isArray(this.config.authorizedUsers)) {
       this.config.authorizedUsers = [];
     }
+    if (!Array.isArray(this.config.authorizedServerRoles)) {
+      this.config.authorizedServerRoles = [];
+    }
     if (!this.config.enableAuthorization) {
       this.log.info('Authorization is disabled, so any user is able to interact with the bot. You should only disable authorization if you trust all users on any server where the bot is on.');
     }
