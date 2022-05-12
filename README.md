@@ -6,7 +6,6 @@
 [![Downloads](https://img.shields.io/npm/dm/iobroker.discord.svg)](https://www.npmjs.com/package/iobroker.discord)
 ![Number of Installations](https://iobroker.live/badges/discord-installed.svg)
 ![Current version in stable repository](https://iobroker.live/badges/discord-stable.svg)
-[![Dependency Status](https://img.shields.io/david/crycode-de/iobroker.discord.svg)](https://david-dm.org/crycode-de/iobroker.discord)
 
 [![NPM](https://nodei.co/npm/iobroker.discord.png?downloads=true)](https://nodei.co/npm/iobroker.discord/)
 
