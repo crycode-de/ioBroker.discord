@@ -26,7 +26,7 @@ A detailed documentation is available in the `docs` directory of the repository:
 
 ## Requirements
 
-* Node.js >= 16.6
+* **Node.js >= 16.9**, NPM >= 7.0.0
 * js-controller >= 4.0
 * admin >= 5.3
 
@@ -57,9 +57,9 @@ See [GitHub issue](https://github.com/crycode-de/ioBroker.discord/issues/1).
 
 ## Changelog
 
-### 0.0.x
+### 1.0.0
 
-* (crycode-de) development
+* (crycode-de) First release
 
 ## License
 

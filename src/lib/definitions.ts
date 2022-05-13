@@ -4,6 +4,7 @@ export const VALID_ACTIVITY_TYPES = <const>['', 'PLAYING', 'STREAMING', 'LISTENI
 export type ValidActivityType = typeof VALID_ACTIVITY_TYPES[number];
 
 import {
+  MessageEditOptions,
   MessageOptions,
   PresenceStatus,
   PresenceStatusData,
@@ -127,7 +128,7 @@ export interface SendToActionSendPayload extends MessageTargetIdentifier {
  * Payload for a `sentTo(...)` `editMessage` action.
  */
 export interface SendToActionEditMessagePayload extends MessageIdentifier {
-  content: string | MessageOptions;
+  content: string | MessageEditOptions;
 }
 
 /**

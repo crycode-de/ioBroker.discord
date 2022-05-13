@@ -1,19 +1,19 @@
 {
     "common": {
         "name": "discord",
-        "version": "0.0.6",
+        "version": "1.0.0",
         "news": {
-            "0.0.6": {
-                "en": "development version",
-                "de": "Entwicklungsversion",
-                "ru": "версия разработки",
-                "pt": "versão de desenvolvimento",
-                "nl": "ontwikkelingsversie",
-                "fr": "version de développement",
-                "it": "versione di sviluppo",
-                "es": "versión de desarrollo",
-                "pl": "wersja rozwojowa",
-                "zh-cn": "开发版"
+            "1.0.0": {
+                "en": "First release",
+                "de": "Erste Veröffentlichung",
+                "ru": "Первый выпуск",
+                "pt": "Primeiro lançamento",
+                "nl": "Eerste uitgave",
+                "fr": "Première sortie",
+                "it": "Prima uscita",
+                "es": "Primer lanzamiento",
+                "pl": "Pierwsze wydanie",
+                "zh-cn": "首次发布"
             }
         },
         "title": "Discord",
@@ -31,7 +31,7 @@
         },
         "desc": {
             "en": "Discord bot integration",
-            "de": "Discord-Bot-Integration",
+            "de": "Discord-Bot Integration",
             "ru": "Интеграция с дискорд-ботом",
             "pt": "Integração de bot do Discord",
             "nl": "Discord bot-integratie",
