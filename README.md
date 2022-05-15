@@ -36,6 +36,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 
 * ioBroker states for all servers of the bot to receive and send messages
 * ioBroker states for all users seen by the bot to receive and send direct messages
+* Simplified Discord server join and leave for the bot
 * Set the bot status including actions
 * Optional observe user presence status
 * Optional observe server member voice status
@@ -57,7 +58,12 @@ See [GitHub issue](https://github.com/crycode-de/ioBroker.discord/issues/1).
 
 ## Changelog
 
-### 1.0.0
+### 1.0.1 (2022-05-15)
+
+* (crycode-de) Added possibility to let the bot leave a Discord server
+* (crycode-de) Fixed crash on server updates
+
+### 1.0.0 (2022-05-13)
 
 * (crycode-de) First release
 

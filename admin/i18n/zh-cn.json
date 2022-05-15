@@ -156,5 +156,12 @@
     "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "如果启用，任何接收到的消息都将存储为原始 json 状态，因此可以在自定义脚本中使用它。",
     "Allowed server roles": "允许的服务器角色",
     "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.": "允许与机器人交互的服务器角色列表。",
-    "Server role": "服务器角色"
+    "Server role": "服务器角色",
+    "Here you are able to let the bot leave a discord server.": "在这里，您可以让机器人离开不和谐的服务器。",
+    "The adapter instance needs to be running to let the bot leave a server!": "适配器实例需要运行才能让机器人离开服务器！",
+    "Select server to leave": "选择服务器离开",
+    "Select a server you want the bot to leave and then click the \"Leave the server!\" button.": "选择您希望机器人离开的服务器，然后单击“离开服务器！”",
+    "Leave the server!": "离开服务器！",
+    "Do you really want to let the bot leave the selected server?": "你真的想让机器人离开选定的服务器吗？",
+    "Yes, leave the server!": "是的，离开服务器！"
 }

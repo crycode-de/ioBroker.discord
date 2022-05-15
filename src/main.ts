@@ -12,6 +12,7 @@ import {
 import {
   Client,
   Collection,
+  Guild,
   GuildMember,
   Intents,
   Message,
@@ -47,6 +48,7 @@ import {
   MessageIdentifier,
   SendToActionAwaitMessageReactionPayload,
   SendToActionAddReactionPayload,
+  SendToActionLeaveServerPayload,
 } from './lib/definitions';
 import { i18n } from './lib/i18n';
 import {
@@ -383,7 +385,14 @@ class DiscordAdapter extends Adapter {
     for (const [, guildBase] of guilds) {
 
       if (this.unloaded) return;
-      const guild = await guildBase.fetch();
+      let guild: Guild;
+      try {
+        guild = await guildBase.fetch();
+      } catch (err) {
+        this.log.warn(`Could not fetch guild information for guild "${guildBase.name}" id:${guildBase.id}`);
+        this.log.debug(`Error: ${err}`);
+        continue;
+      }
       if (this.unloaded) return;
 
       knownServersAndChannelsIds.add(`${this.namespace}.servers.${guild.id}`);
@@ -1820,6 +1829,17 @@ class DiscordAdapter extends Adapter {
         this.sendTo(obj.from, obj.command, users, obj.callback);
         break;
 
+      case 'getServers':
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+
+        const servers = this.client?.guilds.cache.map((g) => ({ label: g.name, value: g.id })) || [];
+        this.log.debug(`Servers: ${servers.map((i) => i.value)}`);
+        this.sendTo(obj.from, obj.command, servers, obj.callback);
+        break;
+
       case 'getServerRoles':
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -2131,6 +2151,44 @@ class DiscordAdapter extends Adapter {
         });
 
         break; // awaitMessageReaction
+
+      case 'leaveServer':
+        /*
+         * let the bot leave a server
+         */
+        if (typeof obj.message !== 'object') {
+          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
+          return;
+        }
+
+        const leaveServerPayload = obj.message as SendToActionLeaveServerPayload;
+
+        // check payload
+        if (!leaveServerPayload.serverId) {
+          this.sendTo(obj.from, obj.command, { error: 'serverId needs to be set', ...leaveServerPayload }, obj.callback);
+          return;
+        }
+
+        const guildToLeave = this.client?.guilds.cache.get(leaveServerPayload.serverId);
+        if (!guildToLeave) {
+          this.sendTo(obj.from, obj.command, { error: `No server with ID ${leaveServerPayload.serverId} found` }, obj.callback);
+          return;
+        }
+
+        try {
+          await guildToLeave.leave();
+          this.log.info(`Left server ${guildToLeave.name} (${guildToLeave.id})`);
+
+          if (obj.callback) {
+            this.sendTo(obj.from, obj.command, { result: 'ok' }, obj.callback);
+          }
+        } catch (err) {
+          if (obj.callback) {
+            this.sendTo(obj.from, obj.command, { error: `Error leaving server ${leaveServerPayload.serverId}: ${err}`, ...leaveServerPayload }, obj.callback);
+          }
+        }
+
+        break;
 
       default:
         /*

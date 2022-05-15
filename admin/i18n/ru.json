@@ -156,5 +156,12 @@
     "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Если включено, любое полученное сообщение будет сохранено в необработанном состоянии json, поэтому его можно будет использовать, например, в пользовательских сценариях.",
     "Allowed server roles": "Разрешенные роли сервера",
     "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.": "Список ролей сервера, которым разрешено взаимодействовать с ботом. ",
-    "Server role": "Роль сервера"
+    "Server role": "Роль сервера",
+    "Here you are able to let the bot leave a discord server.": "Здесь вы можете позволить боту покинуть дискорд-сервер.",
+    "The adapter instance needs to be running to let the bot leave a server!": "Экземпляр адаптера должен быть запущен, чтобы бот мог покинуть сервер!",
+    "Select server to leave": "Выберите сервер, чтобы покинуть",
+    "Select a server you want the bot to leave and then click the \"Leave the server!\" button.": "Выберите сервер, который вы хотите, чтобы бот покинул, а затем нажмите «Покинуть сервер!» ",
+    "Leave the server!": "Покиньте сервер!",
+    "Do you really want to let the bot leave the selected server?": "Вы действительно хотите, чтобы бот покинул выбранный сервер?",
+    "Yes, leave the server!": "Да, покиньте сервер!"
 }

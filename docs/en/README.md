@@ -13,6 +13,7 @@ Additionally, the adapter can register Discord slash commands to get and set ioB
 * [Features](#features)
 * [Creating a Discord bot](#creating-a-discord-bot)
 * [Adding the bot to a server](#adding-the-bot-to-a-server)
+  * [Remove the bot from a server](#remove-the-bot-from-a-server)
 * [States](#states)
   * [discord.0.bot.*](#discord0bot)
   * [discord.0.servers.\<server-id\>.*](#discord0serversserver-id)
@@ -46,6 +47,7 @@ Additionally, the adapter can register Discord slash commands to get and set ioB
 
 * ioBroker states for all servers of the bot to receive and send messages
 * ioBroker states for all users seen by the bot to receive and send direct messages
+* Simplified Discord server join and leave for the bot
 * Set the bot status including actions
 * Optional observe user presence status
 * Optional observe server member voice status
@@ -117,6 +119,12 @@ Also the following scopes are required:
 
 If some of the above permissions or scopes are missing, some features of the
 adapter might not work.
+
+### Remove the bot from a server
+
+To remove the bot from a server, you may use the server select field on the same
+adapter instance configuration page.
+Just select the server and click the button to instruct the bot to leave the server.
 
 ## States
 

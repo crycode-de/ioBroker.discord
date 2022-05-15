@@ -586,6 +586,57 @@
             "paddingTop": 0,
             "paddingBottom": 0
           }
+        },
+        "_serverLeaveDivider": {
+          "type": "divider"
+        },
+        "_serverLeaveInfo1": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "text": "Here you are able to let the bot leave a discord server."
+        },
+        "_serverLeaveInfo2": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "_alive",
+          "text": "The adapter instance needs to be running to let the bot leave a server!",
+          "style": {
+            "color": "red"
+          }
+        },
+        "serverLeaveSelect": {
+          "type": "selectSendTo",
+          "newLine": true,
+          "sm": 12,
+          "lg": 6,
+          "label": "Select server to leave",
+          "help": "Select a server you want the bot to leave and then click the \"Leave the server!\" button.",
+          "hidden": "!_alive",
+          "command": "getServers",
+          "doNotSave": true
+        },
+
+        "_serverLeaveButton": {
+          "type": "sendTo",
+          "sm": 12,
+          "md": 6,
+          "lg": 2,
+          "label": "Leave the server!",
+          "variant": "outlined",
+          "hidden": "!_alive",
+          "disabled": "!data.serverLeaveSelect",
+          "command": "leaveServer",
+          "jsonData": "{\"serverId\":\"${data.serverLeaveSelect}\"}",
+          "confirm": {
+            "condition": "true",
+            "type": "warning",
+            "title": "Warning",
+            "text": "Do you really want to let the bot leave the selected server?",
+            "ok": "Yes, leave the server!",
+            "cancel": "Cancel"
+          }
         }
       }
     }

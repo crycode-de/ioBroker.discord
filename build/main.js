@@ -269,7 +269,14 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     for (const [, guildBase] of guilds) {
       if (this.unloaded)
         return;
-      const guild = await guildBase.fetch();
+      let guild;
+      try {
+        guild = await guildBase.fetch();
+      } catch (err) {
+        this.log.warn(`Could not fetch guild information for guild "${guildBase.name}" id:${guildBase.id}`);
+        this.log.debug(`Error: ${err}`);
+        continue;
+      }
       if (this.unloaded)
         return;
       knownServersAndChannelsIds.add(`${this.namespace}.servers.${guild.id}`);
@@ -1442,7 +1449,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d, _e, _f, _g;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
     if (typeof obj !== "object")
       return;
     this.log.debug(`Got message: ${JSON.stringify(obj)}`);
@@ -1476,6 +1483,15 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.log.debug(`Users: ${users.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, users, obj.callback);
         break;
+      case "getServers":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        const servers = ((_b = this.client) == null ? void 0 : _b.guilds.cache.map((g) => ({ label: g.name, value: g.id }))) || [];
+        this.log.debug(`Servers: ${servers.map((i) => i.value)}`);
+        this.sendTo(obj.from, obj.command, servers, obj.callback);
+        break;
       case "getServerRoles":
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -1502,7 +1518,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
-        if ((_c = (_b = this.client) == null ? void 0 : _b.user) == null ? void 0 : _c.id) {
+        if ((_d = (_c = this.client) == null ? void 0 : _c.user) == null ? void 0 : _d.id) {
           const perms = new import_discord.Permissions([
             import_discord.Permissions.FLAGS.CHANGE_NICKNAME,
             import_discord.Permissions.FLAGS.VIEW_CHANNEL,
@@ -1546,13 +1562,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         if (sendPayload.userId || sendPayload.userTag) {
           let user;
           if (sendPayload.userId) {
-            user = (_d = this.client) == null ? void 0 : _d.users.cache.get(sendPayload.userId);
+            user = (_e = this.client) == null ? void 0 : _e.users.cache.get(sendPayload.userId);
             if (!user) {
               this.sendTo(obj.from, obj.command, __spreadValues({ error: `No user with userId ${sendPayload.userId} found` }, sendPayload), obj.callback);
               return;
             }
           } else {
-            user = (_e = this.client) == null ? void 0 : _e.users.cache.find((u) => u.tag === sendPayload.userTag);
+            user = (_f = this.client) == null ? void 0 : _f.users.cache.find((u) => u.tag === sendPayload.userTag);
             if (!user) {
               this.sendTo(obj.from, obj.command, __spreadValues({ error: `No user with userTag ${sendPayload.userTag} found` }, sendPayload), obj.callback);
               return;
@@ -1565,7 +1581,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             this.sendTo(obj.from, obj.command, __spreadValues({ error: `Error sending message to user ${user.tag}: ${err}` }, sendPayload), obj.callback);
           }
         } else if (sendPayload.serverId && sendPayload.channelId) {
-          const channel = (_g = (_f = this.client) == null ? void 0 : _f.guilds.cache.get(sendPayload.serverId)) == null ? void 0 : _g.channels.cache.get(sendPayload.channelId);
+          const channel = (_h = (_g = this.client) == null ? void 0 : _g.guilds.cache.get(sendPayload.serverId)) == null ? void 0 : _h.channels.cache.get(sendPayload.channelId);
           if (!(channel == null ? void 0 : channel.isText())) {
             this.sendTo(obj.from, obj.command, __spreadValues({ error: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found` }, sendPayload), obj.callback);
             return;
@@ -1716,6 +1732,33 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           const reactions = collected.map((r) => ({ emoji: r.emoji.name, emojiId: r.emoji.id, users: r.users.cache.map((u) => ({ id: u.id, tag: u.tag })) }));
           this.sendTo(obj.from, obj.command, __spreadValues({ reactions }, awaitMessageReactionPayload), obj.callback);
         });
+        break;
+      case "leaveServer":
+        if (typeof obj.message !== "object") {
+          this.sendTo(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
+          return;
+        }
+        const leaveServerPayload = obj.message;
+        if (!leaveServerPayload.serverId) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: "serverId needs to be set" }, leaveServerPayload), obj.callback);
+          return;
+        }
+        const guildToLeave = (_i = this.client) == null ? void 0 : _i.guilds.cache.get(leaveServerPayload.serverId);
+        if (!guildToLeave) {
+          this.sendTo(obj.from, obj.command, { error: `No server with ID ${leaveServerPayload.serverId} found` }, obj.callback);
+          return;
+        }
+        try {
+          await guildToLeave.leave();
+          this.log.info(`Left server ${guildToLeave.name} (${guildToLeave.id})`);
+          if (obj.callback) {
+            this.sendTo(obj.from, obj.command, { result: "ok" }, obj.callback);
+          }
+        } catch (err) {
+          if (obj.callback) {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: `Error leaving server ${leaveServerPayload.serverId}: ${err}` }, leaveServerPayload), obj.callback);
+          }
+        }
         break;
       default:
         this.log.warn(`Got message with unknown command: ${obj.command}`);

@@ -145,3 +145,10 @@ export interface SendToActionAwaitMessageReactionPayload extends MessageIdentifi
 export interface SendToActionAddReactionPayload extends MessageIdentifier {
   emoji: string;
 }
+
+/**
+ * Payload for a `sentTo(...)` `leaveServer` action.
+ */
+export interface SendToActionLeaveServerPayload {
+  serverId: Snowflake;
+}

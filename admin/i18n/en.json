@@ -135,6 +135,13 @@
     "Mute Members": "Mute Members",
     "Deafen Members": "Deafen Members",
     "Move Members": "Move Members",
+    "Here you are able to let the bot leave a discord server.": "Here you are able to let the bot leave a discord server.",
+    "The adapter instance needs to be running to let the bot leave a server!": "The adapter instance needs to be running to let the bot leave a server!",
+    "Select server to leave": "Select server to leave",
+    "Select a server you want the bot to leave and then click the \"Leave the server!\" button.": "Select a server you want the bot to leave and then click the \"Leave the server!\" button.",
+    "Leave the server!": "Leave the server!",
+    "Do you really want to let the bot leave the selected server?": "Do you really want to let the bot leave the selected server?",
+    "Yes, leave the server!": "Yes, leave the server!",
 
     "Enable text2command for this state": "Enable text2command for this state",
     "When enabled, the received message is send to the configured text2command instance.": "When enabled, the received message is send to the configured text2command instance.",

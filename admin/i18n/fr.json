@@ -156,5 +156,12 @@
     "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Si activé, tout message reçu sera stocké dans un état json brut, il pourra donc être utilisé dans des scripts personnalisés par exemple.",
     "Allowed server roles": "Rôles de serveur autorisés",
     "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.": "Liste des rôles de serveur autorisés à interagir avec le bot. ",
-    "Server role": "Rôle de serveur"
+    "Server role": "Rôle de serveur",
+    "Here you are able to let the bot leave a discord server.": "Ici, vous pouvez laisser le bot quitter un serveur discord.",
+    "The adapter instance needs to be running to let the bot leave a server!": "L'instance de l'adaptateur doit être en cours d'exécution pour permettre au bot de quitter un serveur !",
+    "Select server to leave": "Sélectionnez le serveur à quitter",
+    "Select a server you want the bot to leave and then click the \"Leave the server!\" button.": "Sélectionnez un serveur que vous souhaitez que le bot quitte, puis cliquez sur \"Quitter le serveur !\" ",
+    "Leave the server!": "Quittez le serveur !",
+    "Do you really want to let the bot leave the selected server?": "Voulez-vous vraiment laisser le bot quitter le serveur sélectionné ?",
+    "Yes, leave the server!": "Oui, quittez le serveur !"
 }

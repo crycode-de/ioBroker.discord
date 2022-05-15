@@ -16,6 +16,7 @@ Zusätzlich kann der Adapter Discord Slash-Befehle registrieren.
 * [Funktionen](#funktionen)
 * [Erstellen eines Discord Bots](#erstellen-eines-discord-bots)
 * [Den Bot einem Server hinzufügen](#den-bot-einem-server-hinzufügen)
+  * [Den Bot von einem Server entfernen](#den-bot-von-einem-server-entfernen)
 * [Zustände (States)](#zustände-states)
   * [discord.0.bot.*](#discord0bot)
   * [discord.0.servers.\<server-id\>.*](#discord0serversserver-id)
@@ -49,6 +50,7 @@ Zusätzlich kann der Adapter Discord Slash-Befehle registrieren.
 
 * ioBroker-Zustände für alle Server des Bots zum Empfangen und Senden von Nachrichten
 * ioBroker-Zustände für alle Benutzer, die vom Bot gesehen werden, zum Empfangen und Senden von Direktnachrichten
+* Vereinfachtes Beitreten und Verlassen von Discord-Server für den Bot
 * Festlegen des Bot-Status inklusive Aktionen
 * Optional beobachten des Anwesenheitsstatus der Benutzer
 * Optional beobachten des Voice-Status der Benutzer
@@ -120,6 +122,13 @@ Zudem werden die folgenden Anwendungsbereiche benötigt:
 
 Wenn Berechtigungen oder Anwendungsbereiche fehlen, dann werden manche
 Funktionen des Adapters nicht funktionieren.
+
+### Den Bot von einem Server entfernen
+
+Um den Bot wieder von einem Server zu entfernen, gibt es weiter unten auf der
+gleichen Seite der Instanzkonfiguration des Adapters die Möglichkeit einen
+Server auszuwählen und dann Button dem Bot zu sagen, dass er den Server
+verlassen soll.
 
 ## Zustände (States)
 

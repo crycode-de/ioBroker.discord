@@ -156,5 +156,12 @@
     "If enabled, any received message will be stored to a raw json state, so it could be used in custom scripts for example.": "Indien ingeschakeld, wordt elk ontvangen bericht opgeslagen in een onbewerkte json-status, zodat het bijvoorbeeld in aangepaste scripts kan worden gebruikt.",
     "Allowed server roles": "Toegestane serverrollen",
     "List of server roles allowed to interact with the bot. These are server specific and only apply to server channels.": "Lijst met serverrollen die mogen communiceren met de bot. ",
-    "Server role": "Serverrol"
+    "Server role": "Serverrol",
+    "Here you are able to let the bot leave a discord server.": "Hier kun je de bot een discord-server laten verlaten.",
+    "The adapter instance needs to be running to let the bot leave a server!": "De adapterinstantie moet actief zijn om de bot een server te laten verlaten!",
+    "Select server to leave": "Selecteer server om te vertrekken",
+    "Select a server you want the bot to leave and then click the \"Leave the server!\" button.": "Selecteer een server die u wilt dat de bot verlaat en klik vervolgens op \"Verlaat de server!\" ",
+    "Leave the server!": "Verlaat de server!",
+    "Do you really want to let the bot leave the selected server?": "Wil je de bot echt de geselecteerde server laten verlaten?",
+    "Yes, leave the server!": "Ja, verlaat de server!"
 }
