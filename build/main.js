@@ -56,6 +56,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.infoConnected = false;
     this.client = null;
     this.messageReceiveStates = /* @__PURE__ */ new Set();
+    this.knownUsers = /* @__PURE__ */ new Set();
     this.text2commandObjects = /* @__PURE__ */ new Set();
     this.extendObjectCache = new import_discord.Collection();
     this.jsonStateCache = new import_discord.Collection();
@@ -889,6 +890,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         })
       ]);
       this.messageReceiveStates.add(`${this.namespace}.users.${user.id}.message`);
+      this.knownUsers.add(user.id);
       const ps = await this.updateUserPresence(user.id, presence, true);
       const proms = [];
       const json = {
@@ -940,6 +942,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         const userId = m[1];
         if (!allServersUsers.has(userId)) {
           this.log.debug(`User ${userId} "${item.value.common.name}" is no longer available - deleting objects`);
+          this.knownUsers.delete(userId);
           this.messageReceiveStates.delete(`${this.namespace}.users.${userId}.message`);
           this.jsonStateCache.delete(`${this.namespace}.users.${userId}.json`);
           await this.delObjectAsyncCached(`users.${userId}`, { recursive: true });
@@ -950,6 +953,10 @@ class DiscordAdapter extends import_adapter_core.Adapter {
   async updateUserPresence(userId, presence, skipJsonStateUpdate = false) {
     var _a, _b, _c, _d;
     if (!this.config.observeUserPresence) {
+      return { activityName: "", activityType: "", status: "" };
+    }
+    if (!this.knownUsers.has(userId)) {
+      this.log.debug(`Can't update user presence for unknown user ${userId}`);
       return { activityName: "", activityType: "", status: "" };
     }
     try {
@@ -1125,6 +1132,10 @@ class DiscordAdapter extends import_adapter_core.Adapter {
   async onClientVoiceStateUpdate(oldState, newState) {
     var _a, _b, _c;
     if (!((_a = newState.member) == null ? void 0 : _a.id)) {
+      return;
+    }
+    if (!this.knownUsers.has(newState.member.id)) {
+      this.log.debug(`Can't update user voice state for unknown user ${newState.member.id}`);
       return;
     }
     const proms = [];

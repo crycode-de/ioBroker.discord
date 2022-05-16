@@ -78,6 +78,12 @@ class DiscordAdapter extends Adapter {
   private messageReceiveStates: Set<string> = new Set();
 
   /**
+   * Set user IDs known to set up.
+   * Used to check if the user objects are created on some events.
+   */
+  private knownUsers: Set<Snowflake> = new Set();
+
+  /**
    * Set of objects from this instance with text2command enabled.
    */
   private text2commandObjects: Set<string> = new Set();
@@ -1043,6 +1049,8 @@ class DiscordAdapter extends Adapter {
 
       this.messageReceiveStates.add(`${this.namespace}.users.${user.id}.message`);
 
+      this.knownUsers.add(user.id);
+
       const ps = await this.updateUserPresence(user.id, presence, true);
 
       const proms: Promise<any>[] = [];
@@ -1104,6 +1112,7 @@ class DiscordAdapter extends Adapter {
         const userId = m[1];
         if (!allServersUsers.has(userId)) {
           this.log.debug(`User ${userId} "${item.value.common.name}" is no longer available - deleting objects`);
+          this.knownUsers.delete(userId);
           this.messageReceiveStates.delete(`${this.namespace}.users.${userId}.message`);
           this.jsonStateCache.delete(`${this.namespace}.users.${userId}.json`);
           await this.delObjectAsyncCached(`users.${userId}`, { recursive: true });
@@ -1120,6 +1129,11 @@ class DiscordAdapter extends Adapter {
    */
   private async updateUserPresence (userId: Snowflake, presence: Presence | null, skipJsonStateUpdate: boolean = false): Promise<UpdateUserPresenceResult> {
     if (!this.config.observeUserPresence) {
+      return { activityName: '', activityType: '', status: '' };
+    }
+
+    if (!this.knownUsers.has(userId)) {
+      this.log.debug(`Can't update user presence for unknown user ${userId}`);
       return { activityName: '', activityType: '', status: '' };
     }
 
@@ -1341,6 +1355,11 @@ class DiscordAdapter extends Adapter {
   @boundMethod
   private async onClientVoiceStateUpdate (oldState: VoiceState, newState: VoiceState): Promise<void> {
     if (!newState.member?.id) {
+      return;
+    }
+
+    if (!this.knownUsers.has(newState.member.id)) {
+      this.log.debug(`Can't update user voice state for unknown user ${newState.member.id}`);
       return;
     }
 
