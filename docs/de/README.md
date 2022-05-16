@@ -64,7 +64,7 @@ Zusätzlich kann der Adapter Discord Slash-Befehle registrieren.
 * Unterstützung von Discord Slash-Befehlen zum Abfragen und Festlegen von Zustandswerten
 * Unterstützung von [text2command] (muss für jeden `.message`-Zustand einzeln aktiviert werden)
 * Senden, bearbeiten und löschen von Nachrichten, Senden von und warten auf Reaktionen auf Nachrichten in eigenen Skripten
-* Optional raw-Zustände für mehr Flexibilität in einen Skripten
+* Optional raw-Zustände für mehr Flexibilität in eigenen Skripten
 
 Es fehlt ein Feature? Erstelle einfach ein Feature-Request auf [GitHub][GitHub New Issue].
 

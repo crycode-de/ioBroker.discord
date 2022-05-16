@@ -427,7 +427,7 @@ export class DiscordAdapterSlashCommands {
         } else {
           // user not authorized
           this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          interaction.editReply(i18n.getString('You are not authorized to call this command!'));
+          await interaction.editReply(i18n.getString('You are not authorized to call this command!'));
         }
         break;
 
@@ -439,13 +439,13 @@ export class DiscordAdapterSlashCommands {
         } else {
           // user not authorized
           this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          interaction.editReply(i18n.getString('You are not authorized to call this command!'));
+          await interaction.editReply(i18n.getString('You are not authorized to call this command!'));
         }
         break;
 
       default:
         this.adapter.log.warn(`Got unknown command ${commandName}!`);
-        interaction.editReply(i18n.getString('Unknown command!'));
+        await interaction.editReply(i18n.getString('Unknown command!'));
     }
   }
 
@@ -665,7 +665,7 @@ export class DiscordAdapterSlashCommands {
         value = parseFloat(valueStr);
 
         if (isNaN(value)) {
-          interaction.editReply(i18n.getString('The given value is not a number!'));
+          await interaction.editReply(i18n.getString('The given value is not a number!'));
           return;
         }
 

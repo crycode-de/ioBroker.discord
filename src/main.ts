@@ -132,7 +132,7 @@ class DiscordAdapter extends Adapter {
   private async onReady(): Promise<void> {
 
     // Reset the connection indicator during startup
-    this.setInfoConnectionState(false, true);
+    await this.setInfoConnectionState(false, true);
 
     // try to get the system language
     const systemConfig = await this.getForeignObjectAsync('system.config');
@@ -398,14 +398,15 @@ class DiscordAdapter extends Adapter {
       knownServersAndChannelsIds.add(`${this.namespace}.servers.${guild.id}`);
 
       // create channel for this guild
+      await this.extendObjectAsyncCached(`servers.${guild.id}`, {
+        type: 'channel',
+        common: {
+          name: guild.name,
+        },
+        native: {},
+      });
+
       await Promise.all([
-        this.extendObjectAsyncCached(`servers.${guild.id}`, {
-          type: 'channel',
-          common: {
-            name: guild.name,
-          },
-          native: {},
-        }),
         this.extendObjectAsyncCached(`servers.${guild.id}.members`, {
           type: 'channel',
           common: {
@@ -531,7 +532,7 @@ class DiscordAdapter extends Adapter {
             type: 'state',
             common: {
               name: i18n.getStringOrTranslated('Voice server deafen'),
-              role: 'indicator',
+              role: 'switch',
               type: 'boolean',
               read: true,
               write: true,
@@ -555,7 +556,7 @@ class DiscordAdapter extends Adapter {
             type: 'state',
             common: {
               name: i18n.getStringOrTranslated('Voice server mute'),
-              role: 'indicator',
+              role: 'switch',
               type: 'boolean',
               read: true,
               write: true,
@@ -762,7 +763,7 @@ class DiscordAdapter extends Adapter {
                   name: i18n.getStringOrTranslated('Send message'),
                   role: 'text',
                   type: 'string',
-                  read: true,
+                  read: false,
                   write: true,
                   def: '',
                 },
@@ -774,7 +775,7 @@ class DiscordAdapter extends Adapter {
                   name: i18n.getStringOrTranslated('Send file'),
                   role: 'text',
                   type: 'string',
-                  read: true,
+                  read: false,
                   write: true,
                   def: '',
                 },
@@ -786,7 +787,7 @@ class DiscordAdapter extends Adapter {
                   name: i18n.getStringOrTranslated('Send reply'),
                   role: 'text',
                   type: 'string',
-                  read: true,
+                  read: false,
                   write: true,
                   def: '',
                 },
@@ -798,7 +799,7 @@ class DiscordAdapter extends Adapter {
                   name: i18n.getStringOrTranslated('Send reaction'),
                   role: 'text',
                   type: 'string',
-                  read: true,
+                  read: false,
                   write: true,
                   def: '',
                 },
@@ -933,7 +934,7 @@ class DiscordAdapter extends Adapter {
             name: i18n.getStringOrTranslated('Send message'),
             role: 'text',
             type: 'string',
-            read: true,
+            read: false,
             write: true,
             def: '',
           },
@@ -945,7 +946,7 @@ class DiscordAdapter extends Adapter {
             name: i18n.getStringOrTranslated('Send file'),
             role: 'text',
             type: 'string',
-            read: true,
+            read: false,
             write: true,
             def: '',
           },
@@ -957,7 +958,7 @@ class DiscordAdapter extends Adapter {
             name: i18n.getStringOrTranslated('Send reply'),
             role: 'text',
             type: 'string',
-            read: true,
+            read: false,
             write: true,
             def: '',
           },
@@ -969,7 +970,7 @@ class DiscordAdapter extends Adapter {
             name: i18n.getStringOrTranslated('Send reaction'),
             role: 'text',
             type: 'string',
-            read: true,
+            read: false,
             write: true,
             def: '',
           },
@@ -1888,7 +1889,7 @@ class DiscordAdapter extends Adapter {
           ]);
           this.sendTo(obj.from, obj.command, `https://discord.com/api/oauth2/authorize?client_id=${this.client.user.id}&permissions=${perms.bitfield}&scope=bot%20applications.commands`, obj.callback);
         } else {
-          this.sendTo(obj.from, obj.command, '- Error -', obj.callback);
+          this.sendTo(obj.from, obj.command, `- ${i18n.getString('Error: The Bot is not connected to Discord!')} -`, obj.callback);
         }
         break;
 

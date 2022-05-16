@@ -270,7 +270,7 @@ class DiscordAdapterSlashCommands {
           await this.handleCmdGetState(interaction);
         } else {
           this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
+          await interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
         }
         break;
       case this.cmdSetStateName:
@@ -278,12 +278,12 @@ class DiscordAdapterSlashCommands {
           await this.handleCmdSetState(interaction);
         } else {
           this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
+          await interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
         }
         break;
       default:
         this.adapter.log.warn(`Got unknown command ${commandName}!`);
-        interaction.editReply(import_i18n.i18n.getString("Unknown command!"));
+        await interaction.editReply(import_i18n.i18n.getString("Unknown command!"));
     }
   }
   async getObjectAndCfgFromAlias(objAlias, interaction) {
@@ -432,7 +432,7 @@ class DiscordAdapterSlashCommands {
         }
         value = parseFloat(valueStr);
         if (isNaN(value)) {
-          interaction.editReply(import_i18n.i18n.getString("The given value is not a number!"));
+          await interaction.editReply(import_i18n.i18n.getString("The given value is not a number!"));
           return;
         }
         valueReply = value.toString();

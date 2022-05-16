@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "discord",
-        "version": "1.0.1",
+        "version": "1.0.2",
         "news": {
+            "1.0.2": {
+                "en": "Fixed some small issues",
+                "de": "Einige kleine Probleme behoben",
+                "ru": "Исправлены некоторые небольшие проблемы",
+                "pt": "Corrigido alguns pequenos problemas",
+                "nl": "Enkele kleine problemen opgelost",
+                "fr": "Correction de quelques petits problèmes",
+                "it": "Risolti alcuni piccoli problemi",
+                "es": "Se corrigieron algunos problemas pequeños",
+                "pl": "Naprawiono kilka drobnych problemów",
+                "zh-cn": "修复了一些小问题"
+            },
             "1.0.1": {
                 "en": "Added possibility to let the bot leave a Discord server",
                 "de": "Möglichkeit hinzugefügt, den Bot einen Discord-Server verlassen zu lassen",

@@ -163,5 +163,6 @@
     "Select a server you want the bot to leave and then click the \"Leave the server!\" button.": "选择您希望机器人离开的服务器，然后单击“离开服务器！”",
     "Leave the server!": "离开服务器！",
     "Do you really want to let the bot leave the selected server?": "你真的想让机器人离开选定的服务器吗？",
-    "Yes, leave the server!": "是的，离开服务器！"
+    "Yes, leave the server!": "是的，离开服务器！",
+    "Error: The Bot is not connected to Discord!": "错误：机器人未连接到 Discord！"
 }

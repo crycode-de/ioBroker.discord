@@ -122,6 +122,7 @@
     "The adapter instance needs to be running to get the link!": "The adapter instance needs to be running to get the link!",
     "Link": "Link",
     "Just copy the link and open it in a new browser tab to start adding the bot to a server.": "Just copy the link and open it in a new browser tab to start adding the bot to a server.",
+    "Error: The Bot is not connected to Discord!": "Error: The Bot is not connected to Discord!",
     "The following bot permissions are required by the adapter and embedded into the link above:": "The following bot permissions are required by the adapter and embedded into the link above:",
     "Change Nickname": "Change Nickname",
     "Read Messages/View Channels": "Read Messages/View Channels",

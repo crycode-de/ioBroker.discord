@@ -163,5 +163,6 @@
     "Select a server you want the bot to leave and then click the \"Leave the server!\" button.": "Sélectionnez un serveur que vous souhaitez que le bot quitte, puis cliquez sur \"Quitter le serveur !\" ",
     "Leave the server!": "Quittez le serveur !",
     "Do you really want to let the bot leave the selected server?": "Voulez-vous vraiment laisser le bot quitter le serveur sélectionné ?",
-    "Yes, leave the server!": "Oui, quittez le serveur !"
+    "Yes, leave the server!": "Oui, quittez le serveur !",
+    "Error: The Bot is not connected to Discord!": "Erreur : Le bot n'est pas connecté à Discord !"
 }

@@ -58,6 +58,10 @@ See [GitHub issue](https://github.com/crycode-de/ioBroker.discord/issues/1).
 
 ## Changelog
 
+### 1.0.2 (2022-05-16)
+
+* (crycode-de) Fixed some small issues found on adapter review
+
 ### 1.0.1 (2022-05-15)
 
 * (crycode-de) Added possibility to let the bot leave a Discord server
