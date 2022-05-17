@@ -250,7 +250,11 @@ class DiscordAdapterSlashCommands {
   }
   async onInteractionCreate(interaction) {
     if (this.adapter.config.enableRawStates) {
-      this.adapter.setState("raw.interactionJson", JSON.stringify(interaction.toJSON(), (_key, value) => typeof value === "bigint" ? value.toString() : value), true);
+      const interactionJson = interaction.toJSON();
+      if (interaction.isCommand()) {
+        interactionJson.options = interaction.options.data;
+      }
+      this.adapter.setState("raw.interactionJson", JSON.stringify(interactionJson, (_key, value) => typeof value === "bigint" ? value.toString() : value), true);
     }
     if (!interaction.isCommand())
       return;

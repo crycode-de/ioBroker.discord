@@ -397,7 +397,11 @@ export class DiscordAdapterSlashCommands {
     // raw states enabled?
     if (this.adapter.config.enableRawStates) {
       // set raw state... not async here since it should not block!
-      this.adapter.setState('raw.interactionJson', JSON.stringify(interaction.toJSON(), (_key, value) => typeof value === 'bigint' ? value.toString() : value), true);
+      const interactionJson = interaction.toJSON() as Record<string, unknown>;
+      if (interaction.isCommand()) {
+        interactionJson.options = interaction.options.data;
+      }
+      this.adapter.setState('raw.interactionJson', JSON.stringify(interactionJson, (_key, value) => typeof value === 'bigint' ? value.toString() : value), true);
     }
 
     // is it a command?

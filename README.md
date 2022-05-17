@@ -58,6 +58,10 @@ See [GitHub issue](https://github.com/crycode-de/ioBroker.discord/issues/1).
 
 ## Changelog
 
+### Work in progress
+
+* (crycode-de) Added command options to `raw.interactionJson` json content
+
 ### 1.0.2 (2022-05-16)
 
 * (crycode-de) Fixed some small issues found on adapter review
