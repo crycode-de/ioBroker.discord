@@ -159,8 +159,11 @@ class DiscordAdapter extends Adapter {
     if (!this.config.enableAuthorization) {
       this.log.info('Authorization is disabled, so any user is able to interact with the bot. You should only disable authorization if you trust all users on any server where the bot is on.');
     }
-    if (this.config.enableAuthorization && this.config.authorizedUsers.length === 0) {
+    if (this.config.enableAuthorization && this.config.authorizedUsers.length === 0 && this.config.authorizedServerRoles.length === 0) {
       this.log.info('Authorization is enabled but no authorized users are defined!');
+    }
+    if (this.config.enableCustomCommands && !Array.isArray(this.config.customCommands)) {
+      this.config.customCommands = [];
     }
 
     // setup generic dynamic objects (most objects will be set up in `updateGuilds` method)
@@ -2309,6 +2312,7 @@ class DiscordAdapter extends Adapter {
             given = {
               getStates:  given.getStates || roleGiven.getStates,
               setStates:  given.setStates || roleGiven.setStates,
+              useCustomCommands:  given.useCustomCommands || roleGiven.useCustomCommands,
               useText2command:  given.useText2command || roleGiven.useText2command,
             };
           }
@@ -2328,6 +2332,7 @@ class DiscordAdapter extends Adapter {
 
     if ((required.getStates && !given.getStates)
         || (required.setStates && !given.setStates)
+        || (required.useCustomCommands && !given.useCustomCommands)
         || (required.useText2command && !given.useText2command)) {
       return false;
     }

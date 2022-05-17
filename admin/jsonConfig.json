@@ -202,7 +202,7 @@
             {
               "type": "checkbox",
               "title": "Get states",
-              "width": "16%",
+              "width": "12.5%",
               "attr": "getStates",
               "filter": false,
               "sort": false,
@@ -211,7 +211,7 @@
             {
               "type": "checkbox",
               "title": "Set states",
-              "width": "16%",
+              "width": "12.5%",
               "attr": "setStates",
               "filter": false,
               "sort": false,
@@ -219,8 +219,17 @@
             },
             {
               "type": "checkbox",
+              "title": "Use custom commands",
+              "width": "12.5%",
+              "attr": "useCustomCommands",
+              "filter": false,
+              "sort": false,
+              "default": false
+            },
+            {
+              "type": "checkbox",
               "title": "Use text2command",
-              "width": "16%",
+              "width": "12.5%",
               "attr": "useText2command",
               "filter": false,
               "sort": false,
@@ -251,7 +260,7 @@
             {
               "type": "checkbox",
               "title": "Get states",
-              "width": "16%",
+              "width": "12.5%",
               "attr": "getStates",
               "filter": false,
               "sort": false,
@@ -260,7 +269,7 @@
             {
               "type": "checkbox",
               "title": "Set states",
-              "width": "16%",
+              "width": "12.5%",
               "attr": "setStates",
               "filter": false,
               "sort": false,
@@ -268,8 +277,17 @@
             },
             {
               "type": "checkbox",
+              "title": "Use custom commands",
+              "width": "12.5%",
+              "attr": "useCustomCommands",
+              "filter": false,
+              "sort": false,
+              "default": false
+            },
+            {
+              "type": "checkbox",
               "title": "Use text2command",
-              "width": "16%",
+              "width": "12.5%",
               "attr": "useText2command",
               "filter": false,
               "sort": false,
@@ -325,7 +343,7 @@
           "label": "Custom get state command name",
           "help": "Custom name for the get state command. Defaults to 'iob-get'.",
           "placeholder": "iob-get",
-          "validator": "data.cmdGetStateName.match(/^([a-zA-Z][0-9a-zA-Z-_]{0,50})?$/)",
+          "validator": "data.cmdGetStateName.match(/^([a-z][0-9a-z-_]{0,50})?$/)",
           "validatorNoSaveOnError": true
         },
         "cmdSetStateName": {
@@ -337,7 +355,7 @@
           "label": "Custom set state command name",
           "help": "Custom name for the set state command. Defaults to 'iob-get'.",
           "placeholder": "iob-set",
-          "validator": "data.cmdSetStateName.match(/^([a-zA-Z][0-9a-zA-Z-_]{0,50})?$/)",
+          "validator": "data.cmdSetStateName.match(/^([a-z][0-9a-z-_]{0,50})?$/)",
           "validatorNoSaveOnError": true
         },
 
@@ -383,6 +401,111 @@
           "style": {
             "color": "red"
           }
+        },
+
+        "enableCustomCommands": {
+          "type": "checkbox",
+          "newLine": true,
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "hidden": "!data.enableCommands",
+          "label": "Enable custom commands",
+          "help": "Define custom commands which may be used for interactions with scripts for example."
+        },
+
+        "customCommands": {
+          "type": "table",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!data.enableCommands || !data.enableCustomCommands",
+          "label": "Custom commands",
+          "help": "List of custom commands and their options.",
+          "items": [
+            {
+              "type": "text",
+              "title": "Name",
+              "width": "25%",
+              "attr": "name",
+              "filter": false,
+              "sort": false,
+              "default": "",
+              "placeholder": "iob-xyz",
+              "validator": "data.name.match(/^[a-z][0-9a-z-_]{0,50}$/)",
+              "validatorNoSaveOnError": true
+            },
+            {
+              "type": "text",
+              "title": "Description",
+              "width": "25%",
+              "attr": "description",
+              "filter": false,
+              "sort": false,
+              "default": "",
+              "placeholder": "Do something usefull",
+              "validator": "data.description.length > 0",
+              "validatorNoSaveOnError": true
+            },
+            {
+              "type": "table",
+              "attr": "options",
+              "title": "Command options",
+              "width": "50%",
+              "items": [
+                {
+                  "type": "select",
+                  "title": "Type",
+                  "width": "30%",
+                  "attr": "type",
+                  "filter": false,
+                  "sort": false,
+                  "options": [
+                    { "label": "String", "value": "string" },
+                    { "label": "Number", "value": "number" },
+                    { "label": "Boolean", "value": "boolean" },
+                    { "label": "User", "value": "user" },
+                    { "label": "Role", "value": "role" },
+                    { "label": "Channel", "value": "channel" },
+                    { "label": "Mentionable", "value": "mentionable" }
+                  ],
+                  "default": "string"
+                },
+                {
+                  "type": "text",
+                  "title": "Name",
+                  "width": "30%",
+                  "attr": "name",
+                  "filter": false,
+                  "sort": false,
+                  "default": "",
+                  "placeholder": "option-1",
+                  "validator": "data.role === 'none' || data.name.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/)",
+                  "validatorNoSaveOnError": true
+                },
+                {
+                  "type": "text",
+                  "title": "Description",
+                  "width": "30%",
+                  "attr": "description",
+                  "filter": false,
+                  "sort": false,
+                  "default": "",
+                  "placeholder": "Option 1",
+                  "validator": "data.description.length > 0",
+                  "validatorNoSaveOnError": true
+                },
+                {
+                  "type": "checkbox",
+                  "title": "Required",
+                  "width": "10%",
+                  "attr": "required",
+                  "filter": false,
+                  "sort": false,
+                  "default": false
+                }
+              ]
+            }
+          ]
         }
       }
     },

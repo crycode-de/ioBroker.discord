@@ -61,6 +61,7 @@ See [GitHub issue](https://github.com/crycode-de/ioBroker.discord/issues/1).
 ### Work in progress
 
 * (crycode-de) Added command options to `raw.interactionJson` json content
+* (crycode-de) Fixed command name checks
 
 ### 1.0.2 (2022-05-16)
 

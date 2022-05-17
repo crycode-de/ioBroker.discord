@@ -26,11 +26,14 @@ declare global {
       commandsGlobal: boolean;
       cmdGetStateName: string;
       cmdSetStateName: string;
+      enableCustomCommands: boolean;
+      customCommands: AdapterConfigCustomCommand[];
     }
 
     interface AdapterConfigAuthorizedFlags {
       getStates: boolean;
       setStates: boolean;
+      useCustomCommands: boolean;
       useText2command: boolean;
     }
 
@@ -41,6 +44,21 @@ declare global {
     interface AdapterConfigAuthorizedServerRoles extends AdapterConfigAuthorizedFlags {
       serverAndRoleId: `${Snowflake}|${Snowflake}`;
     }
+
+    interface AdapterConfigCustomCommand {
+      name: string;
+      description: string;
+      options: AdapterConfigCustomCommandOptions[];
+    }
+
+    interface AdapterConfigCustomCommandOptions {
+      type: AdapterConfigCustomCommandOptionType;
+      name: string;
+      description: string;
+      required: boolean;
+    }
+
+    type AdapterConfigCustomCommandOptionType = 'string' | 'number' | 'boolean' | 'user' | 'role' | 'channel' | 'mentionable';
 
     interface CustomConfig {
       enabled?: boolean;

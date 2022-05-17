@@ -89,11 +89,7 @@ export interface UpdateUserPresenceResult {
   activityName: string;
 }
 
-export interface CheckAuthorizationOpts {
-  getStates?: boolean;
-  setStates?: boolean;
-  useText2command?: boolean;
-}
+export type CheckAuthorizationOpts = Partial<ioBroker.AdapterConfigAuthorizedFlags>;
 
 /**
  * Parameters needed to identify a message target.

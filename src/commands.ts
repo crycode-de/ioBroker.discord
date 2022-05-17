@@ -57,6 +57,11 @@ export class DiscordAdapterSlashCommands {
   private cmdSetStateName: string = 'iob-set';
 
   /**
+   * Set of the known (registered) custom commands.
+   */
+  private customCommands: Set<string> = new Set();
+
+  /**
    * If commands are fully registered including their permissions.
    */
   private registerCommandsDone: boolean = false;
@@ -95,7 +100,7 @@ export class DiscordAdapterSlashCommands {
   public async onReady (): Promise<void> {
     // apply custom command names if configured
     if (this.adapter.config.cmdGetStateName) {
-      if (this.adapter.config.cmdGetStateName.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/)) {
+      if (this.adapter.config.cmdGetStateName.match(/^[a-z][0-9a-z-_]{0,50}$/)) {
         this.cmdGetStateName = this.adapter.config.cmdGetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom get state command name '${this.adapter.config.cmdGetStateName}' provied! Using default 'iob-get'.`);
@@ -103,7 +108,7 @@ export class DiscordAdapterSlashCommands {
     }
     if (this.adapter.config.cmdSetStateName) {
       this.cmdSetStateName = this.adapter.config.cmdSetStateName;
-      if (this.adapter.config.cmdSetStateName.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/)) {
+      if (this.adapter.config.cmdSetStateName.match(/^[a-z][0-9a-z-_]{0,50}$/)) {
         this.cmdSetStateName = this.adapter.config.cmdSetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom set state command name '${this.adapter.config.cmdSetStateName}' provied! Using default 'iob-set'.`);
@@ -210,6 +215,72 @@ export class DiscordAdapterSlashCommands {
       cmdSet,
     ];
 
+    // custom commands
+    this.customCommands.clear();
+    if (this.adapter.config.enableCustomCommands) {
+      loopCustomCommands:
+      for (const customCommandCfg of this.adapter.config.customCommands) {
+        if (!customCommandCfg.name.match(/^[a-zA-Z][0-9a-z-_]{0,50}$/) || customCommandCfg.description.length === 0) {
+          this.adapter.log.warn(`Custom command "${customCommandCfg.name}" has an invalid name or description configured!`);
+          continue;
+        }
+
+        // create the command
+        const cmdCustom = new SlashCommandBuilder()
+          .setName(customCommandCfg.name)
+          .setDescription(customCommandCfg.description)
+          .setDefaultPermission(true);
+
+        // add configured options
+        if (Array.isArray(customCommandCfg.options)) {
+          for (const customCommandCfgOpt of customCommandCfg.options) {
+            if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-z-_]{0,50}$/) || customCommandCfgOpt.description.length === 0) {
+              this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" has an invalid name or description configured!`);
+              continue loopCustomCommands;
+            }
+
+            switch (customCommandCfgOpt.type) {
+              case 'string':
+                cmdCustom.addStringOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+
+              case 'number':
+                cmdCustom.addNumberOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+
+              case 'boolean':
+                cmdCustom.addBooleanOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+
+              case 'user':
+                cmdCustom.addUserOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+
+              case 'role':
+                cmdCustom.addRoleOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+
+              case 'channel':
+                cmdCustom.addChannelOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+
+              case 'mentionable':
+                cmdCustom.addMentionableOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+
+              default:
+                this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name} has an invalid type set"!`);
+                continue loopCustomCommands;
+            }
+          }
+        }
+
+        // add custom command to the commands
+        commands.push(cmdCustom);
+        this.customCommands.add(customCommandCfg.name);
+      }
+    }
+
     const commandsJson = commands.map((cmd) => cmd.toJSON());
 
     // only update the commands if something has changed
@@ -233,7 +304,7 @@ export class DiscordAdapterSlashCommands {
           } else {
             // commands per guild
             await this.rest.put(Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: commandsJson });
-            this.adapter.log.info(`Registered commands for server ${guild.name} (id:${guild.id}) (get: ${numGet}, set: ${numSet})`);
+            this.adapter.log.info(`Registered commands for server ${guild.name} (id:${guild.id}) (get: ${numGet}, set: ${numSet}, custom: ${this.customCommands.size})`);
           }
 
         } catch (err) {
@@ -250,7 +321,7 @@ export class DiscordAdapterSlashCommands {
         if (this.adapter.config.commandsGlobal) {
           // global commands enabled
           await this.rest.put(Routes.applicationCommands(this.adapter.client.user.id), { body: commandsJson });
-          this.adapter.log.info(`Registered global commands (get: ${numGet}, set: ${numSet})`);
+          this.adapter.log.info(`Registered global commands (get: ${numGet}, set: ${numSet}, custom: ${this.customCommands.size})`);
 
         } else {
           // global command disabled
@@ -418,38 +489,46 @@ export class DiscordAdapterSlashCommands {
       return;
     }
 
-    this.adapter.log.debug(`Got command ${commandName} ${interaction.toJSON()}`);
+    this.adapter.log.debug(`Got command ${commandName} ${JSON.stringify(interaction.options.data)}`);
 
     const authCheckTarget = interaction.member instanceof GuildMember ? interaction.member : user;
 
-    switch (commandName) {
-      case this.cmdGetStateName:
-        // check user authorization (user should only be able to call the command if authorized but check it nevertheless to be sure)
-        if (this.adapter.checkUserAuthorization(authCheckTarget, { getStates: true })) {
-          // user authorized
-          await this.handleCmdGetState(interaction);
-        } else {
-          // user not authorized
-          this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          await interaction.editReply(i18n.getString('You are not authorized to call this command!'));
-        }
-        break;
+    if (commandName === this.cmdGetStateName) {
+      // check user authorization
+      if (this.adapter.checkUserAuthorization(authCheckTarget, { getStates: true })) {
+        // user authorized
+        await this.handleCmdGetState(interaction);
+      } else {
+        // user not authorized
+        this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
+        await interaction.editReply(i18n.getString('You are not authorized to call this command!'));
+      }
 
-      case this.cmdSetStateName:
-        // check user authorization (user should only be able to call the command if authorized but check it nevertheless to be sure)
-        if (this.adapter.checkUserAuthorization(authCheckTarget, { setStates: true })) {
-          // user authorized
-          await this.handleCmdSetState(interaction);
-        } else {
-          // user not authorized
-          this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          await interaction.editReply(i18n.getString('You are not authorized to call this command!'));
-        }
-        break;
+    } else if (commandName === this.cmdSetStateName) {
+      // check user authorization
+      if (this.adapter.checkUserAuthorization(authCheckTarget, { setStates: true })) {
+        // user authorized
+        await this.handleCmdSetState(interaction);
+      } else {
+        // user not authorized
+        this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
+        await interaction.editReply(i18n.getString('You are not authorized to call this command!'));
+      }
 
-      default:
-        this.adapter.log.warn(`Got unknown command ${commandName}!`);
-        await interaction.editReply(i18n.getString('Unknown command!'));
+    } else if (this.customCommands.has(commandName)) {
+      // check user authorization
+      if (this.adapter.checkUserAuthorization(authCheckTarget, { useCustomCommands: true })) {
+        // user authorized
+        await this.handleCmdCustom(interaction);
+      } else {
+        // user not authorized
+        this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
+        await interaction.editReply(i18n.getString('You are not authorized to call this command!'));
+      }
+
+    } else {
+      this.adapter.log.warn(`Got unknown command ${commandName}!`);
+      await interaction.editReply(i18n.getString('Unknown command!'));
     }
   }
 
@@ -717,6 +796,14 @@ export class DiscordAdapterSlashCommands {
 
     // send reply
     await interaction.editReply(`${cfg.name}: ${valueReply}${unit}`);
+  }
+
+  /**
+   * Handler for custom slash commands.
+   * @param interaction The interaction which triggered this.
+   */
+  private async handleCmdCustom (interaction: CommandInteraction<CacheType>): Promise<void> {
+    await interaction.editReply('Not implemented yet');
   }
 
   /**

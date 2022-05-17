@@ -139,7 +139,9 @@
         "enableCommands": false,
         "commandsGlobal": false,
         "cmdGetStateName": "",
-        "cmdSetStateName": ""
+        "cmdSetStateName": "",
+        "enableCustomCommands": false,
+        "customCommands": []
     },
     "objects": [],
     "instanceObjects": [

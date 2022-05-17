@@ -42,6 +42,7 @@ class DiscordAdapterSlashCommands {
     this.rest = new import_rest.REST({ version: "10" });
     this.cmdGetStateName = "iob-get";
     this.cmdSetStateName = "iob-set";
+    this.customCommands = /* @__PURE__ */ new Set();
     this.registerCommandsDone = false;
     this.lastCommandsJson = null;
     this.commandObjectConfig = new import_discord.Collection();
@@ -51,7 +52,7 @@ class DiscordAdapterSlashCommands {
   }
   async onReady() {
     if (this.adapter.config.cmdGetStateName) {
-      if (this.adapter.config.cmdGetStateName.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/)) {
+      if (this.adapter.config.cmdGetStateName.match(/^[a-z][0-9a-zA-Z-_]{0,50}$/)) {
         this.cmdGetStateName = this.adapter.config.cmdGetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom get state command name '${this.adapter.config.cmdGetStateName}' provied! Using default 'iob-get'.`);
@@ -59,7 +60,7 @@ class DiscordAdapterSlashCommands {
     }
     if (this.adapter.config.cmdSetStateName) {
       this.cmdSetStateName = this.adapter.config.cmdSetStateName;
-      if (this.adapter.config.cmdSetStateName.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/)) {
+      if (this.adapter.config.cmdSetStateName.match(/^[a-z][0-9a-zA-Z-_]{0,50}$/)) {
         this.cmdSetStateName = this.adapter.config.cmdSetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom set state command name '${this.adapter.config.cmdSetStateName}' provied! Using default 'iob-set'.`);
@@ -126,6 +127,53 @@ class DiscordAdapterSlashCommands {
       cmdGet,
       cmdSet
     ];
+    this.customCommands.clear();
+    if (this.adapter.config.enableCustomCommands) {
+      loopCustomCommands:
+        for (const customCommandCfg of this.adapter.config.customCommands) {
+          if (!customCommandCfg.name.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/) || customCommandCfg.description.length === 0) {
+            this.adapter.log.warn(`Custom command "${customCommandCfg.name}" has an invalid name or description configured!`);
+            continue;
+          }
+          const cmdCustom = new import_builders.SlashCommandBuilder().setName(customCommandCfg.name).setDescription(customCommandCfg.description).setDefaultPermission(true);
+          if (Array.isArray(customCommandCfg.options)) {
+            for (const customCommandCfgOpt of customCommandCfg.options) {
+              if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-zA-Z-_]{0,50}$/) || customCommandCfgOpt.description.length === 0) {
+                this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" has an invalid name or description configured!`);
+                continue loopCustomCommands;
+              }
+              switch (customCommandCfgOpt.type) {
+                case "string":
+                  cmdCustom.addStringOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                  break;
+                case "number":
+                  cmdCustom.addNumberOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                  break;
+                case "boolean":
+                  cmdCustom.addBooleanOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                  break;
+                case "user":
+                  cmdCustom.addUserOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                  break;
+                case "role":
+                  cmdCustom.addRoleOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                  break;
+                case "channel":
+                  cmdCustom.addChannelOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                  break;
+                case "mentionable":
+                  cmdCustom.addMentionableOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                  break;
+                default:
+                  this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name} has an invalid type set"!`);
+                  continue loopCustomCommands;
+              }
+            }
+          }
+          commands.push(cmdCustom);
+          this.customCommands.add(customCommandCfg.name);
+        }
+    }
     const commandsJson = commands.map((cmd) => cmd.toJSON());
     if (!(0, import_node_util.isDeepStrictEqual)(commandsJson, this.lastCommandsJson)) {
       this.adapter.log.debug("Commands needs to be updated");
@@ -140,7 +188,7 @@ class DiscordAdapterSlashCommands {
             await this.removeGuildCommands(guild);
           } else {
             await this.rest.put(import_v10.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: commandsJson });
-            this.adapter.log.info(`Registered commands for server ${guild.name} (id:${guild.id}) (get: ${numGet}, set: ${numSet})`);
+            this.adapter.log.info(`Registered commands for server ${guild.name} (id:${guild.id}) (get: ${numGet}, set: ${numSet}, custom: ${this.customCommands.size})`);
           }
         } catch (err) {
           if (err instanceof import_discord.DiscordAPIError && err.message === "Missing Access") {
@@ -153,7 +201,7 @@ class DiscordAdapterSlashCommands {
       try {
         if (this.adapter.config.commandsGlobal) {
           await this.rest.put(import_v10.Routes.applicationCommands(this.adapter.client.user.id), { body: commandsJson });
-          this.adapter.log.info(`Registered global commands (get: ${numGet}, set: ${numSet})`);
+          this.adapter.log.info(`Registered global commands (get: ${numGet}, set: ${numSet}, custom: ${this.customCommands.size})`);
         } else {
           await this.removeGlobalCommands();
         }
@@ -266,28 +314,32 @@ class DiscordAdapterSlashCommands {
       this.adapter.log.warn(`Got command ${commandName} but command registration is not done yet.`);
       return;
     }
-    this.adapter.log.debug(`Got command ${commandName} ${interaction.toJSON()}`);
+    this.adapter.log.debug(`Got command ${commandName} ${JSON.stringify(interaction.options.data)}`);
     const authCheckTarget = interaction.member instanceof import_discord.GuildMember ? interaction.member : user;
-    switch (commandName) {
-      case this.cmdGetStateName:
-        if (this.adapter.checkUserAuthorization(authCheckTarget, { getStates: true })) {
-          await this.handleCmdGetState(interaction);
-        } else {
-          this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          await interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
-        }
-        break;
-      case this.cmdSetStateName:
-        if (this.adapter.checkUserAuthorization(authCheckTarget, { setStates: true })) {
-          await this.handleCmdSetState(interaction);
-        } else {
-          this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-          await interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
-        }
-        break;
-      default:
-        this.adapter.log.warn(`Got unknown command ${commandName}!`);
-        await interaction.editReply(import_i18n.i18n.getString("Unknown command!"));
+    if (commandName === this.cmdGetStateName) {
+      if (this.adapter.checkUserAuthorization(authCheckTarget, { getStates: true })) {
+        await this.handleCmdGetState(interaction);
+      } else {
+        this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
+        await interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
+      }
+    } else if (commandName === this.cmdSetStateName) {
+      if (this.adapter.checkUserAuthorization(authCheckTarget, { setStates: true })) {
+        await this.handleCmdSetState(interaction);
+      } else {
+        this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
+        await interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
+      }
+    } else if (this.customCommands.has(commandName)) {
+      if (this.adapter.checkUserAuthorization(authCheckTarget, { useCustomCommands: true })) {
+        await this.handleCmdCustom(interaction);
+      } else {
+        this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
+        await interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
+      }
+    } else {
+      this.adapter.log.warn(`Got unknown command ${commandName}!`);
+      await interaction.editReply(import_i18n.i18n.getString("Unknown command!"));
     }
   }
   async getObjectAndCfgFromAlias(objAlias, interaction) {
@@ -473,6 +525,9 @@ class DiscordAdapterSlashCommands {
       return;
     }
     await interaction.editReply(`${cfg.name}: ${valueReply}${unit}`);
+  }
+  async handleCmdCustom(interaction) {
+    await interaction.editReply("Not implemented yet");
   }
   logConfiguredCommandObjects() {
     this.adapter.log.info("Configured state objects for discord slash commands:");
