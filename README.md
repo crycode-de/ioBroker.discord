@@ -62,6 +62,7 @@ See [GitHub issue](https://github.com/crycode-de/ioBroker.discord/issues/1).
 
 * (crycode-de) Added command options to `raw.interactionJson` json content
 * (crycode-de) Fixed command name checks
+* (crycode-de) Register get/set commands only if states are configured for this
 
 ### 1.0.2 (2022-05-16)
 

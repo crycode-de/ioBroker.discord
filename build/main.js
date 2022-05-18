@@ -131,6 +131,17 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     } else {
       await this.delObjectAsync("raw", { recursive: true });
     }
+    if (this.config.enableCustomCommands) {
+      await this.extendObjectAsync("slashCommands", {
+        type: "channel",
+        common: {
+          name: import_i18n.i18n.getStringOrTranslated("Custom Discord slash commands")
+        },
+        native: {}
+      });
+    } else {
+      await this.delObjectAsync("slashCommands", { recursive: true });
+    }
     this.client = new import_discord.Client({
       intents: [
         import_discord.Intents.FLAGS.GUILDS,

@@ -38,19 +38,19 @@ class I18n {
     this.language = "en";
     this.isFloatComma = false;
   }
-  getStringOrTranslated(key) {
+  getStringOrTranslated(key, ...args) {
     if (import_en.default[key]) {
       return {
-        de: import_de.default[key] || key,
-        en: import_en.default[key] || key,
-        es: import_es.default[key] || key,
-        fr: import_fr.default[key] || key,
-        it: import_it.default[key] || key,
-        nl: import_nl.default[key] || key,
-        pl: import_pl.default[key] || key,
-        pt: import_pt.default[key] || key,
-        ru: import_ru.default[key] || key,
-        "zh-cn": import_zh_cn.default[key] || key
+        de: this.replacePlaceholders(import_de.default[key] || key, ...args),
+        en: this.replacePlaceholders(import_en.default[key] || key, ...args),
+        es: this.replacePlaceholders(import_es.default[key] || key, ...args),
+        fr: this.replacePlaceholders(import_fr.default[key] || key, ...args),
+        it: this.replacePlaceholders(import_it.default[key] || key, ...args),
+        nl: this.replacePlaceholders(import_nl.default[key] || key, ...args),
+        pl: this.replacePlaceholders(import_pl.default[key] || key, ...args),
+        pt: this.replacePlaceholders(import_pt.default[key] || key, ...args),
+        ru: this.replacePlaceholders(import_ru.default[key] || key, ...args),
+        "zh-cn": this.replacePlaceholders(import_zh_cn.default[key] || key, ...args)
       };
     } else {
       return key;
@@ -92,10 +92,13 @@ class I18n {
       default:
         str = key;
     }
+    return this.replacePlaceholders(str, ...args);
+  }
+  replacePlaceholders(text, ...args) {
     for (const s of args) {
-      str = str.replace("%s", s);
+      text = text.replace("%s", s);
     }
-    return str;
+    return text;
   }
 }
 const i18n = new I18n();

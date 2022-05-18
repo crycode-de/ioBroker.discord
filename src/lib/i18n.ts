@@ -31,20 +31,21 @@ class I18n {
    * Get a translation object or a single string for a given translation key.
    * Uses the i18n files in `admin/i18n`.
    * @param key The key from `en.json`.
+   * @param args Array of strings to be inserted at `%s` in the translated strings.
    */
-  public getStringOrTranslated (key: I18nKey): ioBroker.StringOrTranslated {
+  public getStringOrTranslated (key: I18nKey, ...args: string[]): ioBroker.StringOrTranslated {
     if (en[key]) {
       return {
-        de: (de as I18nObj)[key] || key,
-        en: (en as I18nObj)[key] || key,
-        es: (es as I18nObj)[key] || key,
-        fr: (fr as I18nObj)[key] || key,
-        it: (it as I18nObj)[key] || key,
-        nl: (nl as I18nObj)[key] || key,
-        pl: (pl as I18nObj)[key] || key,
-        pt: (pt as I18nObj)[key] || key,
-        ru: (ru as I18nObj)[key] || key,
-        'zh-cn': (zhCn as I18nObj)[key] || key,
+        de: this.replacePlaceholders((de as I18nObj)[key] || key, ...args),
+        en: this.replacePlaceholders((en as I18nObj)[key] || key, ...args),
+        es: this.replacePlaceholders((es as I18nObj)[key] || key, ...args),
+        fr: this.replacePlaceholders((fr as I18nObj)[key] || key, ...args),
+        it: this.replacePlaceholders((it as I18nObj)[key] || key, ...args),
+        nl: this.replacePlaceholders((nl as I18nObj)[key] || key, ...args),
+        pl: this.replacePlaceholders((pl as I18nObj)[key] || key, ...args),
+        pt: this.replacePlaceholders((pt as I18nObj)[key] || key, ...args),
+        ru: this.replacePlaceholders((ru as I18nObj)[key] || key, ...args),
+        'zh-cn': this.replacePlaceholders((zhCn as I18nObj)[key] || key, ...args),
       };
     } else {
       return key;
@@ -73,12 +74,20 @@ class I18n {
       default: str = key;
     }
 
-    // replace args
+    return this.replacePlaceholders(str, ...args);
+  }
+
+  /**
+   * Replace `%s` placeholders in the given text.
+   * @param text The text.
+   * @param args Array of strings to be inserted at `%s` in the text.
+   */
+  private replacePlaceholders (text: string, ...args: string[]) : string {
     for (const s of args) {
-      str = str.replace('%s', s);
+      text = text.replace('%s', s);
     }
 
-    return str;
+    return text;
   }
 }
 

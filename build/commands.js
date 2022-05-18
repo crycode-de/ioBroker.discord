@@ -52,7 +52,7 @@ class DiscordAdapterSlashCommands {
   }
   async onReady() {
     if (this.adapter.config.cmdGetStateName) {
-      if (this.adapter.config.cmdGetStateName.match(/^[a-z][0-9a-zA-Z-_]{0,50}$/)) {
+      if (this.adapter.config.cmdGetStateName.match(/^[a-z][0-9a-z-_]{0,50}$/)) {
         this.cmdGetStateName = this.adapter.config.cmdGetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom get state command name '${this.adapter.config.cmdGetStateName}' provied! Using default 'iob-get'.`);
@@ -60,7 +60,7 @@ class DiscordAdapterSlashCommands {
     }
     if (this.adapter.config.cmdSetStateName) {
       this.cmdSetStateName = this.adapter.config.cmdSetStateName;
-      if (this.adapter.config.cmdSetStateName.match(/^[a-z][0-9a-zA-Z-_]{0,50}$/)) {
+      if (this.adapter.config.cmdSetStateName.match(/^[a-z][0-9a-z-_]{0,50}$/)) {
         this.cmdSetStateName = this.adapter.config.cmdSetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom set state command name '${this.adapter.config.cmdSetStateName}' provied! Using default 'iob-set'.`);
@@ -92,56 +92,69 @@ class DiscordAdapterSlashCommands {
       await this.removeGlobalCommands();
       return;
     }
-    const cmdGet = new import_builders.SlashCommandBuilder().setName(this.cmdGetStateName).setDescription(import_i18n.i18n.getString("Get an ioBroker state value"));
-    const cmdSet = new import_builders.SlashCommandBuilder().setName(this.cmdSetStateName).setDescription(import_i18n.i18n.getString("Set an ioBroker state value"));
-    cmdGet.setDefaultPermission(true);
-    cmdSet.setDefaultPermission(true);
-    cmdGet.addStringOption((opt) => {
-      opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to get")).setRequired(true);
-      for (const [, objCfg] of this.commandObjectConfig) {
-        if (objCfg.get) {
-          opt.addChoices({
-            name: objCfg.name,
-            value: objCfg.alias
-          });
+    const commands = [];
+    const numGet = this.commandObjectConfig.filter((c) => c.get === true).size;
+    const numSet = this.commandObjectConfig.filter((c) => c.set === true).size;
+    if (numGet > 0) {
+      const cmdGet = new import_builders.SlashCommandBuilder().setName(this.cmdGetStateName).setDescription(import_i18n.i18n.getString("Get an ioBroker state value")).setDefaultPermission(true);
+      cmdGet.addStringOption((opt) => {
+        opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to get")).setRequired(true);
+        for (const [, objCfg] of this.commandObjectConfig) {
+          if (objCfg.get) {
+            opt.addChoices({
+              name: objCfg.name,
+              value: objCfg.alias
+            });
+          }
         }
-      }
-      return opt;
-    });
-    cmdSet.addStringOption((opt) => {
-      opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to set")).setRequired(true);
-      for (const [, objCfg] of this.commandObjectConfig) {
-        if (objCfg.set) {
-          opt.addChoices({
-            name: objCfg.name,
-            value: objCfg.alias
-          });
+        return opt;
+      });
+      commands.push(cmdGet);
+    }
+    if (numSet > 0) {
+      const cmdSet = new import_builders.SlashCommandBuilder().setName(this.cmdSetStateName).setDescription(import_i18n.i18n.getString("Set an ioBroker state value")).setDefaultPermission(true);
+      cmdSet.addStringOption((opt) => {
+        opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to set")).setRequired(true);
+        for (const [, objCfg] of this.commandObjectConfig) {
+          if (objCfg.set) {
+            opt.addChoices({
+              name: objCfg.name,
+              value: objCfg.alias
+            });
+          }
         }
-      }
-      return opt;
-    });
-    cmdSet.addStringOption((opt) => {
-      return opt.setName("value").setDescription(import_i18n.i18n.getString("The value to set")).setRequired(true);
-    });
-    const commands = [
-      cmdGet,
-      cmdSet
-    ];
+        return opt;
+      });
+      cmdSet.addStringOption((opt) => {
+        return opt.setName("value").setDescription(import_i18n.i18n.getString("The value to set")).setRequired(true);
+      });
+      commands.push(cmdSet);
+    }
     this.customCommands.clear();
     if (this.adapter.config.enableCustomCommands) {
       loopCustomCommands:
         for (const customCommandCfg of this.adapter.config.customCommands) {
-          if (!customCommandCfg.name.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/) || customCommandCfg.description.length === 0) {
+          if (!customCommandCfg.name.match(/^[a-zA-Z][0-9a-z-_]{0,50}$/) || customCommandCfg.description.length === 0) {
             this.adapter.log.warn(`Custom command "${customCommandCfg.name}" has an invalid name or description configured!`);
             continue;
           }
+          if (this.customCommands.has(customCommandCfg.name)) {
+            this.adapter.log.warn(`Custom command "${customCommandCfg.name}" is configured multiple times! The command will be ignored.`);
+            continue;
+          }
           const cmdCustom = new import_builders.SlashCommandBuilder().setName(customCommandCfg.name).setDescription(customCommandCfg.description).setDefaultPermission(true);
+          const cmdOpts = /* @__PURE__ */ new Set();
           if (Array.isArray(customCommandCfg.options)) {
             for (const customCommandCfgOpt of customCommandCfg.options) {
-              if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-zA-Z-_]{0,50}$/) || customCommandCfgOpt.description.length === 0) {
+              if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-z-_]{0,50}$/) || customCommandCfgOpt.description.length === 0) {
                 this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" has an invalid name or description configured!`);
                 continue loopCustomCommands;
               }
+              if (cmdOpts.has(customCommandCfgOpt.name)) {
+                this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" is configured multiple times! The command will be ignored.`);
+                continue loopCustomCommands;
+              }
+              cmdOpts.add(customCommandCfgOpt.name);
               switch (customCommandCfgOpt.type) {
                 case "string":
                   cmdCustom.addStringOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
@@ -174,14 +187,17 @@ class DiscordAdapterSlashCommands {
           this.customCommands.add(customCommandCfg.name);
         }
     }
+    if (commands.length === 0) {
+      if (this.adapter.config.enableCustomCommands) {
+        this.adapter.log.warn("Commands are enabled but not configured for any state object and no custom commands are configured! Use the custom configuration of a state object to activate commands on it or add custom commands in the adapter instance configuration.");
+      } else {
+        this.adapter.log.warn("Commands are enabled but not configured for any state object! Use the custom configuration of a state object to activate commands on it.");
+      }
+    }
     const commandsJson = commands.map((cmd) => cmd.toJSON());
     if (!(0, import_node_util.isDeepStrictEqual)(commandsJson, this.lastCommandsJson)) {
       this.adapter.log.debug("Commands needs to be updated");
-      if (this.commandObjectConfig.size === 0) {
-        this.adapter.log.warn("Commands are enabled but not configured for any state object! Use the custom configuration of a state object to activate commands on it.");
-      }
-      const numGet = this.commandObjectConfig.filter((c) => c.get === true).size;
-      const numSet = this.commandObjectConfig.filter((c) => c.set === true).size;
+      await this.setupCustomCommandIobObjects();
       for (const [, guild] of this.adapter.client.guilds.cache) {
         try {
           if (this.adapter.config.commandsGlobal) {
@@ -260,6 +276,167 @@ class DiscordAdapterSlashCommands {
       } else {
         this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}): ${err}`);
       }
+    }
+  }
+  async setupCustomCommandIobObjects() {
+    for (const cmdName of this.customCommands) {
+      const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === cmdName);
+      if (!cmdCfg)
+        continue;
+      await this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}`, {
+        type: "channel",
+        common: {
+          name: cmdCfg.description
+        },
+        native: {}
+      });
+      await Promise.all([
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.json`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("JSON data"),
+            role: "json",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.timestamp`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Last use timestamp"),
+            role: "date",
+            type: "number",
+            read: true,
+            write: false,
+            def: 0
+          },
+          native: {}
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.sendReply`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Send reply"),
+            role: "text",
+            type: "string",
+            read: false,
+            write: true,
+            def: ""
+          },
+          native: {}
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.interactionId`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Interaction ID"),
+            role: "text",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.userId`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("User ID"),
+            role: "text",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.userTag`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("User tag"),
+            role: "text",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.serverId`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Server ID"),
+            role: "text",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.channelId`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Channel ID"),
+            role: "text",
+            type: "string",
+            read: true,
+            write: false,
+            def: ""
+          },
+          native: {}
+        })
+      ]);
+      const proms = [];
+      for (const cmdCfgOpt of cmdCfg.options) {
+        let role;
+        let type;
+        let def;
+        switch (cmdCfgOpt.type) {
+          case "number":
+            role = "value";
+            type = "number";
+            def = null;
+            break;
+          case "boolean":
+            role = "indicator";
+            type = "boolean";
+            def = null;
+            break;
+          default:
+            role = "text";
+            type = "string";
+            def = "";
+        }
+        proms.push(this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.option-${cmdCfgOpt.name}`, {
+          type: "state",
+          common: {
+            name: import_i18n.i18n.getStringOrTranslated("Option %s", cmdCfgOpt.description),
+            role,
+            type,
+            read: true,
+            write: false,
+            def
+          },
+          native: {}
+        }));
+      }
+      const objListOptions = await this.adapter.getObjectListAsync({
+        startkey: `${this.adapter.namespace}.slashCommands.${cmdName}.option-`,
+        endkey: `${this.adapter.namespace}.slashCommands.${cmdName}.option-\u9999`
+      });
+      const reOptionsName = new RegExp(`^${this.adapter.name}\\.${this.adapter.instance}\\.slashCommands\\.${cmdName}\\.option-(.*)$`);
+      for (const item of objListOptions.rows) {
+        const m = item.id.match(reOptionsName);
+        if (m) {
+          const oldoptName = m[1];
+          if (!cmdCfg.options.find((o) => o.name === oldoptName)) {
+            proms.push(this.adapter.delObjectAsyncCached(`slashCommands.${cmdName}.option-${oldoptName}`));
+          }
+        }
+      }
+      await Promise.all(proms);
     }
   }
   setupCommandObject(objId, cfg) {
@@ -527,6 +704,48 @@ class DiscordAdapterSlashCommands {
     await interaction.editReply(`${cfg.name}: ${valueReply}${unit}`);
   }
   async handleCmdCustom(interaction) {
+    var _a;
+    const {
+      commandName,
+      channelId,
+      guildId,
+      user,
+      options
+    } = interaction;
+    const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
+    if (!cmdCfg)
+      return;
+    const proms = [];
+    const json = {
+      interactionId: interaction.id,
+      channelId,
+      serverId: guildId || null,
+      user: {
+        id: user.id,
+        tag: user.tag,
+        displayName: interaction.member instanceof import_discord.GuildMember ? interaction.member.displayName : user.username
+      },
+      timestamp: interaction.createdTimestamp,
+      options: {}
+    };
+    for (const optCfg of cmdCfg.options) {
+      let val = (_a = options.data.find((o) => o.name === optCfg.name)) == null ? void 0 : _a.value;
+      if (val === void 0) {
+        val = null;
+      }
+      json.options[optCfg.name] = val;
+      proms.push(this.adapter.setStateAsync(`slashCommands.${commandName}.option-${optCfg.name}`, val, true));
+    }
+    await Promise.all([
+      this.adapter.setStateAsync(`slashCommands.${commandName}.interactionId`, interaction.id, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.channelId`, channelId, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.serverId`, guildId || null, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.userId`, user.id, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.userTag`, user.tag, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.timestamp`, interaction.createdTimestamp, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.json`, JSON.stringify(json), true),
+      ...proms
+    ]);
     await interaction.editReply("Not implemented yet");
   }
   logConfiguredCommandObjects() {

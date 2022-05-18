@@ -83,6 +83,19 @@ export interface JsonMessageObj {
   };
 }
 
+export interface JsonSlashCommandObj {
+  interactionId: Snowflake;
+  user: {
+    id: Snowflake;
+    tag: string;
+    displayName: string;
+  };
+  channelId: Snowflake;
+  serverId: Snowflake | null;
+  timestamp: number;
+  options: Record<string, string | number | boolean | null>;
+}
+
 export interface UpdateUserPresenceResult {
   status: PresenceStatus | '';
   activityType: ValidActivityType | 'CUSTOM' | '';

@@ -205,6 +205,18 @@ class DiscordAdapter extends Adapter {
       await this.delObjectAsync('raw', { recursive: true });
     }
 
+    if (this.config.enableCustomCommands) {
+      await this.extendObjectAsync('slashCommands', {
+        type: 'channel',
+        common: {
+          name: i18n.getStringOrTranslated('Custom Discord slash commands'),
+        },
+        native: {},
+      });
+    } else {
+      await this.delObjectAsync('slashCommands', { recursive: true });
+    }
+
     // setup the discord client
     this.client = new Client({
       intents: [
@@ -2360,7 +2372,7 @@ class DiscordAdapter extends Adapter {
    *  a) it's the first call for this `id` or
    *  b) the object needs to be changed.
    */
-  private async extendObjectAsyncCached (id: string, objPart: ioBroker.PartialObject, options?: ioBroker.ExtendObjectOptions): ioBroker.SetObjectPromise {
+  public async extendObjectAsyncCached (id: string, objPart: ioBroker.PartialObject, options?: ioBroker.ExtendObjectOptions): ioBroker.SetObjectPromise {
     const cachedObj: ioBroker.PartialObject | undefined = this.extendObjectCache.get(id);
 
     if (isDeepStrictEqual(cachedObj, objPart)) {
@@ -2376,7 +2388,7 @@ class DiscordAdapter extends Adapter {
    * Internal replacement for `delObjectAsync(...)` which also removes the local
    * cache entry for the given `id`.
    */
-  private async delObjectAsyncCached (id: string, options?: ioBroker.DelObjectOptions): Promise<void> {
+  public async delObjectAsyncCached (id: string, options?: ioBroker.DelObjectOptions): Promise<void> {
     if (options?.recursive) {
       this.extendObjectCache.filter((_obj, id2) => id2.startsWith(id)).each((_obj, id2) => this.extendObjectCache.delete(id2));
     } else {

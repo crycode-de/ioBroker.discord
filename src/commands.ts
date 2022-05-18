@@ -22,6 +22,7 @@ import {
   getBasenameFromFilePathOrUrl,
   getBufferAndNameFromBase64String,
 } from './lib/utils';
+import { JsonSlashCommandObj } from './lib/definitions';
 
 export interface CommandObjectConfig {
   id: string;
@@ -161,59 +162,67 @@ export class DiscordAdapterSlashCommands {
       return;
     }
 
-    const cmdGet = new SlashCommandBuilder()
-      .setName(this.cmdGetStateName)
-      .setDescription(i18n.getString('Get an ioBroker state value'));
-
-    const cmdSet = new SlashCommandBuilder()
-      .setName(this.cmdSetStateName)
-      .setDescription(i18n.getString('Set an ioBroker state value'));
-
-    // set default permissions to true - permissions are checked by the adapter later
-    cmdGet.setDefaultPermission(true);
-    cmdSet.setDefaultPermission(true);
-
-    // add options
-    cmdGet.addStringOption((opt) => {
-      opt.setName('state')
-        .setDescription(i18n.getString('The ioBroker state to get'))
-        .setRequired(true);
-      for (const [, objCfg] of this.commandObjectConfig) {
-        if (objCfg.get) {
-          opt.addChoices({
-            name: objCfg.name,
-            value: objCfg.alias,
-          });
-        }
-      }
-      return opt;
-    });
-
-    cmdSet.addStringOption((opt) => {
-      opt.setName('state')
-        .setDescription(i18n.getString('The ioBroker state to set'))
-        .setRequired(true);
-      for (const [, objCfg] of this.commandObjectConfig) {
-        if (objCfg.set) {
-          opt.addChoices({
-            name: objCfg.name,
-            value: objCfg.alias,
-          });
-        }
-      }
-      return opt;
-    });
-    cmdSet.addStringOption((opt) => {
-      return opt.setName('value')
-        .setDescription(i18n.getString('The value to set'))
-        .setRequired(true);
-    });
-
     // build commands array
-    const commands: SlashCommandBuilder[] = [
-      cmdGet,
-      cmdSet,
-    ];
+    const commands: SlashCommandBuilder[] = [];
+
+    const numGet = this.commandObjectConfig.filter((c) => c.get === true).size;
+    const numSet = this.commandObjectConfig.filter((c) => c.set === true).size;
+
+    // setup iob-get command if objects configured for get
+    if (numGet > 0) {
+      const cmdGet = new SlashCommandBuilder()
+        .setName(this.cmdGetStateName)
+        .setDescription(i18n.getString('Get an ioBroker state value'))
+        .setDefaultPermission(true);
+
+      // add options
+      cmdGet.addStringOption((opt) => {
+        opt.setName('state')
+          .setDescription(i18n.getString('The ioBroker state to get'))
+          .setRequired(true);
+        for (const [, objCfg] of this.commandObjectConfig) {
+          if (objCfg.get) {
+            opt.addChoices({
+              name: objCfg.name,
+              value: objCfg.alias,
+            });
+          }
+        }
+        return opt;
+      });
+
+      commands.push(cmdGet);
+    }
+
+    // setup iob-set command if objects configured for set
+    if (numSet > 0) {
+      const cmdSet = new SlashCommandBuilder()
+        .setName(this.cmdSetStateName)
+        .setDescription(i18n.getString('Set an ioBroker state value'))
+        .setDefaultPermission(true);
+
+      cmdSet.addStringOption((opt) => {
+        opt.setName('state')
+          .setDescription(i18n.getString('The ioBroker state to set'))
+          .setRequired(true);
+        for (const [, objCfg] of this.commandObjectConfig) {
+          if (objCfg.set) {
+            opt.addChoices({
+              name: objCfg.name,
+              value: objCfg.alias,
+            });
+          }
+        }
+        return opt;
+      });
+      cmdSet.addStringOption((opt) => {
+        return opt.setName('value')
+          .setDescription(i18n.getString('The value to set'))
+          .setRequired(true);
+      });
+
+      commands.push(cmdSet);
+    }
 
     // custom commands
     this.customCommands.clear();
@@ -225,6 +234,11 @@ export class DiscordAdapterSlashCommands {
           continue;
         }
 
+        if (this.customCommands.has(customCommandCfg.name)) {
+          this.adapter.log.warn(`Custom command "${customCommandCfg.name}" is configured multiple times! The command will be ignored.`);
+          continue;
+        }
+
         // create the command
         const cmdCustom = new SlashCommandBuilder()
           .setName(customCommandCfg.name)
@@ -232,12 +246,19 @@ export class DiscordAdapterSlashCommands {
           .setDefaultPermission(true);
 
         // add configured options
+        const cmdOpts: Set<string> = new Set();
         if (Array.isArray(customCommandCfg.options)) {
           for (const customCommandCfgOpt of customCommandCfg.options) {
             if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-z-_]{0,50}$/) || customCommandCfgOpt.description.length === 0) {
               this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" has an invalid name or description configured!`);
               continue loopCustomCommands;
             }
+
+            if (cmdOpts.has(customCommandCfgOpt.name)) {
+              this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" is configured multiple times! The command will be ignored.`);
+              continue loopCustomCommands;
+            }
+            cmdOpts.add(customCommandCfgOpt.name);
 
             switch (customCommandCfgOpt.type) {
               case 'string':
@@ -281,18 +302,23 @@ export class DiscordAdapterSlashCommands {
       }
     }
 
+    // check if any command is set and log an warning if not
+    if (commands.length === 0) {
+      if (this.adapter.config.enableCustomCommands) {
+        this.adapter.log.warn('Commands are enabled but not configured for any state object and no custom commands are configured! Use the custom configuration of a state object to activate commands on it or add custom commands in the adapter instance configuration.');
+      } else {
+        this.adapter.log.warn('Commands are enabled but not configured for any state object! Use the custom configuration of a state object to activate commands on it.');
+      }
+    }
+
     const commandsJson = commands.map((cmd) => cmd.toJSON());
 
     // only update the commands if something has changed
     if (!isDeepStrictEqual(commandsJson, this.lastCommandsJson)) {
       this.adapter.log.debug('Commands needs to be updated');
 
-      if (this.commandObjectConfig.size === 0) {
-        this.adapter.log.warn('Commands are enabled but not configured for any state object! Use the custom configuration of a state object to activate commands on it.');
-      }
-
-      const numGet = this.commandObjectConfig.filter((c) => c.get === true).size;
-      const numSet = this.commandObjectConfig.filter((c) => c.set === true).size;
+      // create/update ioBroker states
+      await this.setupCustomCommandIobObjects();
 
       // register commands for all servers of the bot (guild commands are applied instant and may have permissions per user set)
       for (const [, guild] of this.adapter.client.guilds.cache) {
@@ -397,6 +423,180 @@ export class DiscordAdapterSlashCommands {
       } else {
         this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}): ${err}`);
       }
+    }
+  }
+
+  private async setupCustomCommandIobObjects (): Promise<void> {
+    for (const cmdName of this.customCommands) {
+      const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === cmdName);
+      if (!cmdCfg) continue; // should never happen, but to be sure
+
+      await this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}`, {
+        type: 'channel',
+        common: {
+          name: cmdCfg.description,
+        },
+        native: {},
+      });
+
+      // generic custom command objects
+      await Promise.all([
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.json`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('JSON data'),
+            role: 'json',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.timestamp`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Last use timestamp'),
+            role: 'date',
+            type: 'number',
+            read: true,
+            write: false,
+            def: 0,
+          },
+          native: {},
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.sendReply`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Send reply'),
+            role: 'text',
+            type: 'string',
+            read: false,
+            write: true,
+            def: '',
+          },
+          native: {},
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.interactionId`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Interaction ID'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.userId`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('User ID'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.userTag`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('User tag'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.serverId`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Server ID'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+        this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.channelId`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Channel ID'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+      ]);
+
+      // custom command option objects
+      const proms: Promise<any>[] = [];
+      for (const cmdCfgOpt of cmdCfg.options) {
+        let role: string;
+        let type: ioBroker.CommonType;
+        let def: any;
+        switch (cmdCfgOpt.type) {
+          case 'number':
+            role = 'value';
+            type = 'number';
+            def = null;
+            break;
+
+          case 'boolean':
+            role = 'indicator';
+            type = 'boolean';
+            def = null;
+            break;
+
+          default:
+            role = 'text';
+            type = 'string';
+            def = '';
+        }
+
+        proms.push(this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.option-${cmdCfgOpt.name}`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Option %s', cmdCfgOpt.description),
+            role,
+            type,
+            read: true,
+            write: false,
+            def,
+          },
+          native: {},
+        }));
+      }
+
+      // check for unused (old) custom command option objects and remove them
+      const objListOptions = await this.adapter.getObjectListAsync({
+        startkey: `${this.adapter.namespace}.slashCommands.${cmdName}.option-`,
+        endkey: `${this.adapter.namespace}.slashCommands.${cmdName}.option-\u9999`,
+      });
+      const reOptionsName = new RegExp(`^${this.adapter.name}\\.${this.adapter.instance}\\.slashCommands\\.${cmdName}\\.option-(.*)$`);
+      for (const item of objListOptions.rows) {
+        const m = item.id.match(reOptionsName);
+        if (m) {
+          const oldoptName = m[1];
+          if (!cmdCfg.options.find((o) => o.name === oldoptName)) {
+            // option does not exist... delete the object
+            proms.push(this.adapter.delObjectAsyncCached(`slashCommands.${cmdName}.option-${oldoptName}`));
+          }
+        }
+      }
+
+      // wait for object create/delete
+      await Promise.all(proms);
     }
   }
 
@@ -803,6 +1003,52 @@ export class DiscordAdapterSlashCommands {
    * @param interaction The interaction which triggered this.
    */
   private async handleCmdCustom (interaction: CommandInteraction<CacheType>): Promise<void> {
+    const {
+      commandName,
+      channelId,
+      guildId,
+      user,
+      options,
+    } = interaction;
+
+    const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
+    if (!cmdCfg) return; // should never happen, but to be sure
+
+    const proms: Promise<any>[] = [];
+
+    const json: JsonSlashCommandObj = {
+      interactionId: interaction.id,
+      channelId,
+      serverId: guildId || null,
+      user: {
+        id: user.id,
+        tag: user.tag,
+        displayName: interaction.member instanceof GuildMember ? interaction.member.displayName : user.username,
+      },
+      timestamp: interaction.createdTimestamp,
+      options: {},
+    };
+
+    for (const optCfg of cmdCfg.options) {
+      let val: string | number | boolean | undefined | null = options.data.find((o) => o.name === optCfg.name)?.value;
+      if (val === undefined) {
+        val = null;
+      }
+      json.options[optCfg.name] = val;
+      proms.push(this.adapter.setStateAsync(`slashCommands.${commandName}.option-${optCfg.name}`, val, true));
+    }
+
+    await Promise.all([
+      this.adapter.setStateAsync(`slashCommands.${commandName}.interactionId`, interaction.id, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.channelId`, channelId, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.serverId`, guildId || null, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.userId`, user.id, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.userTag`, user.tag, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.timestamp`, interaction.createdTimestamp, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.json`, JSON.stringify(json), true),
+      ...proms,
+    ]);
+
     await interaction.editReply('Not implemented yet');
   }
 
