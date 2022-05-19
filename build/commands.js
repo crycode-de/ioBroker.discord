@@ -791,18 +791,15 @@ class DiscordAdapterSlashCommands {
   async sendCmdCustomReply(interactionId, msg) {
     const interaction = this.lastInteractions.get(interactionId);
     if (!interaction) {
-      this.adapter.log.warn(`No current interaction with ID ${interactionId} found for reply!`);
-      return false;
+      throw new Error(`No current interaction with ID ${interactionId} found for reply!`);
     }
     const { commandName } = interaction;
     const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
     if (!cmdCfg) {
-      this.adapter.log.warn(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
-      return false;
+      throw new Error(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
     }
     if (!interaction.isRepliable()) {
-      this.adapter.log.warn(`Interaction ${interactionId} of custom slash command ${commandName} is not repliable!`);
-      return false;
+      throw new Error(`Interaction ${interactionId} of custom slash command ${commandName} is not repliable!`);
     }
     if (typeof msg === "string") {
       if (msg.startsWith("{") && msg.endsWith("}")) {
@@ -810,12 +807,10 @@ class DiscordAdapterSlashCommands {
         try {
           msg = JSON.parse(msg);
         } catch (err) {
-          this.adapter.log.warn(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but cannot be parsed!`);
-          return false;
+          throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but cannot be parsed!`);
         }
         if (!(msg == null ? void 0 : msg.files) && !msg.content || msg.files && !Array.isArray(msg.files) || msg.embeds && !Array.isArray(msg.embeds)) {
-          this.adapter.log.warn(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but seams to be invalid!`);
-          return false;
+          throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but seams to be invalid!`);
         }
       } else {
         msg = {
@@ -823,13 +818,8 @@ class DiscordAdapterSlashCommands {
         };
       }
     }
-    try {
-      await interaction.editReply(msg);
-    } catch (err) {
-      this.adapter.log.warn(`Error while replying to interaction ${interactionId} of custom slash command ${commandName}! ${err}`);
-      return false;
-    }
-    return true;
+    const replyMsg = await interaction.editReply(msg);
+    return replyMsg.id;
   }
   logConfiguredCommandObjects() {
     this.adapter.log.info("Configured state objects for discord slash commands:");

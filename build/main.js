@@ -1470,7 +1470,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       this.log.warn(`No interaction reference or no content for reply for ${stateId}!`);
       return false;
     }
-    return this.discordSlashCommands.sendCmdCustomReply(interactionId, content);
+    try {
+      await this.discordSlashCommands.sendCmdCustomReply(interactionId, content);
+      return true;
+    } catch (err) {
+      this.log.warn(`Error while replying to interaction ${interactionId} of custom slash command! ${err}`);
+      return false;
+    }
   }
   async onVoiceStateChange(stateId, state) {
     var _a;
@@ -1796,6 +1802,31 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           const reactions = collected.map((r) => ({ emoji: r.emoji.name, emojiId: r.emoji.id, users: r.users.cache.map((u) => ({ id: u.id, tag: u.tag })) }));
           this.sendTo(obj.from, obj.command, __spreadValues({ reactions }, awaitMessageReactionPayload), obj.callback);
         });
+        break;
+      case "sendCustomCommandReply":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if (typeof obj.message !== "object") {
+          this.sendTo(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
+          return;
+        }
+        const sendCustomCommandReplyPayload = obj.message;
+        if (typeof sendCustomCommandReplyPayload.interactionId !== "string") {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: "interactionId needs to be a string" }, sendCustomCommandReplyPayload), obj.callback);
+          return;
+        }
+        if (!sendCustomCommandReplyPayload.content || typeof sendCustomCommandReplyPayload.content !== "string" && typeof sendCustomCommandReplyPayload.content !== "object") {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: "content needs to be a string or a MessageOptions object" }, sendCustomCommandReplyPayload), obj.callback);
+          return;
+        }
+        try {
+          const messageId = await this.discordSlashCommands.sendCmdCustomReply(sendCustomCommandReplyPayload.interactionId, sendCustomCommandReplyPayload.content);
+          this.sendTo(obj.from, obj.command, __spreadProps(__spreadValues({ result: `Reply sent` }, sendCustomCommandReplyPayload), { messageId }), obj.callback);
+        } catch (err) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: `Error sending reply: ${err}` }, sendCustomCommandReplyPayload), obj.callback);
+        }
         break;
       case "leaveServer":
         if (typeof obj.message !== "object") {

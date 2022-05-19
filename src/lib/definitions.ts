@@ -187,3 +187,11 @@ export interface SendToActionAddReactionPayload extends MessageIdentifier {
 export interface SendToActionLeaveServerPayload {
   serverId: Snowflake;
 }
+
+/**
+ * Payload for a `sentTo(...)` `sendCustomCommandReply` action.
+ */
+export interface SendToActionSendCustomCommandReplyPayload {
+  interactionId: Snowflake;
+  content: string | MessageOptions;
+}

@@ -1120,28 +1120,26 @@ export class DiscordAdapterSlashCommands {
    * Send a reply to a custom slash command.
    * @param interactionId The ID of the interaction to reply to. The interactions needs to be cached in this instance.
    * @param msg The message to reply with. May be a simple string, a MessageOptions object or a stringified JSON MessageOptions object.
-   * @returns Promise which resolves to `true` if the reply is sent, or `false` in case of an error.
+   * @returns Promise which resolves withe the ID of the reply message if the reply is sent.
+   * @throws Error if the reply could not be sent for some reason (i.e. some check failed).
    */
-  public async sendCmdCustomReply (interactionId: Snowflake, msg: string | MessageOptions): Promise<boolean> {
+  public async sendCmdCustomReply (interactionId: Snowflake, msg: string | MessageOptions): Promise<Snowflake> {
     // get the interaction
     const interaction = this.lastInteractions.get(interactionId);
 
     if (!interaction) {
-      this.adapter.log.warn(`No current interaction with ID ${interactionId} found for reply!`);
-      return false;
+      throw new Error(`No current interaction with ID ${interactionId} found for reply!`);
     }
 
     const { commandName } = interaction;
 
     const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
     if (!cmdCfg) {
-      this.adapter.log.warn(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
-      return false;
+      throw new Error(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
     }
 
     if (!interaction.isRepliable()) {
-      this.adapter.log.warn(`Interaction ${interactionId} of custom slash command ${commandName} is not repliable!`);
-      return false;
+      throw new Error(`Interaction ${interactionId} of custom slash command ${commandName} is not repliable!`);
     }
 
     // if a string is given try to parse it and prepare it as MessageOptions object
@@ -1153,14 +1151,12 @@ export class DiscordAdapterSlashCommands {
         try {
           msg = JSON.parse(msg) as MessageOptions;
         } catch (err) {
-          this.adapter.log.warn(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but cannot be parsed!`);
-          return false;
+          throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but cannot be parsed!`);
         }
 
         // do some basic checks against the parsed object
         if ((!msg?.files && !msg.content) || (msg.files && !Array.isArray(msg.files)) || (msg.embeds && !Array.isArray(msg.embeds))) {
-          this.adapter.log.warn(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but seams to be invalid!`);
-          return false;
+          throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but seams to be invalid!`);
         }
 
       } else {
@@ -1172,15 +1168,8 @@ export class DiscordAdapterSlashCommands {
     }
 
     // send the reply
-    try {
-      await interaction.editReply(msg);
-
-    } catch (err) {
-      this.adapter.log.warn(`Error while replying to interaction ${interactionId} of custom slash command ${commandName}! ${err}`);
-      return false;
-    }
-
-    return true;
+    const replyMsg = await interaction.editReply(msg);
+    return replyMsg.id;
   }
 
   /**
