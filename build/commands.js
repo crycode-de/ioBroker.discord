@@ -46,6 +46,7 @@ class DiscordAdapterSlashCommands {
     this.registerCommandsDone = false;
     this.lastCommandsJson = null;
     this.commandObjectConfig = new import_discord.Collection();
+    this.lastInteractions = new import_discord.Collection();
     this.triggerDelayedRegisterSlashCommandsTimeout = null;
     this.wellKnownbooleanTrueValues = /* @__PURE__ */ new Set(["true", "on", "yes", "1"]);
     this.adapter = adapter;
@@ -704,7 +705,6 @@ class DiscordAdapterSlashCommands {
     await interaction.editReply(`${cfg.name}: ${valueReply}${unit}`);
   }
   async handleCmdCustom(interaction) {
-    var _a;
     const {
       commandName,
       channelId,
@@ -715,6 +715,7 @@ class DiscordAdapterSlashCommands {
     const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
     if (!cmdCfg)
       return;
+    this.lastInteractions.set(interaction.id, interaction);
     const proms = [];
     const json = {
       interactionId: interaction.id,
@@ -729,12 +730,47 @@ class DiscordAdapterSlashCommands {
       options: {}
     };
     for (const optCfg of cmdCfg.options) {
-      let val = (_a = options.data.find((o) => o.name === optCfg.name)) == null ? void 0 : _a.value;
-      if (val === void 0) {
-        val = null;
+      const opt = options.data.find((o) => o.name === optCfg.name);
+      if (opt) {
+        json.options[optCfg.name] = {
+          val: opt.value !== void 0 ? opt.value : null,
+          type: opt.type
+        };
+        if (opt.user instanceof import_discord.User) {
+          json.options[optCfg.name].user = {
+            id: opt.user.id,
+            tag: opt.user.tag,
+            bot: opt.user.bot
+          };
+        }
+        if (opt.member instanceof import_discord.GuildMember) {
+          json.options[optCfg.name].member = {
+            id: opt.member.id,
+            displayName: opt.member.displayName,
+            roles: opt.member.roles.cache.map((r) => ({ id: r.id, name: r.name }))
+          };
+        }
+        if (opt.role instanceof import_discord.Role) {
+          json.options[optCfg.name].role = {
+            id: opt.role.id,
+            name: opt.role.name
+          };
+        }
+        if (opt.channel instanceof import_discord.GuildChannel) {
+          json.options[optCfg.name].channel = {
+            id: opt.channel.id,
+            name: opt.channel.name,
+            type: opt.channel.type,
+            lastMessageId: opt.channel.isText() ? opt.channel.lastMessageId : null
+          };
+        }
+      } else {
+        json.options[optCfg.name] = {
+          val: null,
+          type: null
+        };
       }
-      json.options[optCfg.name] = val;
-      proms.push(this.adapter.setStateAsync(`slashCommands.${commandName}.option-${optCfg.name}`, val, true));
+      proms.push(this.adapter.setStateAsync(`slashCommands.${commandName}.option-${optCfg.name}`, json.options[optCfg.name].val, true));
     }
     await Promise.all([
       this.adapter.setStateAsync(`slashCommands.${commandName}.interactionId`, interaction.id, true),
@@ -747,6 +783,11 @@ class DiscordAdapterSlashCommands {
       ...proms
     ]);
     await interaction.editReply("Not implemented yet");
+    const outdatedTs = Date.now() - 15 * 6e4;
+    const removedInteractions = this.lastInteractions.sweep((ia) => ia.createdTimestamp < outdatedTs);
+    if (removedInteractions > 0) {
+      this.adapter.log.debug(`Removed ${removedInteractions} outdated interactions from cache`);
+    }
   }
   logConfiguredCommandObjects() {
     this.adapter.log.info("Configured state objects for discord slash commands:");

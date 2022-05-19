@@ -4,6 +4,7 @@ export const VALID_ACTIVITY_TYPES = <const>['', 'PLAYING', 'STREAMING', 'LISTENI
 export type ValidActivityType = typeof VALID_ACTIVITY_TYPES[number];
 
 import {
+  ApplicationCommandOptionType,
   MessageEditOptions,
   MessageOptions,
   PresenceStatus,
@@ -93,7 +94,32 @@ export interface JsonSlashCommandObj {
   channelId: Snowflake;
   serverId: Snowflake | null;
   timestamp: number;
-  options: Record<string, string | number | boolean | null>;
+  options: Record<string, JsonSlashCommandObjOption>;
+}
+
+export interface JsonSlashCommandObjOption {
+  val: string | number | boolean | null;
+  type: ApplicationCommandOptionType | null;
+  user?: {
+    id: Snowflake;
+    tag: string;
+    bot: boolean;
+  };
+  member?: {
+    id: Snowflake;
+    displayName: string;
+    roles: { id: Snowflake, name: string }[];
+  }
+  role?: {
+    id: Snowflake;
+    name: string;
+  };
+  channel?: {
+    id: Snowflake;
+    name: string;
+    type: 'GUILD_CATEGORY' | 'GUILD_NEWS' | 'GUILD_STAGE_VOICE' | 'GUILD_STORE' | 'GUILD_TEXT' | 'GUILD_VOICE';
+    lastMessageId: Snowflake | null;
+  }
 }
 
 export interface UpdateUserPresenceResult {

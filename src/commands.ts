@@ -8,9 +8,13 @@ import {
   CommandInteraction,
   DiscordAPIError,
   Guild,
+  GuildChannel,
   GuildMember,
   Interaction,
   MessageOptions,
+  Role,
+  Snowflake,
+  User,
 } from 'discord.js';
 import { SlashCommandBuilder } from '@discordjs/builders';
 import { REST } from '@discordjs/rest';
@@ -77,6 +81,12 @@ export class DiscordAdapterSlashCommands {
    * Collection of configurations for objects with commands enabled.
    */
   private commandObjectConfig: Collection<string, CommandObjectConfig> = new Collection();
+
+  /**
+   * Collection of the last seen interactions of custom commands (not iob-get/-set).
+   * Need to cache this here since there seams be no way to get an interaction by ID from discord.js.
+   */
+  private lastInteractions: Collection<Snowflake, CommandInteraction<CacheType>> = new Collection();
 
   /**
    * Timeout to trigger the delayed registration of the slash commands.
@@ -1011,11 +1021,17 @@ export class DiscordAdapterSlashCommands {
       options,
     } = interaction;
 
+    // get the related custom command config
     const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
     if (!cmdCfg) return; // should never happen, but to be sure
 
+    // add this interaction to the collection of last interactions
+    this.lastInteractions.set(interaction.id, interaction);
+
+    // promises for all set state actions
     const proms: Promise<any>[] = [];
 
+    // prepare json data
     const json: JsonSlashCommandObj = {
       interactionId: interaction.id,
       channelId,
@@ -1029,15 +1045,53 @@ export class DiscordAdapterSlashCommands {
       options: {},
     };
 
+    // loop over configured options and prepare data ... options.data* may not be set for optional options
     for (const optCfg of cmdCfg.options) {
-      let val: string | number | boolean | undefined | null = options.data.find((o) => o.name === optCfg.name)?.value;
-      if (val === undefined) {
-        val = null;
+      const opt = options.data.find((o) => o.name === optCfg.name);
+      if (opt) {
+        json.options[optCfg.name] = {
+          val: opt.value !== undefined ? opt.value : null,
+          type: opt.type,
+        };
+
+        if (opt.user instanceof User) {
+          json.options[optCfg.name].user = {
+            id: opt.user.id,
+            tag: opt.user.tag,
+            bot: opt.user.bot,
+          };
+        }
+        if (opt.member instanceof GuildMember) {
+          json.options[optCfg.name].member = {
+            id: opt.member.id,
+            displayName: opt.member.displayName,
+            roles: opt.member.roles.cache.map((r) => ({ id: r.id, name: r.name })),
+          };
+        }
+        if (opt.role instanceof Role) {
+          json.options[optCfg.name].role = {
+            id: opt.role.id,
+            name: opt.role.name,
+          };
+        }
+        if (opt.channel instanceof GuildChannel) {
+          json.options[optCfg.name].channel = {
+            id: opt.channel.id,
+            name: opt.channel.name,
+            type: opt.channel.type,
+            lastMessageId: opt.channel.isText() ? opt.channel.lastMessageId : null,
+          };
+        }
+      } else {
+        json.options[optCfg.name] = {
+          val: null,
+          type: null,
+        };
       }
-      json.options[optCfg.name] = val;
-      proms.push(this.adapter.setStateAsync(`slashCommands.${commandName}.option-${optCfg.name}`, val, true));
+      proms.push(this.adapter.setStateAsync(`slashCommands.${commandName}.option-${optCfg.name}`, json.options[optCfg.name].val, true));
     }
 
+    // set the states
     await Promise.all([
       this.adapter.setStateAsync(`slashCommands.${commandName}.interactionId`, interaction.id, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.channelId`, channelId, true),
@@ -1050,6 +1104,13 @@ export class DiscordAdapterSlashCommands {
     ]);
 
     await interaction.editReply('Not implemented yet');
+
+    // remove outdated interactions
+    const outdatedTs = Date.now() - 15 * 60000; // 15 min
+    const removedInteractions = this.lastInteractions.sweep((ia) => ia.createdTimestamp < outdatedTs);
+    if (removedInteractions > 0) {
+      this.adapter.log.debug(`Removed ${removedInteractions} outdated interactions from cache`);
+    }
   }
 
   /**
