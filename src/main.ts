@@ -293,13 +293,18 @@ class DiscordAdapter extends Adapter {
     this.discordSlashCommands.onReady();
 
     // subscribe needed states and objects
-    this.subscribeStates('*.send');
-    this.subscribeStates('*.sendFile');
-    this.subscribeStates('*.sendReply');
-    this.subscribeStates('*.sendReaction');
+    this.subscribeStates('servers.*.channels.*.send');
+    this.subscribeStates('servers.*.channels.*.sendFile');
+    this.subscribeStates('servers.*.channels.*.sendReply');
+    this.subscribeStates('servers.*.channels.*.sendReaction');
+    this.subscribeStates('users.*.send');
+    this.subscribeStates('users.*.sendFile');
+    this.subscribeStates('users.*.sendReply');
+    this.subscribeStates('users.*.sendReaction');
     this.subscribeStates('servers.*.members.*.voiceDisconnect');
     this.subscribeStates('servers.*.members.*.voiceServerMute');
     this.subscribeStates('servers.*.members.*.voiceServerDeaf');
+    this.subscribeStates('slashCommands.*.sendReply');
     this.subscribeStates('bot.*');
     this.subscribeForeignObjects('*'); // needed to handle custom object configs
 
@@ -1538,8 +1543,12 @@ class DiscordAdapter extends Adapter {
           break;
 
         default: // other own states
+          // custom slash command reply
+          if (stateId.match(/^discord\.\d+\.slashCommands\..*\.sendReply/)) {
+            setAck = await this.onCustomCommandSendReplyStateChange(stateId, state);
+
           // .send / .sendFile / .sendReply
-          if (stateId.endsWith('.send') || stateId.endsWith('.sendFile') || stateId.endsWith('.sendReply') || stateId.endsWith('.sendReaction')) {
+          } else if (stateId.endsWith('.send') || stateId.endsWith('.sendFile') || stateId.endsWith('.sendReply') || stateId.endsWith('.sendReaction')) {
             setAck = await this.onSendStateChange(stateId, state);
 
           // voice disconnect, mute/unmute, deafen/undeafen
@@ -1769,6 +1778,51 @@ class DiscordAdapter extends Adapter {
       this.log.warn(`Error sending value of ${stateId} to ${targetName}: ${err}`);
       return false;
     }
+  }
+
+  /**
+   * Handler for changes on own custom commands .sendReply states.
+   * Sends the given text, json or file to the corresponding discord channel.
+   * @returns `true` if the reply is send.
+   */
+  private async onCustomCommandSendReplyStateChange (stateId: string, state: ioBroker.State): Promise<boolean> {
+
+    if (!this.client?.isReady()) {
+      this.log.warn(`State ${stateId} changed but client is not ready!`);
+      return false;
+    }
+
+    if (typeof state.val !== 'string') {
+      this.log.warn(`State ${stateId} changed but value if not a string!`);
+      return false;
+    }
+
+    if (state.val.length === 0) {
+      this.log.debug(`State ${stateId} changed but value is empty`);
+      return false;
+    }
+
+    const targetStateIdBase = stateId.replace(/\.\w+$/, '');
+
+    const idx = state.val.indexOf('|');
+    let interactionId: Snowflake;
+    let content: string;
+    if (idx > 0) {
+      interactionId = state.val.slice(0, idx);
+      content = state.val.slice(idx + 1);
+    } else {
+      // use id from last received command
+      this.log.debug(`Get reply interaction reference from last received interaction for ${targetStateIdBase}`);
+      interactionId = (await this.getForeignStateAsync(`${targetStateIdBase}.interactionId`))?.val as string;
+      content = state.val;
+    }
+
+    if (!interactionId || !content) {
+      this.log.warn(`No interaction reference or no content for reply for ${stateId}!`);
+      return false;
+    }
+
+    return this.discordSlashCommands.sendCmdCustomReply(interactionId, content);
   }
 
   /**

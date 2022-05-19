@@ -204,13 +204,18 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       this.client.on("voiceStateUpdate", this.onClientVoiceStateUpdate);
     }
     this.discordSlashCommands.onReady();
-    this.subscribeStates("*.send");
-    this.subscribeStates("*.sendFile");
-    this.subscribeStates("*.sendReply");
-    this.subscribeStates("*.sendReaction");
+    this.subscribeStates("servers.*.channels.*.send");
+    this.subscribeStates("servers.*.channels.*.sendFile");
+    this.subscribeStates("servers.*.channels.*.sendReply");
+    this.subscribeStates("servers.*.channels.*.sendReaction");
+    this.subscribeStates("users.*.send");
+    this.subscribeStates("users.*.sendFile");
+    this.subscribeStates("users.*.sendReply");
+    this.subscribeStates("users.*.sendReaction");
     this.subscribeStates("servers.*.members.*.voiceDisconnect");
     this.subscribeStates("servers.*.members.*.voiceServerMute");
     this.subscribeStates("servers.*.members.*.voiceServerDeaf");
+    this.subscribeStates("slashCommands.*.sendReply");
     this.subscribeStates("bot.*");
     this.subscribeForeignObjects("*");
     this.log.debug("Get all objects with custom config ...");
@@ -1266,7 +1271,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           setAck = true;
           break;
         default:
-          if (stateId.endsWith(".send") || stateId.endsWith(".sendFile") || stateId.endsWith(".sendReply") || stateId.endsWith(".sendReaction")) {
+          if (stateId.match(/^discord\.\d+\.slashCommands\..*\.sendReply/)) {
+            setAck = await this.onCustomCommandSendReplyStateChange(stateId, state);
+          } else if (stateId.endsWith(".send") || stateId.endsWith(".sendFile") || stateId.endsWith(".sendReply") || stateId.endsWith(".sendReaction")) {
             setAck = await this.onSendStateChange(stateId, state);
           } else if (stateId.endsWith(".voiceDisconnect") || stateId.endsWith(".voiceServerMute") || stateId.endsWith(".voiceServerDeaf")) {
             setAck = await this.onVoiceStateChange(stateId, state);
@@ -1432,6 +1439,38 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       this.log.warn(`Error sending value of ${stateId} to ${targetName}: ${err}`);
       return false;
     }
+  }
+  async onCustomCommandSendReplyStateChange(stateId, state) {
+    var _a, _b;
+    if (!((_a = this.client) == null ? void 0 : _a.isReady())) {
+      this.log.warn(`State ${stateId} changed but client is not ready!`);
+      return false;
+    }
+    if (typeof state.val !== "string") {
+      this.log.warn(`State ${stateId} changed but value if not a string!`);
+      return false;
+    }
+    if (state.val.length === 0) {
+      this.log.debug(`State ${stateId} changed but value is empty`);
+      return false;
+    }
+    const targetStateIdBase = stateId.replace(/\.\w+$/, "");
+    const idx = state.val.indexOf("|");
+    let interactionId;
+    let content;
+    if (idx > 0) {
+      interactionId = state.val.slice(0, idx);
+      content = state.val.slice(idx + 1);
+    } else {
+      this.log.debug(`Get reply interaction reference from last received interaction for ${targetStateIdBase}`);
+      interactionId = (_b = await this.getForeignStateAsync(`${targetStateIdBase}.interactionId`)) == null ? void 0 : _b.val;
+      content = state.val;
+    }
+    if (!interactionId || !content) {
+      this.log.warn(`No interaction reference or no content for reply for ${stateId}!`);
+      return false;
+    }
+    return this.discordSlashCommands.sendCmdCustomReply(interactionId, content);
   }
   async onVoiceStateChange(stateId, state) {
     var _a;

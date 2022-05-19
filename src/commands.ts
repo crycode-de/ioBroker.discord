@@ -1103,7 +1103,10 @@ export class DiscordAdapterSlashCommands {
       ...proms,
     ]);
 
-    await interaction.editReply('Not implemented yet');
+    /*****
+     * Hint: Interaction reply is deferred, but no reply will be send here.
+     *       The reply must be triggered by the user using the .sendReply state or a `sendTo(...)` action.
+     *****/
 
     // remove outdated interactions
     const outdatedTs = Date.now() - 15 * 60000; // 15 min
@@ -1111,6 +1114,73 @@ export class DiscordAdapterSlashCommands {
     if (removedInteractions > 0) {
       this.adapter.log.debug(`Removed ${removedInteractions} outdated interactions from cache`);
     }
+  }
+
+  /**
+   * Send a reply to a custom slash command.
+   * @param interactionId The ID of the interaction to reply to. The interactions needs to be cached in this instance.
+   * @param msg The message to reply with. May be a simple string, a MessageOptions object or a stringified JSON MessageOptions object.
+   * @returns Promise which resolves to `true` if the reply is sent, or `false` in case of an error.
+   */
+  public async sendCmdCustomReply (interactionId: Snowflake, msg: string | MessageOptions): Promise<boolean> {
+    // get the interaction
+    const interaction = this.lastInteractions.get(interactionId);
+
+    if (!interaction) {
+      this.adapter.log.warn(`No current interaction with ID ${interactionId} found for reply!`);
+      return false;
+    }
+
+    const { commandName } = interaction;
+
+    const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
+    if (!cmdCfg) {
+      this.adapter.log.warn(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
+      return false;
+    }
+
+    if (!interaction.isRepliable()) {
+      this.adapter.log.warn(`Interaction ${interactionId} of custom slash command ${commandName} is not repliable!`);
+      return false;
+    }
+
+    // if a string is given try to parse it and prepare it as MessageOptions object
+    if (typeof msg === 'string') {
+      if (msg.startsWith('{') && msg.endsWith('}')) {
+        // seams to be json
+        this.adapter.log.debug(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json`);
+
+        try {
+          msg = JSON.parse(msg) as MessageOptions;
+        } catch (err) {
+          this.adapter.log.warn(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but cannot be parsed!`);
+          return false;
+        }
+
+        // do some basic checks against the parsed object
+        if ((!msg?.files && !msg.content) || (msg.files && !Array.isArray(msg.files)) || (msg.embeds && !Array.isArray(msg.embeds))) {
+          this.adapter.log.warn(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but seams to be invalid!`);
+          return false;
+        }
+
+      } else {
+        // just a string
+        msg = {
+          content: msg,
+        };
+      }
+    }
+
+    // send the reply
+    try {
+      await interaction.editReply(msg);
+
+    } catch (err) {
+      this.adapter.log.warn(`Error while replying to interaction ${interactionId} of custom slash command ${commandName}! ${err}`);
+      return false;
+    }
+
+    return true;
   }
 
   /**

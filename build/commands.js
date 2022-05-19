@@ -782,12 +782,54 @@ class DiscordAdapterSlashCommands {
       this.adapter.setStateAsync(`slashCommands.${commandName}.json`, JSON.stringify(json), true),
       ...proms
     ]);
-    await interaction.editReply("Not implemented yet");
     const outdatedTs = Date.now() - 15 * 6e4;
     const removedInteractions = this.lastInteractions.sweep((ia) => ia.createdTimestamp < outdatedTs);
     if (removedInteractions > 0) {
       this.adapter.log.debug(`Removed ${removedInteractions} outdated interactions from cache`);
     }
+  }
+  async sendCmdCustomReply(interactionId, msg) {
+    const interaction = this.lastInteractions.get(interactionId);
+    if (!interaction) {
+      this.adapter.log.warn(`No current interaction with ID ${interactionId} found for reply!`);
+      return false;
+    }
+    const { commandName } = interaction;
+    const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
+    if (!cmdCfg) {
+      this.adapter.log.warn(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
+      return false;
+    }
+    if (!interaction.isRepliable()) {
+      this.adapter.log.warn(`Interaction ${interactionId} of custom slash command ${commandName} is not repliable!`);
+      return false;
+    }
+    if (typeof msg === "string") {
+      if (msg.startsWith("{") && msg.endsWith("}")) {
+        this.adapter.log.debug(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json`);
+        try {
+          msg = JSON.parse(msg);
+        } catch (err) {
+          this.adapter.log.warn(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but cannot be parsed!`);
+          return false;
+        }
+        if (!(msg == null ? void 0 : msg.files) && !msg.content || msg.files && !Array.isArray(msg.files) || msg.embeds && !Array.isArray(msg.embeds)) {
+          this.adapter.log.warn(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but seams to be invalid!`);
+          return false;
+        }
+      } else {
+        msg = {
+          content: msg
+        };
+      }
+    }
+    try {
+      await interaction.editReply(msg);
+    } catch (err) {
+      this.adapter.log.warn(`Error while replying to interaction ${interactionId} of custom slash command ${commandName}! ${err}`);
+      return false;
+    }
+    return true;
   }
   logConfiguredCommandObjects() {
     this.adapter.log.info("Configured state objects for discord slash commands:");
