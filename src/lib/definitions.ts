@@ -99,7 +99,7 @@ export interface JsonSlashCommandObj {
 }
 
 export interface JsonSlashCommandObjOption {
-  val: string | number | boolean | null;
+  value: string | number | boolean | null;
   type: ApplicationCommandOptionType | null;
   user?: {
     id: Snowflake;
@@ -110,7 +110,7 @@ export interface JsonSlashCommandObjOption {
     id: Snowflake;
     displayName: string;
     roles: { id: Snowflake, name: string }[];
-  }
+  };
   role?: {
     id: Snowflake;
     name: string;
@@ -120,7 +120,7 @@ export interface JsonSlashCommandObjOption {
     name: string;
     type: 'GUILD_CATEGORY' | 'GUILD_NEWS' | 'GUILD_STAGE_VOICE' | 'GUILD_STORE' | 'GUILD_TEXT' | 'GUILD_VOICE';
     lastMessageId: Snowflake | null;
-  }
+  };
 }
 
 export interface UpdateUserPresenceResult {

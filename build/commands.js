@@ -742,7 +742,7 @@ class DiscordAdapterSlashCommands {
       const opt = options.data.find((o) => o.name === optCfg.name);
       if (opt) {
         json.options[optCfg.name] = {
-          val: opt.value !== void 0 ? opt.value : null,
+          value: opt.value !== void 0 ? opt.value : null,
           type: opt.type
         };
         if (opt.user instanceof import_discord.User) {
@@ -775,11 +775,11 @@ class DiscordAdapterSlashCommands {
         }
       } else {
         json.options[optCfg.name] = {
-          val: null,
+          value: null,
           type: null
         };
       }
-      proms.push(this.adapter.setStateAsync(`slashCommands.${commandName}.option-${optCfg.name}`, json.options[optCfg.name].val, true));
+      proms.push(this.adapter.setStateAsync(`slashCommands.${commandName}.option-${optCfg.name}`, json.options[optCfg.name].value, true));
     }
     await Promise.all([
       this.adapter.setStateAsync(`slashCommands.${commandName}.interactionId`, interaction.id, true),
