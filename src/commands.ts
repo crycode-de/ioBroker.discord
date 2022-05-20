@@ -1145,26 +1145,10 @@ export class DiscordAdapterSlashCommands {
 
     // if a string is given try to parse it and prepare it as MessageOptions object
     if (typeof msg === 'string') {
-      if (msg.startsWith('{') && msg.endsWith('}')) {
-        // seams to be json
-        this.adapter.log.debug(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json`);
-
-        try {
-          msg = JSON.parse(msg) as MessageOptions;
-        } catch (err) {
-          throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but cannot be parsed!`);
-        }
-
-        // do some basic checks against the parsed object
-        if ((!msg?.files && !msg.content) || (msg.files && !Array.isArray(msg.files)) || (msg.embeds && !Array.isArray(msg.embeds))) {
-          throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but seams to be invalid!`);
-        }
-
-      } else {
-        // just a string
-        msg = {
-          content: msg,
-        };
+      try {
+        msg = this.adapter.parseStringifiedMessageOptions(msg);
+      } catch (err) {
+        throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} is invalid: ${err}`);
       }
     }
 

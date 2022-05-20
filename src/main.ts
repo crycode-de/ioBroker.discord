@@ -1705,12 +1705,21 @@ class DiscordAdapter extends Adapter {
           return false;
         }
 
-        mo = {
-          content,
-          reply: {
+        try {
+          mo = this.parseStringifiedMessageOptions(state.val);
+        } catch (err) {
+          this.log.debug(`State ${stateId} value is invalid: ${err}`);
+          return false;
+        }
+
+        // add the message reference if it is not already set
+        if (!mo.reply) {
+          mo.reply = {
             messageReference,
-          },
-        };
+          };
+        } else if (!mo.reply.messageReference) {
+          mo.reply.messageReference = messageReference;
+        }
 
       } else {
         // reaction
@@ -1746,28 +1755,13 @@ class DiscordAdapter extends Adapter {
      * `state.val` may be JSON for .send states
      * Try to parse the JSON as MessageOptions object to allow sending of files, embeds, ...
      */
-    } else if (state.val.startsWith('{') && state.val.endsWith('}')) {
-      // seams to be json
-      this.log.debug(`State ${stateId} value seams to be json`);
-
-      try {
-        mo = JSON.parse(state.val) as MessageOptions;
-      } catch (err) {
-        this.log.warn(`State ${stateId} value seams to be json but cannot be parsed!`);
-        return false;
-      }
-
-      // do some basic checks against the parsed object
-      if ((!mo?.files && !mo.content) || (mo.files && !Array.isArray(mo.files)) || (mo.embeds && !Array.isArray(mo.embeds))) {
-        this.log.warn(`State ${stateId} value seams to be json but seams to be invalid!`);
-        return false;
-      }
-
     } else {
-      // just a string
-      mo = {
-        content: state.val,
-      };
+      try {
+        mo = this.parseStringifiedMessageOptions(state.val);
+      } catch (err) {
+        this.log.debug(`State ${stateId} value is invalid: ${err}`);
+        return false;
+      }
     }
 
     this.log.debug(`Send to ${targetName}: ${JSON.stringify(mo)}`);
@@ -2332,6 +2326,47 @@ class DiscordAdapter extends Adapter {
         }
 
     }
+  }
+
+  /**
+   * Try to detect and parse stringified JSON MessageOptions.
+   *
+   * If the `content` starts/ends with curly braces if will be treated as
+   * stringified JSON. Then the JSON will be parsed and some basic checks will
+   * be run against the parsed object.
+   *
+   * Otherwise the content will be treated as a simple string and wrapped into
+   * a `MessageOptions` object.
+   * @param content The stringified content to be parsed.
+   * @returns A `MessageOptions` object.
+   * @throws An error if parsing JSON or a check failed.
+   */
+  public parseStringifiedMessageOptions (content: string): MessageOptions {
+    let mo: MessageOptions;
+
+    if (content.startsWith('{') && content.endsWith('}')) {
+      // seams to be json
+      this.log.debug(`Content seams to be json`);
+
+      try {
+        mo = JSON.parse(content) as MessageOptions;
+      } catch (err) {
+        throw new Error(`Content seams to be json but cannot be parsed!`);
+      }
+
+      // do some basic checks against the parsed object
+      if ((!mo?.files && !mo.content) || (mo.files && !Array.isArray(mo.files)) || (mo.embeds && !Array.isArray(mo.embeds))) {
+        throw new Error(`Content is json but seams to be invalid!`);
+      }
+
+    } else {
+      // just a string... create MessageOptions object
+      mo = {
+        content,
+      };
+    }
+
+    return mo;
   }
 
   /**
