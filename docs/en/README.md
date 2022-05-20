@@ -20,6 +20,7 @@ Additionally, the adapter can register Discord slash commands to get and set ioB
   * [discord.0.servers.\<server-id\>.channels.\<channel-id\>.*](#discord0serversserver-idchannelschannel-id)
   * [discord.0.servers.\<server-id\>.members.\<user-id\>.*](#discord0serversserver-idmembersuser-id)
   * [discord.0.users.\<user-id\>.*](#discord0usersuser-id)
+  * [discord.0.slashCommands.\<command-name\>.*](#discord0slashcommandscommand-name)
   * [discord.0.raw.*](#discord0raw)
 * [Authorization](#authorization)
 * [Messages](#messages)
@@ -36,12 +37,15 @@ Additionally, the adapter can register Discord slash commands to get and set ioB
   * [Get states](#get-states)
   * [Set states](#set-states)
   * [Get an overview about states configured for slash commands](#get-an-overview-about-states-configured-for-slash-commands)
+  * [Custom slash commands](#custom-slash-commands)
+    * [Structure of a custom slash command json state](#structure-of-a-custom-slash-command-json-state)
 * [Usage in scripts](#usage-in-scripts)
   * [Send a message from a script](#send-a-message-from-a-script)
   * [Edit a message from a script](#edit-a-message-from-a-script)
   * [Delete a message from a script](#delete-a-message-from-a-script)
   * [Add a reaction emoji to a message from a script](#add-a-reaction-emoji-to-a-message-from-a-script)
   * [Await reactions to a message in a script](#await-reactions-to-a-message-in-a-script)
+  * [Reply to a custom slash command from a script](#reply-to-a-custom-slash-command-from-a-script)
 
 ## Features
 
@@ -59,6 +63,7 @@ Additionally, the adapter can register Discord slash commands to get and set ioB
 * Send messages, files, reactions (emojis), reply messages, or custom json-formated message contents
 * List server and channel members including member roles
 * Support for Discord slash commands to get and set state values
+* Support for user defined Discord slash commands to be handled by custom scripts
 * Support for [text2command] (has to be enabled for each `.message` state where it should be used)
 * Send, edit and delete messages, add and await message reactions using Scripts
 * Optional raw states to allow more flexibility in custom scripts
@@ -215,6 +220,31 @@ For the `status` and `activity*` states to be up to date, the option _Observe us
 
 For all `message*` and `send*` states see messages section below.
 
+### discord.0.slashCommands.\<command-name\>.*
+
+If custom commands are enabled in the adapter instance configuration, the
+following states will be present.
+
+All this states will be updated on each call of the custom command.
+
+| Name | Description |
+|---|---|
+| `json` | JSON data of the last use of the command. This contains some additional information which are not present in the single states. |
+| `interactionId` | ID of the last use of the command. |
+| `userId` | ID of the user, who called the command. |
+| `userTag` | Tag of the user, who called the command. |
+| `channelId` | ID of the channel, where the command is called. |
+| `serverId` | ID of the server, where the command is called or `null` if the command is used in a direct message. |
+| `timestamp` | Timestamp of the last use of the command. |
+| `option-*` | Options which were provided to the command. For each configured option a state will be created. If an option is not provided on command call, this state will be set to `null`. |
+| `sendReply` | Send a reply to a called command. Like in `.send` states of a channel or user, this may be sting or stringified JSON object. See _Messages_ section below. |
+
+**Note:** It's recommended to use the `json` state in custom scripts to prevent
+overlaps.
+Example: A custom script reads the single `option-*` states while
+some user called the command again and the options from the first and the
+second command get mixed up.
+
 ### discord.0.raw.*
 
 If raw states are enabled in the adapter instance configuration, the following
@@ -351,7 +381,7 @@ Examples: `This is a reply.`, `971032590515568660|This is a reply.`
 #### Sending special custom messages
 
 You can send special custom messages writing a stringified JSON message object
-into the `.send` state.
+into the `.send` or `.sendReply` states.
 
 The JSON object must of type `MessageOptions`.
 For more information read the [discord.js MessageOptions documentation][MessageOptions].
@@ -502,6 +532,82 @@ If `min` and `max` values are defined in the state object, they are also checked
 To get an overview about all states where slash commands are enabled, you can
 simply click the button _Log state objects configured for commands_ in the adapter
 instance configuration and see the log output.
+
+### Custom slash commands
+
+In the adapter instance configuration, custom slash commands can be enabled
+and configured.
+The configured custom commands will be registered on Discord together with the
+default get and set commands.
+
+For each custom command some options may be added, which will be shown in the
+Discord client when calling the command.
+
+When a custom command gets called, the data will be written into re corresponding
+states. See the description of the states in the _States_ section above.
+
+All information including the option values will be stored in the `.json` state
+of the command.
+This state should mainly be used to get the command data in scripts since all
+needed information are stored in a single place and can't get mixed up on
+multiple command calls within a short time.
+If an option is not provided on command call, the option value will be `null`.
+For options of type _user_, _role_, _channel_ or _mentionable_ additional
+properties of the option object will be filled.
+
+**Note:** It's up to you to handle the command data and send a reply to the
+command, i.e. using a custom script.
+You have up to ten minutes to send a reply using the `.sendReply` state or the
+corresponding `sendTo(...)` action.
+If you don't send a reply in time, the Discord client will show the error
+message _The application did not respond_.
+
+**Hint:** You may send a reply to one command call multiple times. This will
+edit the reply and set it to the new content.
+
+#### Structure of a custom slash command json state
+
+```js
+{
+  interactionId: string,
+  commandName: string,
+  user: {
+    id: string,
+    tag: string,
+    displayName: string,
+  },
+  channelId: string,
+  serverId: string | null,
+  timestamp: number,
+  options: {
+    [string]: {
+      value: string | number | boolean | null,
+      type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'USER' | 'ROLE' | 'CHANNEL' | 'MENTIONABLE' | null,
+      user?: { // if type is USER or MENIONABLE
+        id: string,
+        tag: string,
+        bot: boolean,
+      },
+      member?: { // if type is USER or MENIONABLE and command is called on a server
+        id: string,
+        displayName: string,
+        roles: { id: string, name: string }[],
+      },
+      role?: { // if type is ROLE or MENTIONABLE
+        id: string,
+        name: string,
+      },
+      channel?: { // if type is CHANNEL
+        id: string,
+        name: string,
+        type: 'GUILD_CATEGORY' | 'GUILD_NEWS' | 'GUILD_STAGE_VOICE' | 'GUILD_STORE' | 'GUILD_TEXT' | 'GUILD_VOICE',
+        lastMessageId: string | null,
+      },
+    },
+    // ...
+  }
+}
+```
 
 ## Usage in scripts
 
@@ -672,7 +778,8 @@ sendTo('discord.0', 'addReaction', {
 
 ### Await reactions to a message in a script
 
-You are able to await reactions (emojis) to a previous message.
+You are able to await reactions (emojis) to a previous message using the
+`awaitMessageReaction` command.
 
 The `message` part of `sendTo(...)` is the same as for `editMessage` (see above)
 without the `content` parameter but with `timeout` and `max` number as
@@ -701,6 +808,49 @@ sendTo('discord.0', 'awaitMessageReaction', {
 }, (ret) => {
   log(ret);
   // {'reactions':[{'emoji':'👍','emojiId':null,'users':[{'id':'490222742801481728','tag':'cryCode#9911'}]}],'serverId':'813364154118963251','channelId':'813364154559102998','messageId':'970754574879162458','timeout':10000,'max':3}
+});
+```
+
+### Reply to a custom slash command from a script
+
+Using the `sendCustomCommandReply` command, you can send a reply to a custom
+slash command call.
+
+The `message` part of `sendTo(...)` needs to be an object with the `content` to
+send and the `interactionId` of the command call:
+
+The `content` may be a simple string, or a [MessageOptions] object
+(like in `sendMessage`).
+
+```js
+on({ id: 'discord.0.slashCommands.iob-test.json', change: 'any', ack: true }, (obj) => {
+  log(`Got custom slash command ${obj.state.val}`);
+  // Got custom slash command {"interactionId":"977265764136517725","commandName":"iob-test","channelId":"813364154559102998","serverId":"813364154118963251","user":{"id":"490222742801481728","tag":"cryCode#9911","displayName":"Peter"},"timestamp":1653068714890,"options":{"myopt":{"value":"test","type":"STRING"}}}
+
+  const data = JSON.parse(obj.state.val);
+
+  let reply;
+  if (data.options.myopt.value) {
+    reply = {
+      content: `You gave me "${data.options.myopt.value}".`,
+      embeds: [
+        {
+          title: 'This is awesome!',
+          color: '#00AA00',
+        },
+      ],
+    };
+  } else {
+    reply = `You gave me nothing. 🤨`;
+  }
+
+  sendTo('discord.0', 'sendCustomCommandReply', {
+    interactionId: data.interactionId,
+    content: reply,
+  }, (ret) => {
+    log(ret);
+    // {'result':'Reply sent','interactionId':'977265764136517725','content':{'content':'You gave me \'test\'.','embeds':[{'title':'This is awesome!','color':'#00AA00'}]},'messageId':'977265765122183248'}
+  });
 });
 ```
 

@@ -23,6 +23,7 @@ Zusätzlich kann der Adapter Discord Slash-Befehle registrieren.
   * [discord.0.servers.\<server-id\>.channels.\<channel-id\>.*](#discord0serversserver-idchannelschannel-id)
   * [discord.0.servers.\<server-id\>.members.\<user-id\>.*](#discord0serversserver-idmembersuser-id)
   * [discord.0.users.\<user-id\>.*](#discord0usersuser-id)
+  * [discord.0.slashCommands.\<command-name\>.*](#discord0slashcommandscommand-name)
   * [discord.0.raw.*](#discord0raw)
 * [Autorisierung](#autorisierung)
 * [Nachrichten](#nachrichten)
@@ -39,12 +40,15 @@ Zusätzlich kann der Adapter Discord Slash-Befehle registrieren.
   * [Zustände abfragen](#zustände-abfragen)
   * [Zustände festlegen](#zustände-festlegen)
   * [Einen Überblick über Zustände mit Konfigurationen für Slash-Befehle erhalten](#einen-überblick-über-zustände-mit-konfigurationen-für-slash-befehle-erhalten)
+  * [Benutzerdefinierte Slash-Befehle](#benutzerdefinierte-slash-befehle)
+    * [Struktur eines json-Zustands von benutzerdefinierten Slash-Befehlen](#struktur-eines-json-zustands-von-benutzerdefinierten-slash-befehlen)
 * [Verwendung in Skripten](#verwendung-in-skripten)
   * [Senden einer Nachricht in einem Skript](#senden-einer-nachricht-in-einem-skript)
   * [Bearbeiten einer Nachricht in einem Skript](#bearbeiten-einer-nachricht-in-einem-skript)
   * [Löschen einer Nachricht in einem Skript](#löschen-einer-nachricht-in-einem-skript)
   * [Reaktions-Emoji zu einer Nachricht hinzufügen in einem Skript](#reaktions-emoji-zu-einer-nachricht-hinzufügen-in-einem-skript)
   * [Auf Reaktionen auf eine Nachricht warten in einem Skript](#auf-reaktionen-auf-eine-nachricht-warten-in-einem-skript)
+  * [Auf benutzerdefinierte Slash-Befehle antworten in einem Skript](#auf-benutzerdefinierte-slash-befehle-antworten-in-einem-skript)
 
 ## Funktionen
 
@@ -222,10 +226,36 @@ _Anwesenheit der Benutzer beobachten_ in der Instanzkonfiguration aktiviert sein
 
 Zu allen `message*` und `send*` Zuständen siehe den Abschnitt _Nachrichten_ weiter unten.
 
+### discord.0.slashCommands.\<command-name\>.*
+
+Wenn benutzerdefinierte Befehle in der Instanzkonfiguration des Adapters
+aktiviert sind, gibt es zusätzlich die folgenden Zustände.
+
+Alle diese Zustände werden bei jedem Aufruf des des benutzerdefinierten Befehls
+aktualisiert.
+
+| Name | Beschreibung |
+|---|---|
+| `json` | JSON-Daten der letzten Nutzung des Befehls. Enthält einige zusätzliche Informationen, die nicht in den einzelnen Zuständen enthalten sind. |
+| `interactionId` | ID der letzten Nutzung des Befehls. |
+| `userId` | ID des Benutzers, der den Befehl aufgerufen hat. |
+| `userTag` | Eindeutiger Tag des Benutzers, der den Befehl aufgerufen hat. |
+| `channelId` | ID des Kanals, in dem der Befehl aufgerufen wurde. |
+| `serverId` | ID des Servers, in dem der Befehl aufgerufen wurde, oder `null` wenn der Befehl in einer Direktnachricht aufgerufen wurde. |
+| `timestamp` | Zeitstempel der letzten Nutzung des Befehls. |
+| `option-*` | Optionen die für den Befehl angegeben wurden. Für jede konfigurierte Option wird ein eigener Zustand erstellt. Wenn eine Option beim Aufruf des Befehls nicht angegeben wird, dann wird der zugehörige Zustand auf `null` gesetzt. |
+| `sendReply` | Eine Antwort auf dem aufgerufenen Befehl senden. Wie bei den `.send`-Zuständen von Kanälen oder Benutzern, kann dies ein String oder ein JSON-Objekt sein. Siehe den Abschnitt _Nachrichten_ weiter unten. |
+
+**Hinweis:** Es wird empfohlen, den `json`-Zustand in eigenen Skripten zu nutzen,
+um Überschneidungen zu vermeiden.
+Beispiel: Ein eigenes Skript ließt die einzelnen `option-*`-Zustände während ein
+Benutzer den Befehl erneut aufruft und die Optionen aus ersten und zweiten
+Aufruf des Befehls geraten durcheinander.
+
 ### discord.0.raw.*
 
-Wenn die Rohzustände in der Instanzkonfiguration aktiviert sind, werden die gibt
-es zusätzlich die folgenden Zustände.
+Wenn die Rohzustände in der Instanzkonfiguration des Adapters aktiviert sind,
+gibt es zusätzlich die folgenden Zustände.
 
 **Hinweis:** Diese Zustände beinhalten Rohdaten ohne jegliche Prüfung, Filterung
 oder Modifizierung durch den Adapter. Server werden als Guild bezeichnet.
@@ -379,7 +409,7 @@ Beispiele: `Dies ist eine Antwort.`, `971032590515568660|Dies ist eine Antwort.`
 #### Senden von speziellen benutzerdefinierten Nachrichten
 
 Es können auch spezielle benutzerdefinierte Nachrichten gesendet werden, indem
-ein JSON-Nachrichten-Objekt in den `.send`-Zustand geschrieben wird.
+ein JSON-Nachrichten-Objekt in einen `.send`- oder `.sendReply`-Zustand geschrieben wird.
 
 Das JSON-Object muss dabei vom Typ `MessageOptions` sein.
 Für mehr Information dazu siehe die [discord.js MessageOptions Dokumentation][MessageOptions].
@@ -551,6 +581,85 @@ Um einen Überblick über alle Zustände mit aktiver Konfiguration für
 Slash-Befehle zu erhalten, kann in der Instanzkonfiguration des Adapter der
 Button _Für Befehle konfigurierte Zustandsobjekte protokollieren_ angeklickt
 werden. Die Ausgabe erfolgt dann im Log der ioBroker-Installation.
+
+### Benutzerdefinierte Slash-Befehle
+
+In der Instanzkonfiguration des Adapters können eigene Slash-Befehle aktiviert
+und konfiguriert werden.
+Die konfigurierten eigenen Befehle werden dann zusammen mit den standardmäßigen
+get- und set-Befehlen bei Discord registriert.
+
+Zu jedem benutzerdefinierten Befehl können Optionen hinzugefügt werden.
+Diese Optionen werden dann im Discord-Client zu dem Befehl angezeigt.
+
+Wenn ein benutzerdefinierte Befehl aufgerufen wird, dann werden die Daten dazu
+in die zugehörigen Zustände geschrieben. Siehe die Beschreibung der Zustände im
+Abschnitt _Zustände (States)_ weiter oben.
+
+Alle Informationen inklusive der Optionen werden in den `.json`-Zustand des
+Befehls geschrieben.
+Dieser Zustand sollte vorrangig genutzt werden, um die Befehlsdaten in Skripten
+zu erhalten, da hier alle nötigen Informationen an einer Stelle abgelegt werden
+und somit auch bei mehrere Befehlsaufrufen in kurzer Zeit nichts durcheinander
+geraten kann.
+Wenn eine Option bei einem Befehlsaufruf nicht angegeben wird, dann enthält
+diese Option den Wert `null`.
+Für Optionen des Types _Benutzer_, _Rolle_, _Kanal_ oder _Erwähnbar_ werden
+zusätzliche Felder in den Options-Objekten befüllt.
+
+**Hinweis:** Der Befehl muss selbst ausgewertet und dann eine Antwort auf den
+Befehl gesendet werden. Dies geht beispielsweise mit einem eigenen Skript.
+Eine Antwort muss innerhalb von zehn Minuten über den `.sendReply`-Zustand
+oder die zugehörige `sendTo(...)`-Aktion gesendet werden.
+Wenn innerhalb der Zeit keine Antwort gesendet wird, dann zeigt der
+Discord-Client den Fehler _Die Anwendung reagiert nicht_ an.
+
+**Hinweis:** Eine Antwort auf einen Befehlsaufruf kann mehrfach gesendet werden.
+Dabei wird die Antwort editiert und mit dem neuen Inhalt überschrieben.
+
+#### Struktur eines json-Zustands von benutzerdefinierten Slash-Befehlen
+
+```js
+{
+  interactionId: string,
+  commandName: string,
+  user: {
+    id: string,
+    tag: string,
+    displayName: string,
+  },
+  channelId: string,
+  serverId: string | null,
+  timestamp: number,
+  options: {
+    [string]: {
+      value: string | number | boolean | null,
+      type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'USER' | 'ROLE' | 'CHANNEL' | 'MENTIONABLE' | null,
+      user?: { // wenn type USER oder MENIONABLE ist
+        id: string,
+        tag: string,
+        bot: boolean,
+      },
+      member?: { // wenn type USER oder MENIONABLE ist und der Befehl auf einem Server aufgerufen wurde
+        id: string,
+        displayName: string,
+        roles: { id: string, name: string }[],
+      },
+      role?: { // wenn type ROLE oder MENTIONABLE ist
+        id: string,
+        name: string,
+      },
+      channel?: { // wenn type CHANNEL ist
+        id: string,
+        name: string,
+        type: 'GUILD_CATEGORY' | 'GUILD_NEWS' | 'GUILD_STAGE_VOICE' | 'GUILD_STORE' | 'GUILD_TEXT' | 'GUILD_VOICE',
+        lastMessageId: string | null,
+      },
+    },
+    // ...
+  }
+}
+```
 
 ## Verwendung in Skripten
 
@@ -726,7 +835,8 @@ sendTo('discord.0', 'addReaction', {
 
 ### Auf Reaktionen auf eine Nachricht warten in einem Skript
 
-Es ist möglich auf Reaktionen (Emojis) auf eine vorherige Nachricht zu warten.
+Es ist möglich mit dem `awaitMessageReaction` Befehl auf Reaktionen (Emojis)
+zu einer vorherigen Nachricht zu warten.
 
 Der `message` Teil von `sendTo(...)` ist der gleiche wie bei `editMessage` (siehe oben),
 jedoch ohne den `content`, aber dafür zusätzlich mit einem `timeout` und einer
@@ -759,6 +869,51 @@ sendTo('discord.0', 'awaitMessageReaction', {
   // {'reactions':[{'emoji':'👍','emojiId':null,'users':[{'id':'490222742801481728','tag':'cryCode#9911'}]}],'serverId':'813364154118963251','channelId':'813364154559102998','messageId':'970754574879162458','timeout':10000,'max':3}
 });
 ```
+
+### Auf benutzerdefinierte Slash-Befehle antworten in einem Skript
+
+Über den Befehl `sendCustomCommandReply` kann eine Antwort auf einen Aufruf
+eines benutzerdefinierten Befehls gesendet werden.
+
+Der `message` Teil von `sendTo(...)` muss ein Objekt mit dem zu sendenden
+`content` und der `interactionId` des Befehlsaufrufs sein.
+
+Der `content` kann ein einfacher String oder ein [MessageOptions]-Objekt sein
+(wie bei `sendMessage`).
+
+```js
+on({ id: 'discord.0.slashCommands.iob-test.json', change: 'any', ack: true }, (obj) => {
+  log(`Benutzerdefinierter Slash-Befehl ${obj.state.val}`);
+  // Benutzerdefinierter Slash-Befehl {"interactionId":"977265764136517725","commandName":"iob-test","channelId":"813364154559102998","serverId":"813364154118963251","user":{"id":"490222742801481728","tag":"cryCode#9911","displayName":"Peter"},"timestamp":1653068714890,"options":{"myopt":{"value":"test","type":"STRING"}}}
+
+  const data = JSON.parse(obj.state.val);
+
+  let reply;
+  if (data.options.myopt.value) {
+    reply = {
+      content: `Du hast mir "${data.options.myopt.value}" gegeben.`,
+      embeds: [
+        {
+          title: 'Das ist großartig!',
+          color: '#00AA00',
+        },
+      ],
+    };
+  } else {
+    reply = `Du hast mir nichts gegeben. 🤨`;
+  }
+
+  sendTo('discord.0', 'sendCustomCommandReply', {
+    interactionId: data.interactionId,
+    content: reply,
+  }, (ret) => {
+    log(ret);
+    // {'result':'Reply sent','interactionId':'977265764136517725','content':{'content':'Du hast mir \'test\' gegeben.','embeds':[{'title':'Das ist großartig!','color':'#00AA00'}]},'messageId':'977265765122183248'}
+  });
+});
+```
+
+
 
 [ioBroker]: https://www.iobroker.net
 [Discord]: https://discord.com
