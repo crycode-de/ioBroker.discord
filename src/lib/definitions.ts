@@ -86,6 +86,7 @@ export interface JsonMessageObj {
 
 export interface JsonSlashCommandObj {
   interactionId: Snowflake;
+  commandName: string;
   user: {
     id: Snowflake;
     tag: string;

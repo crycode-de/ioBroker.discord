@@ -1034,6 +1034,7 @@ export class DiscordAdapterSlashCommands {
     // prepare json data
     const json: JsonSlashCommandObj = {
       interactionId: interaction.id,
+      commandName,
       channelId,
       serverId: guildId || null,
       user: {

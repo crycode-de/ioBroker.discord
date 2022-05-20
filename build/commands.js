@@ -719,6 +719,7 @@ class DiscordAdapterSlashCommands {
     const proms = [];
     const json = {
       interactionId: interaction.id,
+      commandName,
       channelId,
       serverId: guildId || null,
       user: {
