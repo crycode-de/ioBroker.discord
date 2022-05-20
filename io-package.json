@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "discord",
-        "version": "1.0.2",
+        "version": "1.1.0",
         "news": {
+            "1.1.0": {
+                "en": "Custom Discord slash commands, Some bug fixes",
+                "de": "Benutzerdefinierte Discord-Slash-Befehle, einige Fehlerbehebungen",
+                "ru": "Пользовательские слэш-команды Discord, некоторые исправления ошибок",
+                "pt": "Comandos de barra personalizados do Discord, algumas correções de bugs",
+                "nl": "Aangepaste Discord-slash-opdrachten, enkele bugfixes",
+                "fr": "Commandes slash Discord personnalisées, quelques corrections de bugs",
+                "it": "Comandi personalizzati Discord slash, alcune correzioni di bug",
+                "es": "Comandos de barra de Discord personalizados, algunas correcciones de errores",
+                "pl": "Niestandardowe polecenia ukośnika Discorda, niektóre poprawki błędów",
+                "zh-cn": "自定义 Discord 斜线命令，一些错误修复"
+            },
             "1.0.2": {
                 "en": "Fixed some small issues",
                 "de": "Einige kleine Probleme behoben",
