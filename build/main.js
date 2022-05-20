@@ -1384,12 +1384,19 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.log.warn(`No message reference or no content for reply for ${stateId}!`);
           return false;
         }
-        mo = {
-          content,
-          reply: {
+        try {
+          mo = this.parseStringifiedMessageOptions(state.val);
+        } catch (err) {
+          this.log.debug(`State ${stateId} value is invalid: ${err}`);
+          return false;
+        }
+        if (!mo.reply) {
+          mo.reply = {
             messageReference
-          }
-        };
+          };
+        } else if (!mo.reply.messageReference) {
+          mo.reply.messageReference = messageReference;
+        }
       } else {
         if (!messageReference || !content) {
           this.log.warn(`No message reference or no/invalid content for reaction for ${stateId}!`);
@@ -1413,22 +1420,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return false;
         }
       }
-    } else if (state.val.startsWith("{") && state.val.endsWith("}")) {
-      this.log.debug(`State ${stateId} value seams to be json`);
-      try {
-        mo = JSON.parse(state.val);
-      } catch (err) {
-        this.log.warn(`State ${stateId} value seams to be json but cannot be parsed!`);
-        return false;
-      }
-      if (!(mo == null ? void 0 : mo.files) && !mo.content || mo.files && !Array.isArray(mo.files) || mo.embeds && !Array.isArray(mo.embeds)) {
-        this.log.warn(`State ${stateId} value seams to be json but seams to be invalid!`);
-        return false;
-      }
     } else {
-      mo = {
-        content: state.val
-      };
+      try {
+        mo = this.parseStringifiedMessageOptions(state.val);
+      } catch (err) {
+        this.log.debug(`State ${stateId} value is invalid: ${err}`);
+        return false;
+      }
     }
     this.log.debug(`Send to ${targetName}: ${JSON.stringify(mo)}`);
     try {
@@ -1861,6 +1859,25 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendTo(obj.from, obj.command, { error: `Unknown command: ${obj.command}` }, obj.callback);
         }
     }
+  }
+  parseStringifiedMessageOptions(content) {
+    let mo;
+    if (content.startsWith("{") && content.endsWith("}")) {
+      this.log.debug(`Content seams to be json`);
+      try {
+        mo = JSON.parse(content);
+      } catch (err) {
+        throw new Error(`Content seams to be json but cannot be parsed!`);
+      }
+      if (!(mo == null ? void 0 : mo.files) && !mo.content || mo.files && !Array.isArray(mo.files) || mo.embeds && !Array.isArray(mo.embeds)) {
+        throw new Error(`Content is json but seams to be invalid!`);
+      }
+    } else {
+      mo = {
+        content
+      };
+    }
+    return mo;
   }
   async getPreviousMessage(identifier) {
     var _a, _b, _c, _d, _e, _f;

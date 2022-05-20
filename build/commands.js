@@ -139,6 +139,14 @@ class DiscordAdapterSlashCommands {
             this.adapter.log.warn(`Custom command "${customCommandCfg.name}" has an invalid name or description configured!`);
             continue;
           }
+          if (customCommandCfg.name === this.cmdGetStateName) {
+            this.adapter.log.warn(`Custom command "${customCommandCfg.name}" is configured but conflicts with default get command! The command will be ignored.`);
+            continue;
+          }
+          if (customCommandCfg.name === this.cmdSetStateName) {
+            this.adapter.log.warn(`Custom command "${customCommandCfg.name}" is configured but conflicts with default set command! The command will be ignored.`);
+            continue;
+          }
           if (this.customCommands.has(customCommandCfg.name)) {
             this.adapter.log.warn(`Custom command "${customCommandCfg.name}" is configured multiple times! The command will be ignored.`);
             continue;
@@ -803,20 +811,10 @@ class DiscordAdapterSlashCommands {
       throw new Error(`Interaction ${interactionId} of custom slash command ${commandName} is not repliable!`);
     }
     if (typeof msg === "string") {
-      if (msg.startsWith("{") && msg.endsWith("}")) {
-        this.adapter.log.debug(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json`);
-        try {
-          msg = JSON.parse(msg);
-        } catch (err) {
-          throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but cannot be parsed!`);
-        }
-        if (!(msg == null ? void 0 : msg.files) && !msg.content || msg.files && !Array.isArray(msg.files) || msg.embeds && !Array.isArray(msg.embeds)) {
-          throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} seams to be json but seams to be invalid!`);
-        }
-      } else {
-        msg = {
-          content: msg
-        };
+      try {
+        msg = this.adapter.parseStringifiedMessageOptions(msg);
+      } catch (err) {
+        throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} is invalid: ${err}`);
       }
     }
     const replyMsg = await interaction.editReply(msg);
