@@ -343,7 +343,7 @@
           "label": "Custom get state command name",
           "help": "Custom name for the get state command. Defaults to 'iob-get'.",
           "placeholder": "iob-get",
-          "validator": "data.cmdGetStateName.match(/^([a-z][0-9a-z-_]{0,50})?$/)",
+          "validator": "data.cmdGetStateName.match(/^([a-z][0-9a-z-_]{0,49})?$/)",
           "validatorNoSaveOnError": true
         },
         "cmdSetStateName": {
@@ -355,7 +355,7 @@
           "label": "Custom set state command name",
           "help": "Custom name for the set state command. Defaults to 'iob-get'.",
           "placeholder": "iob-set",
-          "validator": "data.cmdSetStateName.match(/^([a-z][0-9a-z-_]{0,50})?$/)",
+          "validator": "data.cmdSetStateName.match(/^([a-z][0-9a-z-_]{0,49})?$/)",
           "validatorNoSaveOnError": true
         },
 
@@ -431,7 +431,7 @@
               "sort": false,
               "default": "",
               "placeholder": "iob-xyz",
-              "validator": "data.name.match(/^[a-z][0-9a-z-_]{0,50}$/)",
+              "validator": "data.name.match(/^[a-z][0-9a-z-_]{0,49}$/)",
               "validatorNoSaveOnError": true
             },
             {
@@ -479,7 +479,7 @@
                   "sort": false,
                   "default": "",
                   "placeholder": "option-1",
-                  "validator": "data.role === 'none' || data.name.match(/^[a-zA-Z][0-9a-zA-Z-_]{0,50}$/)",
+                  "validator": "data.role === 'none' || data.name.match(/^[a-z][0-9a-z-_]{0,49}$/)",
                   "validatorNoSaveOnError": true
                 },
                 {

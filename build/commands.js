@@ -53,7 +53,7 @@ class DiscordAdapterSlashCommands {
   }
   async onReady() {
     if (this.adapter.config.cmdGetStateName) {
-      if (this.adapter.config.cmdGetStateName.match(/^[a-z][0-9a-z-_]{0,50}$/)) {
+      if (this.adapter.config.cmdGetStateName.match(/^[a-z][0-9a-z-_]{0,49}$/)) {
         this.cmdGetStateName = this.adapter.config.cmdGetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom get state command name '${this.adapter.config.cmdGetStateName}' provied! Using default 'iob-get'.`);
@@ -61,7 +61,7 @@ class DiscordAdapterSlashCommands {
     }
     if (this.adapter.config.cmdSetStateName) {
       this.cmdSetStateName = this.adapter.config.cmdSetStateName;
-      if (this.adapter.config.cmdSetStateName.match(/^[a-z][0-9a-z-_]{0,50}$/)) {
+      if (this.adapter.config.cmdSetStateName.match(/^[a-z][0-9a-z-_]{0,49}$/)) {
         this.cmdSetStateName = this.adapter.config.cmdSetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom set state command name '${this.adapter.config.cmdSetStateName}' provied! Using default 'iob-set'.`);
@@ -135,7 +135,7 @@ class DiscordAdapterSlashCommands {
     if (this.adapter.config.enableCustomCommands) {
       loopCustomCommands:
         for (const customCommandCfg of this.adapter.config.customCommands) {
-          if (!customCommandCfg.name.match(/^[a-zA-Z][0-9a-z-_]{0,50}$/) || customCommandCfg.description.length === 0) {
+          if (!customCommandCfg.name.match(/^[a-z][0-9a-z-_]{0,49}$/) || customCommandCfg.description.length === 0) {
             this.adapter.log.warn(`Custom command "${customCommandCfg.name}" has an invalid name or description configured!`);
             continue;
           }
@@ -153,43 +153,44 @@ class DiscordAdapterSlashCommands {
           }
           const cmdCustom = new import_builders.SlashCommandBuilder().setName(customCommandCfg.name).setDescription(customCommandCfg.description).setDefaultPermission(true);
           const cmdOpts = /* @__PURE__ */ new Set();
-          if (Array.isArray(customCommandCfg.options)) {
-            for (const customCommandCfgOpt of customCommandCfg.options) {
-              if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-z-_]{0,50}$/) || customCommandCfgOpt.description.length === 0) {
-                this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" has an invalid name or description configured!`);
+          if (!Array.isArray(customCommandCfg.options)) {
+            customCommandCfg.options = [];
+          }
+          for (const customCommandCfgOpt of customCommandCfg.options) {
+            if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-z-_]{0,49}$/) || customCommandCfgOpt.description.length === 0) {
+              this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" has an invalid name or description configured!`);
+              continue loopCustomCommands;
+            }
+            if (cmdOpts.has(customCommandCfgOpt.name)) {
+              this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" is configured multiple times! The command will be ignored.`);
+              continue loopCustomCommands;
+            }
+            cmdOpts.add(customCommandCfgOpt.name);
+            switch (customCommandCfgOpt.type) {
+              case "string":
+                cmdCustom.addStringOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+              case "number":
+                cmdCustom.addNumberOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+              case "boolean":
+                cmdCustom.addBooleanOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+              case "user":
+                cmdCustom.addUserOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+              case "role":
+                cmdCustom.addRoleOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+              case "channel":
+                cmdCustom.addChannelOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+              case "mentionable":
+                cmdCustom.addMentionableOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
+                break;
+              default:
+                this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name} has an invalid type set"!`);
                 continue loopCustomCommands;
-              }
-              if (cmdOpts.has(customCommandCfgOpt.name)) {
-                this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" is configured multiple times! The command will be ignored.`);
-                continue loopCustomCommands;
-              }
-              cmdOpts.add(customCommandCfgOpt.name);
-              switch (customCommandCfgOpt.type) {
-                case "string":
-                  cmdCustom.addStringOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
-                  break;
-                case "number":
-                  cmdCustom.addNumberOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
-                  break;
-                case "boolean":
-                  cmdCustom.addBooleanOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
-                  break;
-                case "user":
-                  cmdCustom.addUserOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
-                  break;
-                case "role":
-                  cmdCustom.addRoleOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
-                  break;
-                case "channel":
-                  cmdCustom.addChannelOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
-                  break;
-                case "mentionable":
-                  cmdCustom.addMentionableOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
-                  break;
-                default:
-                  this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name} has an invalid type set"!`);
-                  continue loopCustomCommands;
-              }
             }
           }
           commands.push(cmdCustom);
