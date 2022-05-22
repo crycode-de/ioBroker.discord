@@ -70,7 +70,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.on("unload", this.onUnload);
   }
   async onReady() {
-    var _a;
+    var _a, _b;
     await this.setInfoConnectionState(false, true);
     const systemConfig = await this.getForeignObjectAsync("system.config");
     import_i18n.i18n.language = (systemConfig == null ? void 0 : systemConfig.common.language) || "en";
@@ -94,6 +94,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     if (this.config.enableCustomCommands && !Array.isArray(this.config.customCommands)) {
       this.config.customCommands = [];
     }
+    this.config.reactOnMentionsEmoji = ((_a = this.config.reactOnMentionsEmoji) == null ? void 0 : _a.trim()) || "\u{1F44D}";
     if (this.config.enableRawStates) {
       await this.extendObjectAsync("raw", {
         type: "channel",
@@ -222,7 +223,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     const view = await this.getObjectViewAsync("system", "custom", {});
     if (view == null ? void 0 : view.rows) {
       for (const item of view.rows) {
-        await this.setupObjCustom(item.id, (_a = item.value) == null ? void 0 : _a[this.namespace]);
+        await this.setupObjCustom(item.id, (_b = item.value) == null ? void 0 : _b[this.namespace]);
       }
     }
     this.log.debug("Getting all objects with custom config done");

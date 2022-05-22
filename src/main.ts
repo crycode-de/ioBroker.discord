@@ -166,6 +166,7 @@ class DiscordAdapter extends Adapter {
     if (this.config.enableCustomCommands && !Array.isArray(this.config.customCommands)) {
       this.config.customCommands = [];
     }
+    this.config.reactOnMentionsEmoji = this.config.reactOnMentionsEmoji?.trim() || '👍';
 
     // setup generic dynamic objects (most objects will be set up in `updateGuilds` method)
     if (this.config.enableRawStates) {

@@ -1,6 +1,6 @@
 // This file extends the AdapterConfig type from "@types/iobroker"
 
-import { EmojiIdentifierResolvable, Snowflake } from 'discord.js';
+import { Snowflake } from 'discord.js';
 
 // Augment the globally declared type ioBroker.AdapterConfig
 declare global {
@@ -10,7 +10,7 @@ declare global {
       botName: string;
       processAllMessagesInServerChannel: boolean;
       reactOnMentions: boolean;
-      reactOnMentionsEmoji: EmojiIdentifierResolvable;
+      reactOnMentionsEmoji: string | Snowflake;
       text2commandInstance: string;
       text2commandRespondWith: 'message' | 'reply' | 'none';
       dynamicServerUpdates: boolean;
