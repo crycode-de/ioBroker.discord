@@ -344,7 +344,10 @@
           "help": "Custom name for the get state command. Defaults to 'iob-get'.",
           "placeholder": "iob-get",
           "validator": "data.cmdGetStateName.match(/^([a-z][0-9a-z-_]{0,49})?$/)",
-          "validatorNoSaveOnError": true
+          "validatorNoSaveOnError": true,
+          "onChange": {
+            "calculateFunc": "data.cmdGetStateName.toLowerCase().replace(/(^[^a-z]|[^0-9a-z-_])/g, '')"
+          }
         },
         "cmdSetStateName": {
           "type": "text",
@@ -356,7 +359,10 @@
           "help": "Custom name for the set state command. Defaults to 'iob-get'.",
           "placeholder": "iob-set",
           "validator": "data.cmdSetStateName.match(/^([a-z][0-9a-z-_]{0,49})?$/)",
-          "validatorNoSaveOnError": true
+          "validatorNoSaveOnError": true,
+          "onChange": {
+            "calculateFunc": "data.cmdSetStateName.toLowerCase().replace(/(^[^a-z]|[^0-9a-z-_])/g, '')"
+          }
         },
 
         "_cmdObjectsConfigHint": {
@@ -432,7 +438,10 @@
               "default": "",
               "placeholder": "iob-xyz",
               "validator": "data.name.match(/^[a-z][0-9a-z-_]{0,49}$/)",
-              "validatorNoSaveOnError": true
+              "validatorNoSaveOnError": true,
+              "onChange": {
+                "calculateFunc": "data.name.toLowerCase().replace(/(^[^a-z]|[^0-9a-z-_])/g, '')"
+              }
             },
             {
               "type": "text",
@@ -479,8 +488,11 @@
                   "sort": false,
                   "default": "",
                   "placeholder": "option-1",
-                  "validator": "data.role === 'none' || data.name.match(/^[a-z][0-9a-z-_]{0,49}$/)",
-                  "validatorNoSaveOnError": true
+                  "validator": "data.name.match(/^[a-z][0-9a-z-_]{0,49}$/)",
+                  "validatorNoSaveOnError": true,
+                  "onChange": {
+                    "calculateFunc": "data.name.toLowerCase().replace(/(^[^a-z]|[^0-9a-z-_])/g, '')"
+                  }
                 },
                 {
                   "type": "text",
