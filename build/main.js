@@ -48,6 +48,19 @@ var import_commands = require("./commands");
 var import_definitions = require("./lib/definitions");
 var import_i18n = require("./lib/i18n");
 var import_utils = require("./lib/utils");
+const LOGIN_WAIT_TIMES = [
+  0,
+  5e3,
+  1e4,
+  3e4,
+  6e4,
+  12e4,
+  12e4,
+  3e5,
+  3e5,
+  3e5,
+  6e5
+];
 class DiscordAdapter extends import_adapter_core.Adapter {
   constructor(options = {}) {
     super(__spreadProps(__spreadValues({}, options), {
@@ -161,6 +174,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       ]
     });
     this.client.on("ready", this.onClientReady);
+    if (this.log.level === "silly") {
+      this.client.on("debug", (message) => this.log.silly(`discordjs: ${message}`));
+    }
     this.client.on("warn", (message) => this.log.warn(`Discord client warning: ${message}`));
     this.client.on("error", (err) => this.log.error(`Discord client error: ${err.toString()}`));
     this.client.on("rateLimit", (rateLimitData) => this.log.debug(`Discord client rate limit hit: ${JSON.stringify(rateLimitData)}`));
@@ -181,6 +197,10 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.client.on("shardResume", (shardId, replayedEvents) => this.log.debug(`Discord client websocket resume (shardId:${shardId} replayedEvents:${replayedEvents})`));
     this.client.on("shardDisconnect", (event, shardId) => this.log.debug(`Discord client websocket disconnect (shardId:${shardId} ${event.reason})`));
     this.client.on("shardReconnecting", (shardId) => this.log.debug(`Discord client websocket reconnecting (shardId:${shardId})`));
+    this.client.on("shardError", (err, shardId) => {
+      this.log.error(`Discord client websocket error (shardId:${shardId}) ${err}`);
+      this.terminate("Discord client websocket error", import_adapter_core.EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
+    });
     this.client.on("messageCreate", this.onClientMessageCreate);
     if (this.config.dynamicServerUpdates) {
       this.client.on("channelCreate", () => this.updateGuilds());
@@ -228,17 +248,36 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     this.log.debug("Getting all objects with custom config done");
     this.initialCustomObjectSetupDone = true;
-    try {
-      await this.client.login(this.config.token);
-    } catch (err) {
-      if (err instanceof Error) {
-        this.log.error(`Discord login error: ${err.toString()}`);
-      } else {
-        this.log.error(`Discord login error`);
-      }
+    if (!await this.loginClient()) {
+      this.terminate("No connection to Discord", import_adapter_core.EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
       return;
     }
     await this.discordSlashCommands.registerSlashCommands();
+  }
+  async loginClient(tryNr = 0) {
+    if (!this.client || this.unloaded) {
+      return false;
+    }
+    try {
+      await this.client.login(this.config.token);
+      return true;
+    } catch (err) {
+      if (err instanceof Error) {
+        this.log.error(`Discord login error: ${err.toString()}`);
+        if (err.name === "AbortError") {
+          tryNr++;
+          if (tryNr >= LOGIN_WAIT_TIMES.length) {
+            tryNr = LOGIN_WAIT_TIMES.length - 1;
+          }
+          this.log.info(`Wait ${LOGIN_WAIT_TIMES[tryNr] / 1e3} seconds before next login try (#${tryNr + 1}) ...`);
+          await this.wait(LOGIN_WAIT_TIMES[tryNr]);
+          return this.loginClient(tryNr);
+        }
+      } else {
+        this.log.error(`Unknown Discord login error`);
+      }
+      return false;
+    }
   }
   async onClientReady() {
     var _a;
@@ -1960,6 +1999,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       return false;
     }
     return true;
+  }
+  wait(time) {
+    return new Promise((resolve) => this.setTimeout(resolve, time));
   }
   async setInfoConnectionState(connected, force = false) {
     if (force || connected !== this.infoConnected) {

@@ -7,6 +7,7 @@ import { boundMethod } from 'autobind-decorator';
 import {
   Adapter,
   AdapterOptions,
+  EXIT_CODES,
 } from '@iobroker/adapter-core';
 
 import {
@@ -56,6 +57,20 @@ import {
   getBasenameFromFilePathOrUrl,
   getBufferAndNameFromBase64String,
 } from './lib/utils';
+
+const LOGIN_WAIT_TIMES = <const>[
+  0, // none - first try!
+  5000, // 5 sek
+  10000, // 10 sek
+  30000, // 30 sek
+  60000, // 1 min
+  120000, // 2 min
+  120000, // 2 min
+  300000, // 5 min
+  300000, // 5 min
+  300000, // 5 min
+  600000, // 10 min
+];
 
 /**
  * ioBroker.discord adapter
@@ -240,6 +255,9 @@ class DiscordAdapter extends Adapter {
 
     this.client.on('ready', this.onClientReady);
 
+    if (this.log.level === 'silly') {
+      this.client.on('debug', (message) => this.log.silly(`discordjs: ${message}`));
+    }
     this.client.on('warn', (message) => this.log.warn(`Discord client warning: ${message}`));
     this.client.on('error', (err) => this.log.error(`Discord client error: ${err.toString()}`));
     this.client.on('rateLimit', (rateLimitData) => this.log.debug(`Discord client rate limit hit: ${JSON.stringify(rateLimitData)}`)); // rate limit event is just a information - discord.js handels rate limits
@@ -265,6 +283,10 @@ class DiscordAdapter extends Adapter {
     this.client.on('shardResume', (shardId, replayedEvents) => this.log.debug(`Discord client websocket resume (shardId:${shardId} replayedEvents:${replayedEvents})`));
     this.client.on('shardDisconnect', (event, shardId) => this.log.debug(`Discord client websocket disconnect (shardId:${shardId} ${event.reason})`));
     this.client.on('shardReconnecting', (shardId) => this.log.debug(`Discord client websocket reconnecting (shardId:${shardId})`));
+    this.client.on('shardError', (err, shardId) => {
+      this.log.error(`Discord client websocket error (shardId:${shardId}) ${err}`);
+      this.terminate('Discord client websocket error', EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
+    });
 
     this.client.on('messageCreate', this.onClientMessageCreate);
 
@@ -323,19 +345,54 @@ class DiscordAdapter extends Adapter {
     // remember that the initial setup of the custom objects is done
     this.initialCustomObjectSetupDone = true;
 
-    try {
-      await this.client.login(this.config.token);
-    } catch (err) {
-      if (err instanceof Error) {
-        this.log.error(`Discord login error: ${err.toString()}`);
-      } else {
-        this.log.error(`Discord login error`);
-      }
-      return;
+    // try to log in the client, terminate if this was not successfull
+    if (!await this.loginClient()) {
+      this.terminate('No connection to Discord', EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
+      return; // needed!
     }
 
     // register discord commands if login was successfull
     await this.discordSlashCommands.registerSlashCommands();
+  }
+
+  /**
+   * Try to log in the discord client.
+   *
+   * This will also handle network related errors.
+   * In case of networt related errors this will retry the login after some time.
+   * The wait time before each retry will be increased for each try, as defined
+   * in `LOGIN_WAIT_TIMES`.
+   * @param tryNr Number of the login try. Should be `0` when login process is started and is increased internally in each try.
+   * @returns Promise which resolves to `true` if logged in, `false` otherwise.
+   */
+  private async loginClient (tryNr: number = 0): Promise<boolean> {
+    if (!this.client || this.unloaded) {
+      return false;
+    }
+
+    try {
+      await this.client.login(this.config.token);
+      return true;
+    } catch (err) {
+      if (err instanceof Error) {
+        this.log.error(`Discord login error: ${err.toString()}`);
+        if (err.name === 'AbortError') {
+          // AbortError is a result of network errors ... retry
+          tryNr++;
+          if (tryNr >= LOGIN_WAIT_TIMES.length) {
+            tryNr = LOGIN_WAIT_TIMES.length - 1;
+          }
+
+          this.log.info(`Wait ${LOGIN_WAIT_TIMES[tryNr] / 1000} seconds before next login try (#${tryNr+1}) ...`);
+          await this.wait(LOGIN_WAIT_TIMES[tryNr]);
+
+          return this.loginClient(tryNr);
+        }
+      } else {
+        this.log.error(`Unknown Discord login error`);
+      }
+      return false;
+    }
   }
 
   /**
@@ -2483,6 +2540,16 @@ class DiscordAdapter extends Adapter {
     }
 
     return true;
+  }
+
+  /**
+   * Awaitable function to just wait some time.
+   *
+   * Uses `Adapter.setTimeout(...)` internally to make sure the timeout is cleared on adapter unload.
+   * @param time Time to wait in ms.
+   */
+  public wait (time: number): Promise<void> {
+    return new Promise((resolve) => this.setTimeout(resolve, time));
   }
 
   /**
