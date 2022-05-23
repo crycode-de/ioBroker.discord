@@ -185,5 +185,7 @@
     "Mentionable": "Menzionabile",
     "option-1": "opzione 1",
     "Option 1": "opzione 1",
-    "Required": "Necessario"
+    "Required": "Necessario",
+    "Ephemeral replies": "Risposte effimere",
+    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "Se selezionato, tutte le risposte ai comandi verranno inviate come effimere, il che renderà la risposta visibile solo all'utente che ha eseguito il comando."
 }

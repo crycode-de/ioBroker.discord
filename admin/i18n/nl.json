@@ -185,5 +185,7 @@
     "Mentionable": "noemenswaardig",
     "option-1": "Optie 1",
     "Option 1": "Optie 1",
-    "Required": "Vereist"
+    "Required": "Vereist",
+    "Ephemeral replies": "Kortstondige antwoorden",
+    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "Indien aangevinkt, zullen alle commando-antwoorden als kortstondig worden verzonden, waardoor het antwoord alleen zichtbaar is voor de gebruiker die de opdracht heeft uitgevoerd."
 }

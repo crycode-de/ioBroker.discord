@@ -320,7 +320,8 @@
           "md": 6,
           "lg": 4,
           "label": "Enable commands",
-          "help": "If checked, the bot will register discord slash commands to get and set ioBroker states."
+          "help": "If checked, the bot will register discord slash commands to get and set ioBroker states.",
+          "default": false
         },
 
         "commandsGlobal": {
@@ -330,7 +331,19 @@
           "lg": 4,
           "hidden": "!data.enableCommands",
           "label": "Use global commands",
-          "help": "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply."
+          "help": "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.",
+          "default": false
+        },
+
+        "commandRepliesEphemeral": {
+          "type": "checkbox",
+          "sm": 12,
+          "md": 6,
+          "lg": 4,
+          "hidden": "!data.enableCommands",
+          "label": "Ephemeral replies",
+          "help": "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.",
+          "default": false
         },
 
         "cmdGetStateName": {
@@ -342,6 +355,7 @@
           "hidden": "!data.enableCommands",
           "label": "Custom get state command name",
           "help": "Custom name for the get state command. Defaults to 'iob-get'.",
+          "default": "",
           "placeholder": "iob-get",
           "validator": "data.cmdGetStateName.match(/^([a-z][0-9a-z-_]{0,49})?$/)",
           "validatorNoSaveOnError": true,
@@ -357,6 +371,7 @@
           "hidden": "!data.enableCommands",
           "label": "Custom set state command name",
           "help": "Custom name for the set state command. Defaults to 'iob-get'.",
+          "default": "",
           "placeholder": "iob-set",
           "validator": "data.cmdSetStateName.match(/^([a-z][0-9a-z-_]{0,49})?$/)",
           "validatorNoSaveOnError": true,
@@ -417,7 +432,8 @@
           "lg": 4,
           "hidden": "!data.enableCommands",
           "label": "Enable custom commands",
-          "help": "Define custom commands which may be used for interactions with scripts for example."
+          "help": "Define custom commands which may be used for interactions with scripts for example.",
+          "default": false
         },
 
         "customCommands": {

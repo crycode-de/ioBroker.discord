@@ -24,6 +24,7 @@ declare global {
 
       enableCommands: boolean;
       commandsGlobal: boolean;
+      commandRepliesEphemeral: boolean;
       cmdGetStateName: string;
       cmdSetStateName: string;
       enableCustomCommands: boolean;

@@ -493,9 +493,6 @@ class DiscordAdapterSlashCommands {
     }
     if (!interaction.isCommand())
       return;
-    if (!interaction.deferred) {
-      await interaction.deferReply();
-    }
     const { commandName, user } = interaction;
     if (!this.registerCommandsDone) {
       this.adapter.log.warn(`Got command ${commandName} but command registration is not done yet.`);
@@ -508,21 +505,30 @@ class DiscordAdapterSlashCommands {
         await this.handleCmdGetState(interaction);
       } else {
         this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-        await interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
+        await interaction.reply({
+          content: import_i18n.i18n.getString("You are not authorized to call this command!"),
+          ephemeral: true
+        });
       }
     } else if (commandName === this.cmdSetStateName) {
       if (this.adapter.checkUserAuthorization(authCheckTarget, { setStates: true })) {
         await this.handleCmdSetState(interaction);
       } else {
         this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-        await interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
+        await interaction.reply({
+          content: import_i18n.i18n.getString("You are not authorized to call this command!"),
+          ephemeral: true
+        });
       }
     } else if (this.customCommands.has(commandName)) {
       if (this.adapter.checkUserAuthorization(authCheckTarget, { useCustomCommands: true })) {
         await this.handleCmdCustom(interaction);
       } else {
         this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-        await interaction.editReply(import_i18n.i18n.getString("You are not authorized to call this command!"));
+        await interaction.reply({
+          content: import_i18n.i18n.getString("You are not authorized to call this command!"),
+          ephemeral: true
+        });
       }
     } else {
       this.adapter.log.warn(`Got unknown command ${commandName}!`);
@@ -532,16 +538,43 @@ class DiscordAdapterSlashCommands {
   async getObjectAndCfgFromAlias(objAlias, interaction) {
     const cfg = this.commandObjectConfig.find((coc) => coc.alias === objAlias);
     if (!cfg) {
-      await interaction.editReply(import_i18n.i18n.getString("Object `%s` not found!", objAlias || ""));
+      if (interaction.replied) {
+        await interaction.editReply({
+          content: import_i18n.i18n.getString("Object `%s` not found!", objAlias || "")
+        });
+      } else {
+        await interaction.reply({
+          content: import_i18n.i18n.getString("Object `%s` not found!", objAlias || ""),
+          ephemeral: true
+        });
+      }
       return [null, null];
     }
     const obj = await this.adapter.getForeignObjectAsync(cfg.id);
     if (!obj) {
-      await interaction.editReply(import_i18n.i18n.getString("Object `%s` not found!", cfg.id));
+      if (interaction.replied) {
+        await interaction.editReply({
+          content: import_i18n.i18n.getString("Object `%s` not found!", cfg.id)
+        });
+      } else {
+        await interaction.reply({
+          content: import_i18n.i18n.getString("Object `%s` not found!", cfg.id),
+          ephemeral: true
+        });
+      }
       return [null, null];
     }
     if (obj.type !== "state") {
-      await interaction.editReply(import_i18n.i18n.getString("Object `%s` is not of type state!", cfg.id));
+      if (interaction.replied) {
+        await interaction.editReply({
+          content: import_i18n.i18n.getString("Object `%s` is not of type state!", cfg.id)
+        });
+      } else {
+        await interaction.reply({
+          content: import_i18n.i18n.getString("Object `%s` is not of type state!", cfg.id),
+          ephemeral: true
+        });
+      }
       return [null, null];
     }
     return [obj, cfg];
@@ -555,13 +588,22 @@ class DiscordAdapterSlashCommands {
     }
     const objCustom = (_a = obj.common.custom) == null ? void 0 : _a[this.adapter.namespace];
     if (!(objCustom == null ? void 0 : objCustom.commandsAllowGet)) {
-      await interaction.editReply(import_i18n.i18n.getString("Get not allowed for state `%s`!", cfg.id));
+      await interaction.reply({
+        content: import_i18n.i18n.getString("Get not allowed for state `%s`!", cfg.id),
+        ephemeral: true
+      });
       return;
     }
     const state = await this.adapter.getForeignStateAsync(cfg.id);
     if (!state) {
-      await interaction.editReply(import_i18n.i18n.getString("State `%s` not found!", cfg.id));
+      await interaction.reply({
+        content: import_i18n.i18n.getString("State `%s` not found!", cfg.id),
+        ephemeral: true
+      });
       return;
+    }
+    if (!interaction.deferred) {
+      await interaction.deferReply({ ephemeral: this.adapter.config.commandRepliesEphemeral });
     }
     let val = "";
     let msgOpts = void 0;
@@ -646,13 +688,22 @@ class DiscordAdapterSlashCommands {
     }
     const objCustom = (_a = obj.common.custom) == null ? void 0 : _a[this.adapter.namespace];
     if (!(objCustom == null ? void 0 : objCustom.commandsAllowSet)) {
-      await interaction.editReply(import_i18n.i18n.getString("Set not allowed for state `%s`!", cfg.id));
+      await interaction.reply({
+        content: import_i18n.i18n.getString("Set not allowed for state `%s`!", cfg.id),
+        ephemeral: true
+      });
       return;
     }
     let valueStr = interaction.options.getString("value");
     if (typeof valueStr !== "string") {
-      await interaction.editReply(import_i18n.i18n.getString("No value provided!"));
+      await interaction.reply({
+        content: import_i18n.i18n.getString("No value provided!"),
+        ephemeral: true
+      });
       return;
+    }
+    if (!interaction.deferred) {
+      await interaction.deferReply({ ephemeral: this.adapter.config.commandRepliesEphemeral });
     }
     valueStr = valueStr.trim();
     const unit = obj.common.unit ? ` ${obj.common.unit}` : "";
@@ -724,6 +775,9 @@ class DiscordAdapterSlashCommands {
     const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
     if (!cmdCfg)
       return;
+    if (!interaction.deferred) {
+      await interaction.deferReply({ ephemeral: this.adapter.config.commandRepliesEphemeral });
+    }
     this.lastInteractions.set(interaction.id, interaction);
     const proms = [];
     const json = {

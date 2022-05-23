@@ -185,5 +185,7 @@
     "Mentionable": "值得一提的",
     "option-1": "选项1",
     "Option 1": "选项1",
-    "Required": "必需的"
+    "Required": "必需的",
+    "Ephemeral replies": "临时回复",
+    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "如果选中，所有命令回复都将作为临时发送，这将使回复仅对执行该命令的用户可见。"
 }

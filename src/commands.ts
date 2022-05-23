@@ -698,10 +698,6 @@ export class DiscordAdapterSlashCommands {
     // is it a command?
     if (!interaction.isCommand()) return;
 
-    if (!interaction.deferred) {
-      await interaction.deferReply();
-    }
-
     const { commandName, user } = interaction;
 
     if (!this.registerCommandsDone) {
@@ -721,7 +717,10 @@ export class DiscordAdapterSlashCommands {
       } else {
         // user not authorized
         this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-        await interaction.editReply(i18n.getString('You are not authorized to call this command!'));
+        await interaction.reply({
+          content: i18n.getString('You are not authorized to call this command!'),
+          ephemeral: true,
+        });
       }
 
     } else if (commandName === this.cmdSetStateName) {
@@ -732,7 +731,10 @@ export class DiscordAdapterSlashCommands {
       } else {
         // user not authorized
         this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-        await interaction.editReply(i18n.getString('You are not authorized to call this command!'));
+        await interaction.reply({
+          content: i18n.getString('You are not authorized to call this command!'),
+          ephemeral: true,
+        });
       }
 
     } else if (this.customCommands.has(commandName)) {
@@ -743,7 +745,10 @@ export class DiscordAdapterSlashCommands {
       } else {
         // user not authorized
         this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
-        await interaction.editReply(i18n.getString('You are not authorized to call this command!'));
+        await interaction.reply({
+          content: i18n.getString('You are not authorized to call this command!'),
+          ephemeral: true,
+        });
       }
 
     } else {
@@ -755,6 +760,8 @@ export class DiscordAdapterSlashCommands {
   /**
    * Try to get the ioBroker object and CommandObjectConfig for a given object alias.
    * The object will be checked if it's a valid state object.
+   *
+   * In case of an error, a reply will be sent to the interaction.
    * @param objAlias The alias of the object.
    * @param interaction The interaction for replies on errors.
    * @returns Array containing the object and the config or null and null.
@@ -763,18 +770,45 @@ export class DiscordAdapterSlashCommands {
     // find the config for the requested object
     const cfg = this.commandObjectConfig.find((coc) => coc.alias === objAlias);
     if (!cfg) {
-      await interaction.editReply(i18n.getString('Object `%s` not found!', objAlias || ''));
+      if (interaction.replied) {
+        await interaction.editReply({
+          content: i18n.getString('Object `%s` not found!', objAlias || ''),
+        });
+      } else {
+        await interaction.reply({
+          content: i18n.getString('Object `%s` not found!', objAlias || ''),
+          ephemeral: true,
+        });
+      }
       return [null, null];
     }
 
     // get the object
     const obj = await this.adapter.getForeignObjectAsync(cfg.id);
     if (!obj) {
-      await interaction.editReply(i18n.getString('Object `%s` not found!', cfg.id));
+      if (interaction.replied) {
+        await interaction.editReply({
+          content: i18n.getString('Object `%s` not found!', cfg.id),
+        });
+      } else {
+        await interaction.reply({
+          content: i18n.getString('Object `%s` not found!', cfg.id),
+          ephemeral: true,
+        });
+      }
       return [null, null];
     }
     if (obj.type !== 'state') {
-      await interaction.editReply(i18n.getString('Object `%s` is not of type state!', cfg.id));
+      if (interaction.replied) {
+        await interaction.editReply({
+          content: i18n.getString('Object `%s` is not of type state!', cfg.id),
+        });
+      } else {
+        await interaction.reply({
+          content: i18n.getString('Object `%s` is not of type state!', cfg.id),
+          ephemeral: true,
+        });
+      }
       return [null, null];
     }
 
@@ -797,15 +831,26 @@ export class DiscordAdapterSlashCommands {
 
     // check if get allowed
     if (!objCustom?.commandsAllowGet) {
-      await interaction.editReply(i18n.getString('Get not allowed for state `%s`!', cfg.id));
+      await interaction.reply({
+        content: i18n.getString('Get not allowed for state `%s`!', cfg.id),
+        ephemeral: true,
+      });
       return;
     }
 
     // get the state
     const state = await this.adapter.getForeignStateAsync(cfg.id);
     if (!state) {
-      await interaction.editReply(i18n.getString('State `%s` not found!', cfg.id));
+      await interaction.reply({
+        content: i18n.getString('State `%s` not found!', cfg.id),
+        ephemeral: true,
+      });
       return;
+    }
+
+    // defer the reply to have more time
+    if (!interaction.deferred) {
+      await interaction.deferReply({ ephemeral: this.adapter.config.commandRepliesEphemeral });
     }
 
     // get the value depending on the state type
@@ -927,14 +972,25 @@ export class DiscordAdapterSlashCommands {
 
     // check if set allowed
     if (!objCustom?.commandsAllowSet) {
-      await interaction.editReply(i18n.getString('Set not allowed for state `%s`!', cfg.id));
+      await interaction.reply({
+        content: i18n.getString('Set not allowed for state `%s`!', cfg.id),
+        ephemeral: true,
+      });
       return;
     }
 
     let valueStr = interaction.options.getString('value');
     if (typeof valueStr !== 'string') {
-      await interaction.editReply(i18n.getString('No value provided!'));
+      await interaction.reply({
+        content: i18n.getString('No value provided!'),
+        ephemeral: true,
+      });
       return;
+    }
+
+    // defer the reply to have more time
+    if (!interaction.deferred) {
+      await interaction.deferReply({ ephemeral: this.adapter.config.commandRepliesEphemeral });
     }
 
     valueStr = valueStr.trim();
@@ -1034,6 +1090,11 @@ export class DiscordAdapterSlashCommands {
     // get the related custom command config
     const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
     if (!cmdCfg) return; // should never happen, but to be sure
+
+    // defer the reply to have more time
+    if (!interaction.deferred) {
+      await interaction.deferReply({ ephemeral: this.adapter.config.commandRepliesEphemeral });
+    }
 
     // add this interaction to the collection of last interactions
     this.lastInteractions.set(interaction.id, interaction);

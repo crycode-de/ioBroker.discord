@@ -53,17 +53,16 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 * Send, edit and delete messages, add and await message reactions using Scripts
 * Optional raw states to allow more flexibility in custom scripts
 
-## Planned features
-
-See [GitHub issue](https://github.com/crycode-de/ioBroker.discord/issues/1).
-
 ## Changelog
 
 ### Work in progress
 
+* (crycode-de) Added support for custom slash commands
+* (crycode-de) Send error replies on slash commands as ephemeral
+* (crycode-de) Added config option to send all slash command replies as ephemeral
+* (crycode-de) Register get/set commands only if states are configured for this
 * (crycode-de) Added command options to `raw.interactionJson` json content
 * (crycode-de) Fixed command name checks
-* (crycode-de) Register get/set commands only if states are configured for this
 
 ### 1.0.2 (2022-05-16)
 

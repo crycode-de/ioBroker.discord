@@ -609,7 +609,7 @@ zusätzliche Felder in den Options-Objekten befüllt.
 
 **Hinweis:** Der Befehl muss selbst ausgewertet und dann eine Antwort auf den
 Befehl gesendet werden. Dies geht beispielsweise mit einem eigenen Skript.
-Eine Antwort muss innerhalb von zehn Minuten über den `.sendReply`-Zustand
+Eine Antwort muss innerhalb von 15 Minuten über den `.sendReply`-Zustand
 oder die zugehörige `sendTo(...)`-Aktion gesendet werden.
 Wenn innerhalb der Zeit keine Antwort gesendet wird, dann zeigt der
 Discord-Client den Fehler _Die Anwendung reagiert nicht_ an.

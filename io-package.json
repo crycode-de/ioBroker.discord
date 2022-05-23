@@ -150,6 +150,7 @@
         "processMessagesFromUnauthorizedUsers": false,
         "enableCommands": false,
         "commandsGlobal": false,
+        "commandRepliesEphemeral": false,
         "cmdGetStateName": "",
         "cmdSetStateName": "",
         "enableCustomCommands": false,

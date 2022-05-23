@@ -115,6 +115,8 @@
     "If checked, the bot will register discord slash commands to get and set ioBroker states.": "If checked, the bot will register discord slash commands to get and set ioBroker states.",
     "Use global commands": "Use global commands",
     "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.": "If checked, the slash commands will be registered globally. This will make commands available in direct messages, but command changes may take up to one hour to apply.",
+    "Ephemeral replies": "Ephemeral replies",
+    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.",
     "Custom get state command name": "Custom get state command name",
     "Custom name for the get state command. Defaults to 'iob-get'.": "Custom name for the get state command. Defaults to 'iob-get'.",
     "Custom set state command name": "Custom set state command name",

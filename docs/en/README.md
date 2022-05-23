@@ -557,7 +557,7 @@ properties of the option object will be filled.
 
 **Note:** It's up to you to handle the command data and send a reply to the
 command, i.e. using a custom script.
-You have up to ten minutes to send a reply using the `.sendReply` state or the
+You have up to 15 minutes to send a reply using the `.sendReply` state or the
 corresponding `sendTo(...)` action.
 If you don't send a reply in time, the Discord client will show the error
 message _The application did not respond_.
