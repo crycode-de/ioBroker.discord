@@ -448,6 +448,21 @@ class DiscordAdapterSlashCommands {
       }
       await Promise.all(proms);
     }
+    const objListSlashCommands = await this.adapter.getObjectListAsync({
+      startkey: `${this.adapter.namespace}.slashCommands.`,
+      endkey: `${this.adapter.namespace}.slashCommands.\u9999`
+    });
+    const re = new RegExp(`^${this.adapter.name}\\.${this.adapter.instance}\\.slashCommands\\.([^.]+)$`);
+    for (const item of objListSlashCommands.rows) {
+      const m = item.id.match(re);
+      if (m) {
+        const cmdName = m[1];
+        if (!this.customCommands.has(cmdName)) {
+          this.adapter.log.debug(`Custom slash command ${cmdName} is not configured - deleting objects`);
+          await this.adapter.delObjectAsyncCached(`slashCommands.${cmdName}`, { recursive: true });
+        }
+      }
+    }
   }
   setupCommandObject(objId, cfg) {
     if (cfg) {

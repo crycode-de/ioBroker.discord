@@ -446,6 +446,9 @@ export class DiscordAdapterSlashCommands {
     }
   }
 
+  /**
+   * Setup the ioBroker object tree for the configured custom commands.
+   */
   private async setupCustomCommandIobObjects (): Promise<void> {
     for (const cmdName of this.customCommands) {
       const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === cmdName);
@@ -618,6 +621,26 @@ export class DiscordAdapterSlashCommands {
       // wait for object create/delete
       await Promise.all(proms);
     }
+
+    /*
+     * find and delete old custom slash command objects
+     */
+    const objListSlashCommands = await this.adapter.getObjectListAsync({
+      startkey: `${this.adapter.namespace}.slashCommands.`,
+      endkey: `${this.adapter.namespace}.slashCommands.\u9999`,
+    });
+    const re = new RegExp(`^${this.adapter.name}\\.${this.adapter.instance}\\.slashCommands\\.([^.]+)$`);
+    for (const item of objListSlashCommands.rows) {
+      const m = item.id.match(re);
+      if (m) {
+        const cmdName = m[1];
+        if (!this.customCommands.has(cmdName)) {
+          this.adapter.log.debug(`Custom slash command ${cmdName} is not configured - deleting objects`);
+          await this.adapter.delObjectAsyncCached(`slashCommands.${cmdName}`, { recursive: true });
+        }
+      }
+    }
+
   }
 
   /**
