@@ -2490,15 +2490,24 @@ class DiscordAdapter extends Adapter {
         const getServerMemberInfoPayload = obj.message as SendToActionServerMemberIdentifier;
 
         // check payload
-        if (!getServerMemberInfoPayload.serverId || !getServerMemberInfoPayload.userId) {
-          this.sendTo(obj.from, obj.command, { error: 'serverId and userlId need to be set', ...getServerMemberInfoPayload }, obj.callback);
+        if (!getServerMemberInfoPayload.serverId || (!getServerMemberInfoPayload.userId && !getServerMemberInfoPayload.userTag)) {
+          this.sendTo(obj.from, obj.command, { error: 'serverId and userlId or userTag need to be set', ...getServerMemberInfoPayload }, obj.callback);
           return;
         }
 
-        const member = this.client?.guilds.cache.get(getServerMemberInfoPayload.serverId)?.members.cache.get(getServerMemberInfoPayload.userId);
-        if (!member) {
-          this.sendTo(obj.from, obj.command, { error: `No member with ID ${getServerMemberInfoPayload.userId} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
-          return;
+        let member: GuildMember | undefined;
+        if (getServerMemberInfoPayload.userId) {
+          member = this.client?.guilds.cache.get(getServerMemberInfoPayload.serverId)?.members.cache.get(getServerMemberInfoPayload.userId);
+          if (!member) {
+            this.sendTo(obj.from, obj.command, { error: `No member with ID ${getServerMemberInfoPayload.userId} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
+            return;
+          }
+        } else {
+          member = this.client?.guilds.cache.get(getServerMemberInfoPayload.serverId)?.members.cache.find((m) => m.user.tag === getServerMemberInfoPayload.userTag);
+          if (!member) {
+            this.sendTo(obj.from, obj.command, { error: `No member with tag ${getServerMemberInfoPayload.userTag} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
+            return;
+          }
         }
 
         this.sendTo(obj.from, obj.command, {
@@ -2537,15 +2546,23 @@ class DiscordAdapter extends Adapter {
         const getUserInfoPayload = obj.message as SendToActionUserIdentifier;
 
         // check payload
-        if (!getUserInfoPayload.userId) {
+        if (!getUserInfoPayload.userId && !getUserInfoPayload.userTag) {
           this.sendTo(obj.from, obj.command, { error: 'userlId needs to be set', ...getUserInfoPayload }, obj.callback);
           return;
         }
 
-        user = this.client?.users.cache.get(getUserInfoPayload.userId);
-        if (!user) {
-          this.sendTo(obj.from, obj.command, { error: `No user with ID ${getUserInfoPayload.userId} found`, ...getUserInfoPayload }, obj.callback);
-          return;
+        if (getUserInfoPayload.userId) {
+          user = this.client?.users.cache.get(getUserInfoPayload.userId);
+          if (!user) {
+            this.sendTo(obj.from, obj.command, { error: `No user with ID ${getUserInfoPayload.userId} found`, ...getUserInfoPayload }, obj.callback);
+            return;
+          }
+        } else {
+          user = this.client?.users.cache.find((u) => u.tag === getUserInfoPayload.userTag);
+          if (!user) {
+            this.sendTo(obj.from, obj.command, { error: `No user with tag ${getUserInfoPayload.userTag} found`, ...getUserInfoPayload }, obj.callback);
+            return;
+          }
         }
 
         this.sendTo(obj.from, obj.command, {

@@ -1557,7 +1557,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r;
     if (typeof obj !== "object")
       return;
     this.log.debug(`Got message: ${JSON.stringify(obj)}`);
@@ -1976,14 +1976,23 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         const getServerMemberInfoPayload = obj.message;
-        if (!getServerMemberInfoPayload.serverId || !getServerMemberInfoPayload.userId) {
-          this.sendTo(obj.from, obj.command, __spreadValues({ error: "serverId and userlId need to be set" }, getServerMemberInfoPayload), obj.callback);
+        if (!getServerMemberInfoPayload.serverId || !getServerMemberInfoPayload.userId && !getServerMemberInfoPayload.userTag) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: "serverId and userlId or userTag need to be set" }, getServerMemberInfoPayload), obj.callback);
           return;
         }
-        const member = (_n = (_m = this.client) == null ? void 0 : _m.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _n.members.cache.get(getServerMemberInfoPayload.userId);
-        if (!member) {
-          this.sendTo(obj.from, obj.command, __spreadValues({ error: `No member with ID ${getServerMemberInfoPayload.userId} for server with ID ${getServerMemberInfoPayload.serverId} found` }, getServerMemberInfoPayload), obj.callback);
-          return;
+        let member;
+        if (getServerMemberInfoPayload.userId) {
+          member = (_n = (_m = this.client) == null ? void 0 : _m.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _n.members.cache.get(getServerMemberInfoPayload.userId);
+          if (!member) {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: `No member with ID ${getServerMemberInfoPayload.userId} for server with ID ${getServerMemberInfoPayload.serverId} found` }, getServerMemberInfoPayload), obj.callback);
+            return;
+          }
+        } else {
+          member = (_p = (_o = this.client) == null ? void 0 : _o.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _p.members.cache.find((m) => m.user.tag === getServerMemberInfoPayload.userTag);
+          if (!member) {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: `No member with tag ${getServerMemberInfoPayload.userTag} for server with ID ${getServerMemberInfoPayload.serverId} found` }, getServerMemberInfoPayload), obj.callback);
+            return;
+          }
         }
         this.sendTo(obj.from, obj.command, {
           id: member.id,
@@ -2012,14 +2021,22 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         const getUserInfoPayload = obj.message;
-        if (!getUserInfoPayload.userId) {
+        if (!getUserInfoPayload.userId && !getUserInfoPayload.userTag) {
           this.sendTo(obj.from, obj.command, __spreadValues({ error: "userlId needs to be set" }, getUserInfoPayload), obj.callback);
           return;
         }
-        user = (_o = this.client) == null ? void 0 : _o.users.cache.get(getUserInfoPayload.userId);
-        if (!user) {
-          this.sendTo(obj.from, obj.command, __spreadValues({ error: `No user with ID ${getUserInfoPayload.userId} found` }, getUserInfoPayload), obj.callback);
-          return;
+        if (getUserInfoPayload.userId) {
+          user = (_q = this.client) == null ? void 0 : _q.users.cache.get(getUserInfoPayload.userId);
+          if (!user) {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: `No user with ID ${getUserInfoPayload.userId} found` }, getUserInfoPayload), obj.callback);
+            return;
+          }
+        } else {
+          user = (_r = this.client) == null ? void 0 : _r.users.cache.find((u) => u.tag === getUserInfoPayload.userTag);
+          if (!user) {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: `No user with tag ${getUserInfoPayload.userTag} found` }, getUserInfoPayload), obj.callback);
+            return;
+          }
         }
         this.sendTo(obj.from, obj.command, {
           id: user.id,

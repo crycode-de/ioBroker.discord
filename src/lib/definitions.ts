@@ -200,7 +200,8 @@ export interface SendToActionChannelIdentifier extends SendToActionServerIdentif
  * Payload for `sentTo(...)` actions requiring a user.
  */
 export interface SendToActionUserIdentifier {
-  userId: Snowflake;
+  userId?: Snowflake;
+  userTag?: Snowflake;
 }
 
 /**

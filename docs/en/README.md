@@ -46,6 +46,11 @@ Additionally, the adapter can register Discord slash commands to get and set ioB
   * [Add a reaction emoji to a message from a script](#add-a-reaction-emoji-to-a-message-from-a-script)
   * [Await reactions to a message in a script](#await-reactions-to-a-message-in-a-script)
   * [Reply to a custom slash command from a script](#reply-to-a-custom-slash-command-from-a-script)
+  * [Get information about a server in a script](#get-information-about-a-server-in-a-script)
+  * [Get information about a server channel in a script](#get-information-about-a-server-channel-in-a-script)
+  * [Get information about a user in a script](#get-information-about-a-user-in-a-script)
+  * [Get information about a server member in a script](#get-information-about-a-server-member-in-a-script)
+  * [Get information about a previous message in a script](#get-information-about-a-previous-message-in-a-script)
 
 ## Features
 
@@ -851,6 +856,95 @@ on({ id: 'discord.0.slashCommands.iob-test.json', change: 'any', ack: true }, (o
     log(ret);
     // {'result':'Reply sent','interactionId':'977265764136517725','content':{'content':'You gave me \'test\'.','embeds':[{'title':'This is awesome!','color':'#00AA00'}]},'messageId':'977265765122183248'}
   });
+});
+```
+
+### Get information about a server in a script
+
+```js
+sendTo('discord.0', 'getServerInfo', {
+  serverId: '813364154118963251',
+}, (ret) => {
+  log(ret);
+});
+```
+
+### Get information about a server channel in a script
+
+```js
+sendTo('discord.0', 'getChannelInfo', {
+  serverId: '813364154118963251',
+  channelId: '813364154559102998',
+}, (ret) => {
+  log(ret);
+});
+```
+
+### Get information about a user in a script
+
+```js
+sendTo('discord.0', 'getUserInfo', {
+  userId: '490222742801481728',
+}, (ret) => {
+  log(ret);
+});
+```
+
+```js
+sendTo('discord.0', 'getUserInfo', {
+  userTag: 'cryCode#9911',
+}, (ret) => {
+  log(ret);
+});
+```
+
+### Get information about a server member in a script
+
+```js
+sendTo('discord.0', 'getServerMemberInfo', {
+  serverId: '813364154118963251',
+  userId: '490222742801481728',
+}, (ret) => {
+  log(ret);
+});
+```
+
+```js
+sendTo('discord.0', 'getServerMemberInfo', {
+  serverId: '813364154118963251',
+  userTag: 'cryCode#9911',
+}, (ret) => {
+  log(ret);
+});
+```
+
+### Get information about a previous message in a script
+
+```js
+sendTo('discord.0', 'getMessageInfo', {
+  serverId: '813364154118963251',
+  channelId: '813364154559102998',
+  messageId: '978252795763359794',
+}, (ret) => {
+  log(ret);
+});
+```
+
+```js
+sendTo('discord.0', 'getMessageInfo', {
+  userId: '490222742801481728',
+  messageId: '976090572760694814',
+}, (ret) => {
+  log(ret);
+});
+```
+
+```js
+sendTo('discord.0', 'getMessageInfo', {
+  userTag: 'cryCode#9911',
+  messageId: '976090572760694814',
+}, (ret) => {
+  log(ret);
 });
 ```
 
