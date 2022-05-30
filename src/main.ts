@@ -923,6 +923,26 @@ class DiscordAdapter extends Adapter {
           ]);
         }
       }
+
+      /*
+       * Delete objects for unknown server members
+       */
+      const objListMembers = await this.getObjectListAsync({
+        startkey: `${this.namespace}.servers.${guild.id}.members.`,
+        endkey: `${this.namespace}.servers.${guild.id}.members.\u9999`,
+      });
+      const reServersMembers = new RegExp(`^${this.name}\\.${this.instance}\\.servers\\.${guild.id}.members\\.(\\d+)$`);
+      for (const item of objListMembers.rows) {
+        const m = item.id.match(reServersMembers);
+        if (m) {
+          const memberId = m[1];
+          if (!guild.members.cache.has(memberId)) {
+            this.log.debug(`Server member ${memberId} of server ${guild.id} is no longer available - deleting objects`);
+            this.jsonStateCache.delete(`${this.namespace}.servers.${guild.id}.members.${memberId}.json`);
+            await this.delObjectAsyncCached(`servers.${guild.id}.members.${memberId}`, { recursive: true });
+          }
+        }
+      }
     }
 
     /*
