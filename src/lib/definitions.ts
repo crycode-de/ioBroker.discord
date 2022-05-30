@@ -183,10 +183,31 @@ export interface SendToActionAddReactionPayload extends MessageIdentifier {
 }
 
 /**
- * Payload for a `sentTo(...)` `leaveServer` action.
+ * Payload for `sentTo(...)` actions requiring a server.
  */
-export interface SendToActionLeaveServerPayload {
+export interface SendToActionServerIdentifier {
   serverId: Snowflake;
+}
+
+/**
+ * Payload for `sentTo(...)` actions requiring a server channel.
+ */
+export interface SendToActionChannelIdentifier extends SendToActionServerIdentifier {
+  channelId: Snowflake;
+}
+
+/**
+ * Payload for `sentTo(...)` actions requiring a user.
+ */
+export interface SendToActionUserIdentifier {
+  userId: Snowflake;
+}
+
+/**
+ * Payload for `sentTo(...)` actions requiring a server member.
+ */
+export interface SendToActionServerMemberIdentifier extends SendToActionServerIdentifier, SendToActionUserIdentifier {
+  // just extends
 }
 
 /**

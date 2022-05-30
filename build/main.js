@@ -1557,11 +1557,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o;
     if (typeof obj !== "object")
       return;
     this.log.debug(`Got message: ${JSON.stringify(obj)}`);
+    let channel;
     let msg;
+    let user;
     switch (obj.command) {
       case "getText2commandInstances":
         if (!obj.callback) {
@@ -1668,7 +1670,6 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         if (sendPayload.userId || sendPayload.userTag) {
-          let user;
           if (sendPayload.userId) {
             user = (_e = this.client) == null ? void 0 : _e.users.cache.get(sendPayload.userId);
             if (!user) {
@@ -1689,7 +1690,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             this.sendTo(obj.from, obj.command, __spreadValues({ error: `Error sending message to user ${user.tag}: ${err}` }, sendPayload), obj.callback);
           }
         } else if (sendPayload.serverId && sendPayload.channelId) {
-          const channel = (_h = (_g = this.client) == null ? void 0 : _g.guilds.cache.get(sendPayload.serverId)) == null ? void 0 : _h.channels.cache.get(sendPayload.channelId);
+          channel = (_h = (_g = this.client) == null ? void 0 : _g.guilds.cache.get(sendPayload.serverId)) == null ? void 0 : _h.channels.cache.get(sendPayload.channelId);
           if (!(channel == null ? void 0 : channel.isText())) {
             this.sendTo(obj.from, obj.command, __spreadValues({ error: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found` }, sendPayload), obj.callback);
             return;
@@ -1829,9 +1830,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         const reactionCollector = msg.createReactionCollector({
-          filter: (_reaction, user) => {
+          filter: (_reaction, user2) => {
             var _a2, _b2;
-            return user.id !== ((_b2 = (_a2 = this.client) == null ? void 0 : _a2.user) == null ? void 0 : _b2.id);
+            return user2.id !== ((_b2 = (_a2 = this.client) == null ? void 0 : _a2.user) == null ? void 0 : _b2.id);
           },
           max: awaitMessageReactionPayload.max,
           time: awaitMessageReactionPayload.timeout
@@ -1892,6 +1893,176 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             this.sendTo(obj.from, obj.command, __spreadValues({ error: `Error leaving server ${leaveServerPayload.serverId}: ${err}` }, leaveServerPayload), obj.callback);
           }
         }
+        break;
+      case "getServerInfo":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if (typeof obj.message !== "object") {
+          this.sendTo(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
+          return;
+        }
+        const getServerInfoPayload = obj.message;
+        if (!getServerInfoPayload.serverId) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: "serverId needs to be set" }, getServerInfoPayload), obj.callback);
+          return;
+        }
+        const server = (_j = this.client) == null ? void 0 : _j.guilds.cache.get(getServerInfoPayload.serverId);
+        if (!server) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: `No server with ID ${getServerInfoPayload.serverId} found` }, getServerInfoPayload), obj.callback);
+          return;
+        }
+        this.sendTo(obj.from, obj.command, {
+          id: server.id,
+          name: server.name,
+          description: server.description,
+          members: server.members.cache.map((m) => ({
+            id: m.id,
+            tag: m.user.tag,
+            displayName: m.displayName
+          })),
+          roles: server.roles.cache.map((r) => ({
+            id: r.id,
+            name: r.name,
+            color: r.hexColor
+          })),
+          channels: server.channels.cache.map((c) => ({
+            id: c.id,
+            parentId: c.parentId,
+            name: c.name,
+            type: c.type
+          }))
+        }, obj.callback);
+        break;
+      case "getChannelInfo":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if (typeof obj.message !== "object") {
+          this.sendTo(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
+          return;
+        }
+        const getChannelInfoPayload = obj.message;
+        if (!getChannelInfoPayload.serverId || !getChannelInfoPayload.channelId) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: "serverId and channelId need to be set" }, getChannelInfoPayload), obj.callback);
+          return;
+        }
+        channel = (_l = (_k = this.client) == null ? void 0 : _k.guilds.cache.get(getChannelInfoPayload.serverId)) == null ? void 0 : _l.channels.cache.get(getChannelInfoPayload.channelId);
+        if (!channel) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: `No channel with ID ${getChannelInfoPayload.channelId} for server with ID ${getChannelInfoPayload.serverId} found` }, getChannelInfoPayload), obj.callback);
+          return;
+        }
+        this.sendTo(obj.from, obj.command, {
+          id: channel.id,
+          parentId: channel.parentId,
+          name: channel.name,
+          type: channel.type,
+          members: !channel.isThread() && channel.members.map((m) => ({
+            id: m.id,
+            tag: m.user.tag,
+            displayName: m.displayName
+          }))
+        }, obj.callback);
+        break;
+      case "getServerMemberInfo":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if (typeof obj.message !== "object") {
+          this.sendTo(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
+          return;
+        }
+        const getServerMemberInfoPayload = obj.message;
+        if (!getServerMemberInfoPayload.serverId || !getServerMemberInfoPayload.userId) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: "serverId and userlId need to be set" }, getServerMemberInfoPayload), obj.callback);
+          return;
+        }
+        const member = (_n = (_m = this.client) == null ? void 0 : _m.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _n.members.cache.get(getServerMemberInfoPayload.userId);
+        if (!member) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: `No member with ID ${getServerMemberInfoPayload.userId} for server with ID ${getServerMemberInfoPayload.serverId} found` }, getServerMemberInfoPayload), obj.callback);
+          return;
+        }
+        this.sendTo(obj.from, obj.command, {
+          id: member.id,
+          tag: member.user.tag,
+          displayName: member.displayName,
+          displayColor: member.displayHexColor,
+          displayAvatarUrl: member.displayAvatarURL(),
+          roles: member.roles.cache.map((r) => ({
+            id: r.id,
+            name: r.name,
+            color: r.hexColor
+          })),
+          joinedAt: member.joinedTimestamp,
+          voiceChannelId: member.voice.channelId,
+          voiceMuted: member.voice.mute,
+          voiceDeaf: member.voice.deaf
+        }, obj.callback);
+        break;
+      case "getUserInfo":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if (typeof obj.message !== "object") {
+          this.sendTo(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
+          return;
+        }
+        const getUserInfoPayload = obj.message;
+        if (!getUserInfoPayload.userId) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: "userlId needs to be set" }, getUserInfoPayload), obj.callback);
+          return;
+        }
+        user = (_o = this.client) == null ? void 0 : _o.users.cache.get(getUserInfoPayload.userId);
+        if (!user) {
+          this.sendTo(obj.from, obj.command, __spreadValues({ error: `No user with ID ${getUserInfoPayload.userId} found` }, getUserInfoPayload), obj.callback);
+          return;
+        }
+        this.sendTo(obj.from, obj.command, {
+          id: user.id,
+          tag: user.tag,
+          avatarUrl: user.avatarURL(),
+          bot: user.bot,
+          accentColor: user.hexAccentColor
+        }, obj.callback);
+        break;
+      case "getMessageInfo":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        if (typeof obj.message !== "object") {
+          this.sendTo(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
+          return;
+        }
+        const getMessageInfoPayload = obj.message;
+        try {
+          msg = await this.getPreviousMessage(getMessageInfoPayload);
+        } catch (err) {
+          if (err instanceof Error && err.message) {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: err.message }, getMessageInfoPayload), obj.callback);
+          } else {
+            this.sendTo(obj.from, obj.command, __spreadValues({ error: err }, getMessageInfoPayload), obj.callback);
+          }
+          return;
+        }
+        this.sendTo(obj.from, obj.command, {
+          id: msg.id,
+          author: {
+            id: msg.author.id,
+            tag: msg.author.tag
+          },
+          content: msg.content,
+          embeds: msg.embeds.map((e) => e.toJSON()),
+          attachments: msg.attachments.map((a) => a.toJSON()),
+          reactions: msg.reactions.cache.map((r) => r.toJSON()),
+          createdTimestamp: msg.createdTimestamp,
+          editedTimestamp: msg.editedTimestamp,
+          reference: msg.reference
+        }, obj.callback);
         break;
       default:
         this.log.warn(`Got message with unknown command: ${obj.command}`);
