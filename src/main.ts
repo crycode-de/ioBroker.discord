@@ -2292,7 +2292,7 @@ class DiscordAdapter extends Adapter {
 
         // collect reactions
         const reactionCollector = msg.createReactionCollector({
-          filter: (_reaction, user) => user.id !== this.client?.user?.id,
+          filter: (_r, u) => u.id !== this.client?.user?.id,
           max: awaitMessageReactionPayload.max,
           time: awaitMessageReactionPayload.timeout,
         });

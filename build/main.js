@@ -1828,9 +1828,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         const reactionCollector = msg.createReactionCollector({
-          filter: (_reaction, user2) => {
+          filter: (_r2, u) => {
             var _a2, _b2;
-            return user2.id !== ((_b2 = (_a2 = this.client) == null ? void 0 : _a2.user) == null ? void 0 : _b2.id);
+            return u.id !== ((_b2 = (_a2 = this.client) == null ? void 0 : _a2.user) == null ? void 0 : _b2.id);
           },
           max: awaitMessageReactionPayload.max,
           time: awaitMessageReactionPayload.timeout
