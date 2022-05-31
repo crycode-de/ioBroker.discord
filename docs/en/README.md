@@ -241,7 +241,9 @@ All this states will be updated on each call of the custom command.
 | `channelId` | ID of the channel, where the command is called. |
 | `serverId` | ID of the server, where the command is called or `null` if the command is used in a direct message. |
 | `timestamp` | Timestamp of the last use of the command. |
-| `option-*` | Options which were provided to the command. For each configured option a state will be created. If an option is not provided on command call, this state will be set to `null`. |
+| `option-*` | Options which are configured for the command. |
+| `option-*.value` | The last value provided to this option on command call. If an option is not provided, this state will be set to `null`. |
+| `option-*.choices` | JSON array containing predefined choices for this option. Only present on options of type string. Example: `["Value 1", "Value 2", { "name": "Value 3", "value": "val3" }]` |
 | `sendReply` | Send a reply to a called command. Like in `.send` states of a channel or user, this may be sting or stringified JSON object. See _Messages_ section below. |
 
 **Note:** It's recommended to use the `json` state in custom scripts to prevent
@@ -546,7 +548,10 @@ The configured custom commands will be registered on Discord together with the
 default get and set commands.
 
 For each custom command some options may be added, which will be shown in the
-Discord client when calling the command.
+Discord client when calling the command.  
+If an option is not provided on command call, the option value will be `null`.  
+For options of type _string_ you may dynamically set predefined choices in the
+corresponding `option-*.choices` state as JSON array.
 
 When a custom command gets called, the data will be written into re corresponding
 states. See the description of the states in the _States_ section above.
@@ -556,7 +561,6 @@ of the command.
 This state should mainly be used to get the command data in scripts since all
 needed information are stored in a single place and can't get mixed up on
 multiple command calls within a short time.
-If an option is not provided on command call, the option value will be `null`.
 For options of type _user_, _role_, _channel_ or _mentionable_ additional
 properties of the option object will be filled.
 

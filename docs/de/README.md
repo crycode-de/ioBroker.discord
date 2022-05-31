@@ -249,6 +249,9 @@ aktualisiert.
 | `serverId` | ID des Servers, in dem der Befehl aufgerufen wurde, oder `null` wenn der Befehl in einer Direktnachricht aufgerufen wurde. |
 | `timestamp` | Zeitstempel der letzten Nutzung des Befehls. |
 | `option-*` | Optionen die für den Befehl angegeben wurden. Für jede konfigurierte Option wird ein eigener Zustand erstellt. Wenn eine Option beim Aufruf des Befehls nicht angegeben wird, dann wird der zugehörige Zustand auf `null` gesetzt. |
+| `option-*` | Optionen die für den Befehl konfiguriert wurden. |
+| `option-*.value` | Der letzte Wert, der für die Option bei dem Befehlsaufruf angegeben wurde. Wenn eine Option nicht angegeben wird, dann wird der zugehörige Zustand auf `null` gesetzt. |
+| `option-*.choices` | JSON-Array mit vordefinierten Auswahlmöglichkeiten für diese Option. Nur vorhanden bei Optionen vom Typ Text. Beispiel: `["Wert 1", "Wert 2", { "name": "Wert 3", "value": "w3" }]` |
 | `sendReply` | Eine Antwort auf dem aufgerufenen Befehl senden. Wie bei den `.send`-Zuständen von Kanälen oder Benutzern, kann dies ein String oder ein JSON-Objekt sein. Siehe den Abschnitt _Nachrichten_ weiter unten. |
 
 **Hinweis:** Es wird empfohlen, den `json`-Zustand in eigenen Skripten zu nutzen,
@@ -594,22 +597,24 @@ und konfiguriert werden.
 Die konfigurierten eigenen Befehle werden dann zusammen mit den standardmäßigen
 get- und set-Befehlen bei Discord registriert.
 
-Zu jedem benutzerdefinierten Befehl können Optionen hinzugefügt werden.
-Diese Optionen werden dann im Discord-Client zu dem Befehl angezeigt.
+Zu jedem benutzerdefinierten Befehl können Optionen hinzugefügt werden.  
+Diese Optionen werden dann im Discord-Client zu dem Befehl angezeigt.  
+Wenn eine Option bei einem Befehlsaufruf nicht angegeben wird, dann enthält
+diese Option den Wert `null`.  
+Für Optionen des Typs _Text_ können dynamisch vordefinierte Auswahlmöglichkeiten
+im zugehörigen `option-*.choices`-Zustand als JSON-Array angegeben werden.
 
 Wenn ein benutzerdefinierte Befehl aufgerufen wird, dann werden die Daten dazu
 in die zugehörigen Zustände geschrieben. Siehe die Beschreibung der Zustände im
 Abschnitt _Zustände (States)_ weiter oben.
 
 Alle Informationen inklusive der Optionen werden in den `.json`-Zustand des
-Befehls geschrieben.
+Befehls geschrieben.  
 Dieser Zustand sollte vorrangig genutzt werden, um die Befehlsdaten in Skripten
 zu erhalten, da hier alle nötigen Informationen an einer Stelle abgelegt werden
 und somit auch bei mehrere Befehlsaufrufen in kurzer Zeit nichts durcheinander
-geraten kann.
-Wenn eine Option bei einem Befehlsaufruf nicht angegeben wird, dann enthält
-diese Option den Wert `null`.
-Für Optionen des Types _Benutzer_, _Rolle_, _Kanal_ oder _Erwähnbar_ werden
+geraten kann.  
+Für Optionen des Typs _Benutzer_, _Rolle_, _Kanal_ oder _Erwähnbar_ werden
 zusätzliche Felder in den Options-Objekten befüllt.
 
 **Hinweis:** Der Befehl muss selbst ausgewertet und dann eine Antwort auf den
