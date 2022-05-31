@@ -258,9 +258,6 @@ export class DiscordAdapterSlashCommands {
           continue;
         }
 
-        // create/update the ioBroker objects
-        await this.setupCustomCommandIobObjects(customCommandCfg);
-
         // create the command
         const cmdCustom = new SlashCommandBuilder()
           .setName(customCommandCfg.name)
@@ -272,6 +269,10 @@ export class DiscordAdapterSlashCommands {
         if (!Array.isArray(customCommandCfg.options)) {
           customCommandCfg.options = [];
         }
+
+        // create/update the ioBroker objects
+        await this.setupCustomCommandIobObjects(customCommandCfg);
+
         for (const customCommandCfgOpt of customCommandCfg.options) {
           if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-z-_]{0,49}$/) || customCommandCfgOpt.description.length === 0) {
             this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" has an invalid name or description configured!`);

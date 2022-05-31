@@ -151,12 +151,12 @@ class DiscordAdapterSlashCommands {
             this.adapter.log.warn(`Custom command "${customCommandCfg.name}" is configured multiple times! The command will be ignored.`);
             continue;
           }
-          await this.setupCustomCommandIobObjects(customCommandCfg);
           const cmdCustom = new import_builders.SlashCommandBuilder().setName(customCommandCfg.name).setDescription(customCommandCfg.description).setDefaultPermission(true);
           const cmdOpts = /* @__PURE__ */ new Set();
           if (!Array.isArray(customCommandCfg.options)) {
             customCommandCfg.options = [];
           }
+          await this.setupCustomCommandIobObjects(customCommandCfg);
           for (const customCommandCfgOpt of customCommandCfg.options) {
             if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-z-_]{0,49}$/) || customCommandCfgOpt.description.length === 0) {
               this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" has an invalid name or description configured!`);
