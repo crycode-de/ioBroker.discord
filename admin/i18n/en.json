@@ -36,6 +36,8 @@
     "Raw data": "Raw data",
     "Last use timestamp": "Last use timestamp",
     "Option %s": "Option %s",
+    "Option %s value": "Option %s value",
+    "Option %s choices": "Option %s choices",
 
     "Get an ioBroker state value": "Get an ioBroker state value",
     "Set an ioBroker state value": "Set an ioBroker state value",
@@ -139,6 +141,7 @@
     "option-1": "option-1",
     "Option 1": "Option 1",
     "Required": "Required",
+    "Hint: For string options, you may set predefined options in the corresponding 'option-*.choices' state.": "Hint: For string options, you may set predefined options in the corresponding 'option-*.choices' state.",
     "Add bot to server": "Add bot to server",
     "Here you are able to get a link to add your bot to a discord server.": "Here you are able to get a link to add your bot to a discord server.",
     "To get the link, you need to insert your bot token in the main settings tab, save the configurations and start/restart the adapter instance.": "To get the link, you need to insert your bot token in the main settings tab, save the configurations and start/restart the adapter instance.",

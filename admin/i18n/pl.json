@@ -187,5 +187,8 @@
     "Option 1": "opcja 1",
     "Required": "Wymagany",
     "Ephemeral replies": "Ulotne odpowiedzi",
-    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "Jeśli zaznaczone, wszystkie odpowiedzi na polecenia będą wysyłane jako efemeryczne, co sprawi, że odpowiedź będzie widoczna tylko dla użytkownika, który wykonał polecenie."
+    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "Jeśli zaznaczone, wszystkie odpowiedzi na polecenia będą wysyłane jako efemeryczne, co sprawi, że odpowiedź będzie widoczna tylko dla użytkownika, który wykonał polecenie.",
+    "Option %s choices": "Opcja %s wyborów",
+    "Option %s value": "Wartość opcji %s",
+    "Hint: For string options, you may set predefined options in the corresponding 'option-*.choices' state.": "Wskazówka: W przypadku opcji łańcuchowych możesz ustawić predefiniowane opcje w odpowiednim stanie 'opcja-*.choices'."
 }

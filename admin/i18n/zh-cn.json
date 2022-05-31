@@ -187,5 +187,8 @@
     "Option 1": "选项1",
     "Required": "必需的",
     "Ephemeral replies": "临时回复",
-    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "如果选中，所有命令回复都将作为临时发送，这将使回复仅对执行该命令的用户可见。"
+    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "如果选中，所有命令回复都将作为临时发送，这将使回复仅对执行该命令的用户可见。",
+    "Option %s choices": "选项 %s 选项",
+    "Option %s value": "选项 %s 值",
+    "Hint: For string options, you may set predefined options in the corresponding 'option-*.choices' state.": "提示：对于字符串选项，您可以在相应的 'option-*.choices' 状态下设置预定义选项。"
 }

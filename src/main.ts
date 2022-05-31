@@ -333,6 +333,7 @@ class DiscordAdapter extends Adapter {
     this.subscribeStates('servers.*.members.*.voiceServerMute');
     this.subscribeStates('servers.*.members.*.voiceServerDeaf');
     this.subscribeStates('slashCommands.*.sendReply');
+    this.subscribeStates('slashCommands.*.option-*.choices');
     this.subscribeStates('bot.*');
     this.subscribeForeignObjects('*'); // needed to handle custom object configs
 
@@ -1629,6 +1630,12 @@ class DiscordAdapter extends Adapter {
           // custom slash command reply
           if (stateId.match(/^discord\.\d+\.slashCommands\..*\.sendReply/)) {
             setAck = await this.onCustomCommandSendReplyStateChange(stateId, state);
+
+          // custom slash command option choices
+          } else if (stateId.match(/^discord\.\d+\.slashCommands\..*\.option-[^.]+\.choices/)) {
+            // trigger delayed register slash commands to handle multiple changes of choices states together
+            this.discordSlashCommands.triggerDelayedRegisterSlashCommands();
+            setAck = true;
 
           // .send / .sendFile / .sendReply
           } else if (stateId.endsWith('.send') || stateId.endsWith('.sendFile') || stateId.endsWith('.sendReply') || stateId.endsWith('.sendReaction')) {

@@ -237,6 +237,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.subscribeStates("servers.*.members.*.voiceServerMute");
     this.subscribeStates("servers.*.members.*.voiceServerDeaf");
     this.subscribeStates("slashCommands.*.sendReply");
+    this.subscribeStates("slashCommands.*.option-*.choices");
     this.subscribeStates("bot.*");
     this.subscribeForeignObjects("*");
     this.log.debug("Get all objects with custom config ...");
@@ -1329,6 +1330,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         default:
           if (stateId.match(/^discord\.\d+\.slashCommands\..*\.sendReply/)) {
             setAck = await this.onCustomCommandSendReplyStateChange(stateId, state);
+          } else if (stateId.match(/^discord\.\d+\.slashCommands\..*\.option-[^.]+\.choices/)) {
+            this.discordSlashCommands.triggerDelayedRegisterSlashCommands();
+            setAck = true;
           } else if (stateId.endsWith(".send") || stateId.endsWith(".sendFile") || stateId.endsWith(".sendReply") || stateId.endsWith(".sendReaction")) {
             setAck = await this.onSendStateChange(stateId, state);
           } else if (stateId.endsWith(".voiceDisconnect") || stateId.endsWith(".voiceServerMute") || stateId.endsWith(".voiceServerDeaf")) {

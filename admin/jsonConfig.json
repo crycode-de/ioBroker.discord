@@ -534,6 +534,14 @@
               ]
             }
           ]
+        },
+
+        "_customCommandsHint": {
+          "type": "staticText",
+          "newLine": true,
+          "sm": 12,
+          "hidden": "!data.enableCommands || !data.enableCustomCommands",
+          "text": "Hint: For string options, you may set predefined options in the corresponding 'option-*.choices' state."
         }
       }
     },

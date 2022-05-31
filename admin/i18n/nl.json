@@ -187,5 +187,8 @@
     "Option 1": "Optie 1",
     "Required": "Vereist",
     "Ephemeral replies": "Kortstondige antwoorden",
-    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "Indien aangevinkt, zullen alle commando-antwoorden als kortstondig worden verzonden, waardoor het antwoord alleen zichtbaar is voor de gebruiker die de opdracht heeft uitgevoerd."
+    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "Indien aangevinkt, zullen alle commando-antwoorden als kortstondig worden verzonden, waardoor het antwoord alleen zichtbaar is voor de gebruiker die de opdracht heeft uitgevoerd.",
+    "Option %s choices": "Optie %s keuzes",
+    "Option %s value": "Optie %s waarde",
+    "Hint: For string options, you may set predefined options in the corresponding 'option-*.choices' state.": "Hint: Voor string-opties kunt u vooraf gedefinieerde opties instellen in de corresponderende 'option-*.choices'-status."
 }

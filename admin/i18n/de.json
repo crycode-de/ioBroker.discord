@@ -172,6 +172,8 @@
     "Custom Discord slash commands": "Benutzerdefinierte Discord-Slash-Befehle",
     "Last use timestamp": "Zeitstempel der letzten Verwendung",
     "Option %s": "Option %s",
+    "Option %s value": "Option %s Wert",
+    "Option %s choices": "Option %s Auswahlmöglichkeiten",
     "Use custom commands": "Benutzerdefinierte Befehle verwenden",
     "Enable custom commands": "Benutzerdefinierte Befehle aktivieren",
     "Define custom commands which may be used for interactions with scripts for example.": "Benutzerdefinierte Befehle definieren, die beispielsweise für Interaktionen mit Skripten verwendet werden können.",
@@ -187,5 +189,6 @@
     "Option 1": "Option 1",
     "Required": "Erforderlich",
     "Ephemeral replies": "Flüchtige Antworten",
-    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "Wenn diese Option aktiviert ist, werden alle Befehlsantworten als flüchtig gesendet, sodass die Antwort nur für den Benutzer sichtbar ist, der den Befehl ausgeführt hat."
+    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "Wenn diese Option aktiviert ist, werden alle Befehlsantworten als flüchtig gesendet, sodass die Antwort nur für den Benutzer sichtbar ist, der den Befehl ausgeführt hat.",
+    "Hint: For string options, you may set predefined options in the corresponding 'option-*.choices' state.": "Hinweis: Für Optionen vom Typ Text können im zugehörigen 'option-*.choices'-Zustand vordefinierte Auswahlmöglichkeiten festgelegt werden."
 }

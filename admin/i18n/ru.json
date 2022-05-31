@@ -187,5 +187,8 @@
     "Option 1": "Опция 1",
     "Required": "Необходимый",
     "Ephemeral replies": "Эфемерные ответы",
-    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "Если флажок установлен, все ответы на команды будут отправлены как эфемерные, что сделает ответ видимым только для пользователя, выполнившего команду."
+    "If checked, all command replies will be send as ephemeral which will make the reply only visible to the user who executed the command.": "Если флажок установлен, все ответы на команды будут отправлены как эфемерные, что сделает ответ видимым только для пользователя, выполнившего команду.",
+    "Option %s choices": "Вариант %s вариантов",
+    "Option %s value": "Параметр %s значение",
+    "Hint: For string options, you may set predefined options in the corresponding 'option-*.choices' state.": "Подсказка: для строковых опций вы можете установить предопределенные опции в соответствующем состоянии 'option-*.choices'."
 }
