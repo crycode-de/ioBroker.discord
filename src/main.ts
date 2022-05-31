@@ -2068,9 +2068,7 @@ class DiscordAdapter extends Adapter {
 
       case 'logConfiguredCommandObjects':
         this.discordSlashCommands.logConfiguredCommandObjects();
-        if (obj.callback) {
-          this.sendTo(obj.from, obj.command, { result: 'ok' }, obj.callback);
-        }
+        this.sendToIfCb(obj.from, obj.command, { result: 'ok' }, obj.callback);
         break;
 
       case 'send':
@@ -2078,13 +2076,8 @@ class DiscordAdapter extends Adapter {
         /*
          * send a message
          */
-        if (!obj.callback) {
-          this.log.warn(`Message '${obj.command}' called without callback!`);
-          return;
-        }
-
         if (typeof obj.message !== 'object') {
-          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
           return;
         }
 
@@ -2092,7 +2085,7 @@ class DiscordAdapter extends Adapter {
 
         // check payload
         if (!sendPayload.content || (typeof sendPayload.content !== 'string' && typeof sendPayload.content !== 'object')) {
-          this.sendTo(obj.from, obj.command, { error: 'content needs to be a string or a MessageOptions object', ...sendPayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'content needs to be a string or a MessageOptions object', ...sendPayload }, obj.callback);
           return;
         }
 
@@ -2102,41 +2095,41 @@ class DiscordAdapter extends Adapter {
             // by userId
             user = this.client?.users.cache.get(sendPayload.userId);
             if (!user) {
-              this.sendTo(obj.from, obj.command, { error: `No user with userId ${sendPayload.userId} found`, ...sendPayload }, obj.callback);
+              this.sendToIfCb(obj.from, obj.command, { error: `No user with userId ${sendPayload.userId} found`, ...sendPayload }, obj.callback);
               return;
             }
           } else {
             // by userTag
             user = this.client?.users.cache.find((u) => u.tag === sendPayload.userTag);
             if (!user) {
-              this.sendTo(obj.from, obj.command, { error: `No user with userTag ${sendPayload.userTag} found`, ...sendPayload }, obj.callback);
+              this.sendToIfCb(obj.from, obj.command, { error: `No user with userTag ${sendPayload.userTag} found`, ...sendPayload }, obj.callback);
               return;
             }
           }
           try {
             msg = await user.send(sendPayload.content);
-            this.sendTo(obj.from, obj.command, { result: `Message sent to user ${user.tag}`, ...sendPayload, messageId: msg.id }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { result: `Message sent to user ${user.tag}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
-            this.sendTo(obj.from, obj.command, { error: `Error sending message to user ${user.tag}: ${err}`, ...sendPayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to user ${user.tag}: ${err}`, ...sendPayload }, obj.callback);
           }
 
         } else if (sendPayload.serverId && sendPayload.channelId) {
           // send to a channel
           channel = this.client?.guilds.cache.get(sendPayload.serverId)?.channels.cache.get(sendPayload.channelId);
           if (!channel?.isText()) {
-            this.sendTo(obj.from, obj.command, { error: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found`, ...sendPayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found`, ...sendPayload }, obj.callback);
             return;
           }
           try {
             msg = await channel.send(sendPayload.content);
-            this.sendTo(obj.from, obj.command, { result: `Message sent to channel ${channel.name}`, ...sendPayload, messageId: msg.id }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { result: `Message sent to channel ${channel.name}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
-            this.sendTo(obj.from, obj.command, { error: `Error sending message to channel ${channel.name}: ${err}`, ...sendPayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to channel ${channel.name}: ${err}`, ...sendPayload }, obj.callback);
           }
 
         } else {
           // missing arguments
-          this.sendTo(obj.from, obj.command, { error: 'userId, userTag or serverId and channelId needs to be set', ...sendPayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'userId, userTag or serverId and channelId needs to be set', ...sendPayload }, obj.callback);
         }
 
         break; // send / sendMessage
@@ -2145,13 +2138,8 @@ class DiscordAdapter extends Adapter {
         /*
          * edit a message
          */
-        if (!obj.callback) {
-          this.log.warn(`Message '${obj.command}' called without callback!`);
-          return;
-        }
-
         if (typeof obj.message !== 'object') {
-          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
           return;
         }
 
@@ -2159,7 +2147,7 @@ class DiscordAdapter extends Adapter {
 
         // check payload
         if (!editMessagePayload.content || (typeof editMessagePayload.content !== 'string' && typeof editMessagePayload.content !== 'object')) {
-          this.sendTo(obj.from, obj.command, { error: 'content needs to be a string or a MessageOptions object', ...editMessagePayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'content needs to be a string or a MessageOptions object', ...editMessagePayload }, obj.callback);
           return;
         }
 
@@ -2168,9 +2156,9 @@ class DiscordAdapter extends Adapter {
           msg = await this.getPreviousMessage(editMessagePayload);
         } catch (err) {
           if (err instanceof Error && err.message) {
-            this.sendTo(obj.from, obj.command, { error: err.message, ...editMessagePayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err.message, ...editMessagePayload }, obj.callback);
           } else {
-            this.sendTo(obj.from, obj.command, { error: err, ...editMessagePayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err, ...editMessagePayload }, obj.callback);
           }
           return;
         }
@@ -2178,13 +2166,13 @@ class DiscordAdapter extends Adapter {
         // try to edit the message
         try {
           if (!msg.editable) {
-            this.sendTo(obj.from, obj.command, { error: `Message with messageId ${editMessagePayload.messageId} is not editable`, ...editMessagePayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `Message with messageId ${editMessagePayload.messageId} is not editable`, ...editMessagePayload }, obj.callback);
             return;
           }
           await msg.edit(editMessagePayload.content);
-          this.sendTo(obj.from, obj.command, { result: `Message edited`, ...editMessagePayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { result: `Message edited`, ...editMessagePayload }, obj.callback);
         } catch (err) {
-          this.sendTo(obj.from, obj.command, { error: `Error editing message: ${err}`, ...editMessagePayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: `Error editing message: ${err}`, ...editMessagePayload }, obj.callback);
         }
 
         break; // editMessage
@@ -2193,13 +2181,8 @@ class DiscordAdapter extends Adapter {
         /*
          * delete a message
          */
-        if (!obj.callback) {
-          this.log.warn(`Message '${obj.command}' called without callback!`);
-          return;
-        }
-
         if (typeof obj.message !== 'object') {
-          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
           return;
         }
 
@@ -2210,9 +2193,9 @@ class DiscordAdapter extends Adapter {
           msg = await this.getPreviousMessage(deleteMessagePayload);
         } catch (err) {
           if (err instanceof Error && err.message) {
-            this.sendTo(obj.from, obj.command, { error: err.message, ...deleteMessagePayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err.message, ...deleteMessagePayload }, obj.callback);
           } else {
-            this.sendTo(obj.from, obj.command, { error: err, ...deleteMessagePayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err, ...deleteMessagePayload }, obj.callback);
           }
           return;
         }
@@ -2220,13 +2203,13 @@ class DiscordAdapter extends Adapter {
         // try to delete the message
         try {
           if (!msg.deletable) {
-            this.sendTo(obj.from, obj.command, { error: `Message with messageId ${deleteMessagePayload.messageId} is not deletable`, ...deleteMessagePayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `Message with messageId ${deleteMessagePayload.messageId} is not deletable`, ...deleteMessagePayload }, obj.callback);
             return;
           }
           await msg.delete();
-          this.sendTo(obj.from, obj.command, { result: `Message deleted`, ...deleteMessagePayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { result: `Message deleted`, ...deleteMessagePayload }, obj.callback);
         } catch (err) {
-          this.sendTo(obj.from, obj.command, { error: `Error deleting message: ${err}`, ...deleteMessagePayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: `Error deleting message: ${err}`, ...deleteMessagePayload }, obj.callback);
         }
 
         break; // deleteMessage
@@ -2235,13 +2218,8 @@ class DiscordAdapter extends Adapter {
         /*
          * add a reaction emoji to a message
          */
-        if (!obj.callback) {
-          this.log.warn(`Message '${obj.command}' called without callback!`);
-          return;
-        }
-
         if (typeof obj.message !== 'object') {
-          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
           return;
         }
 
@@ -2249,7 +2227,7 @@ class DiscordAdapter extends Adapter {
 
         // check payload
         if (typeof addReactionPayload.emoji !== 'string') {
-          this.sendTo(obj.from, obj.command, { error: 'emoji needs to be a string', ...addReactionPayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'emoji needs to be a string', ...addReactionPayload }, obj.callback);
           return;
         }
 
@@ -2258,9 +2236,9 @@ class DiscordAdapter extends Adapter {
           msg = await this.getPreviousMessage(addReactionPayload);
         } catch (err) {
           if (err instanceof Error && err.message) {
-            this.sendTo(obj.from, obj.command, { error: err.message, ...addReactionPayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err.message, ...addReactionPayload }, obj.callback);
           } else {
-            this.sendTo(obj.from, obj.command, { error: err, ...addReactionPayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err, ...addReactionPayload }, obj.callback);
           }
           return;
         }
@@ -2268,9 +2246,9 @@ class DiscordAdapter extends Adapter {
         // try to add the reaction to the message
         try {
           await msg.react(addReactionPayload.emoji);
-          this.sendTo(obj.from, obj.command, { result: `Reaction added to message`, ...addReactionPayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { result: `Reaction added to message`, ...addReactionPayload }, obj.callback);
         } catch (err) {
-          this.sendTo(obj.from, obj.command, { error: `Error adding reaction to message: ${err}`, ...addReactionPayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: `Error adding reaction to message: ${err}`, ...addReactionPayload }, obj.callback);
         }
 
         break; // addReaction
@@ -2329,13 +2307,8 @@ class DiscordAdapter extends Adapter {
         /*
          * send a reply to a custom slash command
          */
-        if (!obj.callback) {
-          this.log.warn(`Message '${obj.command}' called without callback!`);
-          return;
-        }
-
         if (typeof obj.message !== 'object') {
-          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
           return;
         }
 
@@ -2343,20 +2316,20 @@ class DiscordAdapter extends Adapter {
 
         // check payload
         if (typeof sendCustomCommandReplyPayload.interactionId !== 'string') {
-          this.sendTo(obj.from, obj.command, { error: 'interactionId needs to be a string', ...sendCustomCommandReplyPayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'interactionId needs to be a string', ...sendCustomCommandReplyPayload }, obj.callback);
           return;
         }
         if (!sendCustomCommandReplyPayload.content || (typeof sendCustomCommandReplyPayload.content !== 'string' && typeof sendCustomCommandReplyPayload.content !== 'object')) {
-          this.sendTo(obj.from, obj.command, { error: 'content needs to be a string or a MessageOptions object', ...sendCustomCommandReplyPayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'content needs to be a string or a MessageOptions object', ...sendCustomCommandReplyPayload }, obj.callback);
           return;
         }
 
         // send the reply
         try {
           const messageId = await this.discordSlashCommands.sendCmdCustomReply(sendCustomCommandReplyPayload.interactionId, sendCustomCommandReplyPayload.content);
-          this.sendTo(obj.from, obj.command, { result: `Reply sent`, ...sendCustomCommandReplyPayload, messageId }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { result: `Reply sent`, ...sendCustomCommandReplyPayload, messageId }, obj.callback);
         } catch (err) {
-          this.sendTo(obj.from, obj.command, { error: `Error sending reply: ${err}`, ...sendCustomCommandReplyPayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: `Error sending reply: ${err}`, ...sendCustomCommandReplyPayload }, obj.callback);
         }
 
         break; // sendCustomCommandReply
@@ -2366,7 +2339,7 @@ class DiscordAdapter extends Adapter {
          * let the bot leave a server
          */
         if (typeof obj.message !== 'object') {
-          this.sendTo(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'sendTo message needs to be an object' }, obj.callback);
           return;
         }
 
@@ -2374,13 +2347,13 @@ class DiscordAdapter extends Adapter {
 
         // check payload
         if (!leaveServerPayload.serverId) {
-          this.sendTo(obj.from, obj.command, { error: 'serverId needs to be set', ...leaveServerPayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'serverId needs to be set', ...leaveServerPayload }, obj.callback);
           return;
         }
 
         const guildToLeave = this.client?.guilds.cache.get(leaveServerPayload.serverId);
         if (!guildToLeave) {
-          this.sendTo(obj.from, obj.command, { error: `No server with ID ${leaveServerPayload.serverId} found` }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: `No server with ID ${leaveServerPayload.serverId} found` }, obj.callback);
           return;
         }
 
@@ -2388,13 +2361,9 @@ class DiscordAdapter extends Adapter {
           await guildToLeave.leave();
           this.log.info(`Left server ${guildToLeave.name} (${guildToLeave.id})`);
 
-          if (obj.callback) {
-            this.sendTo(obj.from, obj.command, { result: 'ok' }, obj.callback);
-          }
+          this.sendToIfCb(obj.from, obj.command, { result: 'ok' }, obj.callback);
         } catch (err) {
-          if (obj.callback) {
-            this.sendTo(obj.from, obj.command, { error: `Error leaving server ${leaveServerPayload.serverId}: ${err}`, ...leaveServerPayload }, obj.callback);
-          }
+          this.sendToIfCb(obj.from, obj.command, { error: `Error leaving server ${leaveServerPayload.serverId}: ${err}`, ...leaveServerPayload }, obj.callback);
         }
 
         break;
@@ -2648,6 +2617,21 @@ class DiscordAdapter extends Adapter {
           this.sendTo(obj.from, obj.command, { error: `Unknown command: ${obj.command}` }, obj.callback);
         }
 
+    }
+  }
+
+  /**
+   * Like `sendTo(...)` but only sends if a callback is given.
+   *
+   * If no callback given, but `message.error` is defined, the error will be
+   * logged as a warning.
+   * @see sendTo
+   */
+  private sendToIfCb (instanceName: string, command: string, message: ioBroker.MessagePayload, callback: ioBroker.MessageCallback | ioBroker.MessageCallbackInfo | undefined): void {
+    if (callback) {
+      this.sendTo(instanceName, command, message, callback);
+    } else if (typeof message === 'object' && message.error) {
+      this.log.warn(message.error);
     }
   }
 
