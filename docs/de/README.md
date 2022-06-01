@@ -292,11 +292,6 @@ die Autorisierung nicht beeinträchtigen.
 Es ist auch möglich die Autorisierung zu deaktivieren. Dies sollte jedoch nur
 gemacht werden, wenn allen Benutzern auf allen Servern des Bots vertraut werden kann!
 
-**Hinweis:** Selbst mit aktivierter Autorisierung kann jeder nicht autorisierte
-Benutzer möglicherweise die konfigurierten Discord-Slash-Befehle und die zugehörigen
-konfigurierten Zustandsnamen und Aliase sehen.
-Dies ist eine Einschränkung von Discord und hat nichts mit dem Adapter zu tun.
-
 ## Nachrichten
 
 Der Adapter ist in der Lage, Nachrichten von Discord Textkanälen und Benutzern

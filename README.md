@@ -61,6 +61,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 * (crycode-de) Send error replies on slash commands as ephemeral
 * (crycode-de) Added config option to send all slash command replies as ephemeral
 * (crycode-de) Register get/set commands only if states are configured for this
+* (crycode-de) Choices for commands are now handled as autocomplete which allows more choices, is more dynamic and shows the choices only to authorized users
 * (crycode-de) Added command options to `raw.interactionJson` json content
 * (crycode-de) Fixed command name checks
 * (crycode-de) Fixed some crashes / stuck conditions when network is not available

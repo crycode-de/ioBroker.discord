@@ -284,10 +284,6 @@ user tag, user name or role name don't affect the authorized users/roles lists.
 It's possible to disable the authorization, but this should be done only if any
 user on any server of the bot can be trusted!
 
-**Note:** Even with authorization enabled any unauthorized user may see the
-configured Discord slash commands and the corresponding configured state names
-and aliases. This is by design of Discord and not related to the adapter.
-
 ## Messages
 
 The adapter is able to receive and send messages from/to discord text channels and users.
