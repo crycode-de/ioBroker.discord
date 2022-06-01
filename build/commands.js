@@ -644,7 +644,9 @@ class DiscordAdapterSlashCommands {
     } else {
       return interaction.respond([]);
     }
-    const matchedChoices = choices.filter((choice) => choice.name.toLowerCase().includes(focusedValue) || choice.value.toLowerCase().includes(focusedValue));
+    const matchedChoices = choices.filter((choice) => {
+      return choice.name.normalize("NFKC").toLowerCase().includes(focusedValue) || choice.value.normalize("NFKC").toLowerCase().includes(focusedValue);
+    });
     matchedChoices.splice(25);
     return interaction.respond(matchedChoices);
   }

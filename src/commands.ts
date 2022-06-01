@@ -931,7 +931,10 @@ export class DiscordAdapterSlashCommands {
     }
 
     // filter for given input
-    const matchedChoices = choices.filter((choice) => (choice.name.toLowerCase().includes(focusedValue) || choice.value.toLowerCase().includes(focusedValue)));
+    const matchedChoices = choices.filter((choice) => {
+      return choice.name.normalize('NFKC').toLowerCase().includes(focusedValue)
+        || choice.value.normalize('NFKC').toLowerCase().includes(focusedValue);
+    });
 
     // max. 25 choices are allowed
     matchedChoices.splice(25);
