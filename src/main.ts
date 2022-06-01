@@ -12,6 +12,7 @@ import {
 
 import {
   Client,
+  CloseEvent as DjsCloseEvent,
   Collection,
   Guild,
   GuildBasedChannel,
@@ -284,10 +285,10 @@ class DiscordAdapter extends Adapter {
       this.setInfoConnectionState(true);
       this.setBotPresence();
     });
-    this.client.on('shardResume', (shardId, replayedEvents) => this.log.debug(`Discord client websocket resume (shardId:${shardId} replayedEvents:${replayedEvents})`));
-    this.client.on('shardDisconnect', (event, shardId) => this.log.debug(`Discord client websocket disconnect (shardId:${shardId} ${event.reason})`));
-    this.client.on('shardReconnecting', (shardId) => this.log.debug(`Discord client websocket reconnecting (shardId:${shardId})`));
-    this.client.on('shardError', (err, shardId) => {
+    this.client.on('shardResume', (shardId: number, replayedEvents: number) => this.log.debug(`Discord client websocket resume (shardId:${shardId} replayedEvents:${replayedEvents})`));
+    this.client.on('shardDisconnect', (event: DjsCloseEvent, shardId: number) => this.log.debug(`Discord client websocket disconnect (shardId:${shardId} ${event.reason})`));
+    this.client.on('shardReconnecting', (shardId: number) => this.log.debug(`Discord client websocket reconnecting (shardId:${shardId})`));
+    this.client.on('shardError', (err: Error, shardId: number) => {
       this.log.error(`Discord client websocket error (shardId:${shardId}) ${err}`);
       this.terminate('Discord client websocket error', EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
     });
