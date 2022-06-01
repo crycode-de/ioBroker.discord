@@ -336,9 +336,9 @@ export class DiscordAdapterSlashCommands {
               }
 
               optionsChoices.set(customCommandCfgOpt.name, choices.map((choice) => {
-                if (typeof choice === 'string') {
+                if (typeof choice === 'string' && choice.length <= 100) {
                   return { name: choice, value: choice };
-                } else if (typeof choice === 'object' && typeof choice.value === 'string' && typeof choice.name === 'string') {
+                } else if (typeof choice === 'object' && typeof choice.value === 'string' && typeof choice.name === 'string' && choice.value.length <= 100 && choice.value.length <= 100) {
                   return { name: choice.name, value: choice.value };
                 } else {
                   this.adapter.log.warn(`Choice ${JSON.stringify(choice)} is not valid for ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices and will be ignored!`);
