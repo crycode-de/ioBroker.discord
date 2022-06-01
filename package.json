@@ -29,7 +29,7 @@
     "@discordjs/rest": "^0.4.1",
     "@iobroker/adapter-core": "^2.6.0",
     "autobind-decorator": "^2.4.0",
-    "discord-api-types": "^0.32.1",
+    "discord-api-types": "^0.33.1",
     "discord.js": "^13.7.0",
     "source-map-support": "^0.5.21"
   },
