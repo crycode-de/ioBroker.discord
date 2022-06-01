@@ -42,7 +42,9 @@ class DiscordAdapterSlashCommands {
     this.rest = new import_rest.REST({ version: "10" });
     this.cmdGetStateName = "iob-get";
     this.cmdSetStateName = "iob-set";
-    this.customCommands = /* @__PURE__ */ new Set();
+    this.cmdGetStateChoices = [];
+    this.cmdSetStateChoices = [];
+    this.customCommands = new import_discord.Collection();
     this.registerCommandsDone = false;
     this.lastCommandsJson = null;
     this.commandObjectConfig = new import_discord.Collection();
@@ -98,39 +100,42 @@ class DiscordAdapterSlashCommands {
     const numSet = this.commandObjectConfig.filter((c) => c.set === true).size;
     if (numGet > 0) {
       const cmdGet = new import_builders.SlashCommandBuilder().setName(this.cmdGetStateName).setDescription(import_i18n.i18n.getString("Get an ioBroker state value")).setDefaultPermission(true);
-      cmdGet.addStringOption((opt) => {
-        opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to get")).setRequired(true);
-        for (const [, objCfg] of this.commandObjectConfig) {
-          if (objCfg.get) {
-            opt.addChoices({
-              name: objCfg.name,
-              value: objCfg.alias
-            });
-          }
-        }
-        return opt;
-      });
+      cmdGet.addStringOption((opt) => opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to get")).setRequired(true).setAutocomplete(true));
       commands.push(cmdGet);
     }
     if (numSet > 0) {
       const cmdSet = new import_builders.SlashCommandBuilder().setName(this.cmdSetStateName).setDescription(import_i18n.i18n.getString("Set an ioBroker state value")).setDefaultPermission(true);
-      cmdSet.addStringOption((opt) => {
-        opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to set")).setRequired(true);
-        for (const [, objCfg] of this.commandObjectConfig) {
-          if (objCfg.set) {
-            opt.addChoices({
-              name: objCfg.name,
-              value: objCfg.alias
-            });
-          }
-        }
-        return opt;
-      });
+      cmdSet.addStringOption((opt) => opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to set")).setRequired(true).setAutocomplete(true));
       cmdSet.addStringOption((opt) => {
         return opt.setName("value").setDescription(import_i18n.i18n.getString("The value to set")).setRequired(true);
       });
       commands.push(cmdSet);
     }
+    this.cmdGetStateChoices = [];
+    this.cmdSetStateChoices = [];
+    for (const [, objCfg] of this.commandObjectConfig) {
+      if (objCfg.get) {
+        this.cmdGetStateChoices.push({
+          name: objCfg.name,
+          value: objCfg.alias
+        });
+      }
+      if (objCfg.set) {
+        this.cmdSetStateChoices.push({
+          name: objCfg.name,
+          value: objCfg.alias
+        });
+      }
+    }
+    const sortFn = (a, b) => {
+      if (a.name > b.name)
+        return 1;
+      if (a.name < b.name)
+        return -1;
+      return 0;
+    };
+    this.cmdGetStateChoices.sort(sortFn);
+    this.cmdSetStateChoices.sort(sortFn);
     this.customCommands.clear();
     if (this.adapter.config.enableCustomCommands) {
       loopCustomCommands:
@@ -152,8 +157,14 @@ class DiscordAdapterSlashCommands {
             continue;
           }
           const cmdCustom = new import_builders.SlashCommandBuilder().setName(customCommandCfg.name).setDescription(customCommandCfg.description).setDefaultPermission(true);
+          const optionsChoices = new import_discord.Collection();
           const cmdOpts = /* @__PURE__ */ new Set();
-          if (!Array.isArray(customCommandCfg.options)) {
+          if (Array.isArray(customCommandCfg.options)) {
+            if (customCommandCfg.options.length > 25) {
+              this.adapter.log.warn(`Custom command "${customCommandCfg.name}" has more than 25 options configured! Only the first 25 options will be used.`);
+              customCommandCfg.options.splice(25);
+            }
+          } else {
             customCommandCfg.options = [];
           }
           await this.setupCustomCommandIobObjects(customCommandCfg);
@@ -180,22 +191,20 @@ class DiscordAdapterSlashCommands {
                 } catch (err) {
                   this.adapter.log.warn(`Could not parse JSON from ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices! ${err}`);
                 }
+                optionsChoices.set(customCommandCfgOpt.name, choices.map((choice) => {
+                  if (typeof choice === "string") {
+                    return { name: choice, value: choice };
+                  } else if (typeof choice === "object" && typeof choice.value === "string" && typeof choice.name === "string") {
+                    return { name: choice.name, value: choice.value };
+                  } else {
+                    this.adapter.log.warn(`Choice ${JSON.stringify(choice)} is not valid for ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices and will be ignored!`);
+                    return null;
+                  }
+                }).filter((choice) => choice !== null));
                 cmdCustom.addStringOption((opt) => {
                   opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required);
-                  for (const choice of choices) {
-                    if (typeof choice === "string") {
-                      opt.addChoices({
-                        name: choice,
-                        value: choice
-                      });
-                    } else if (typeof choice === "object" && typeof choice.value === "string" && typeof choice.name === "string") {
-                      opt.addChoices({
-                        name: choice.name,
-                        value: choice.value
-                      });
-                    } else {
-                      this.adapter.log.warn(`Choice ${JSON.stringify(choice)} is not valid for ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices and will be ignored!`);
-                    }
+                  if (choices.length > 0) {
+                    opt.setAutocomplete(true);
                   }
                   return opt;
                 });
@@ -224,7 +233,7 @@ class DiscordAdapterSlashCommands {
             }
           }
           commands.push(cmdCustom);
-          this.customCommands.add(customCommandCfg.name);
+          this.customCommands.set(customCommandCfg.name, optionsChoices);
         }
       const objListSlashCommands = await this.adapter.getObjectListAsync({
         startkey: `${this.adapter.namespace}.slashCommands.`,
@@ -333,6 +342,7 @@ class DiscordAdapterSlashCommands {
     }
   }
   async setupCustomCommandIobObjects(cmdCfg) {
+    var _a;
     const cmdName = cmdCfg.name;
     await this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}`, {
       type: "channel",
@@ -507,6 +517,7 @@ class DiscordAdapterSlashCommands {
         const oldoptName = m[1];
         if (!cmdCfg.options.find((o) => o.name === oldoptName)) {
           proms.push(this.adapter.delObjectAsyncCached(`slashCommands.${cmdName}.option-${oldoptName}`, { recursive: true }));
+          (_a = this.customCommands.get(cmdName)) == null ? void 0 : _a.delete(oldoptName);
         }
       }
     }
@@ -554,8 +565,13 @@ class DiscordAdapterSlashCommands {
       }
       this.adapter.setState("raw.interactionJson", JSON.stringify(interactionJson, (_key, value) => typeof value === "bigint" ? value.toString() : value), true);
     }
-    if (!interaction.isCommand())
-      return;
+    if (interaction.isCommand()) {
+      this.handleCommandInteraction(interaction);
+    } else if (interaction.isAutocomplete()) {
+      this.handleAutocompleteInteraction(interaction);
+    }
+  }
+  async handleCommandInteraction(interaction) {
     const { commandName, user } = interaction;
     if (!this.registerCommandsDone) {
       this.adapter.log.warn(`Got command ${commandName} but command registration is not done yet.`);
@@ -597,6 +613,40 @@ class DiscordAdapterSlashCommands {
       this.adapter.log.warn(`Got unknown command ${commandName}!`);
       await interaction.editReply(import_i18n.i18n.getString("Unknown command!"));
     }
+  }
+  async handleAutocompleteInteraction(interaction) {
+    var _a;
+    const { commandName, user } = interaction;
+    const focused = interaction.options.getFocused(true);
+    let focusedValue;
+    if (typeof focused.value !== "string") {
+      return interaction.respond([]);
+    } else {
+      focusedValue = focused.value.toLowerCase();
+    }
+    const authCheckTarget = interaction.member instanceof import_discord.GuildMember ? interaction.member : user;
+    let choices;
+    if (commandName === this.cmdGetStateName) {
+      if (!this.adapter.checkUserAuthorization(authCheckTarget, { getStates: true })) {
+        return interaction.respond([]);
+      }
+      choices = this.cmdGetStateChoices;
+    } else if (commandName === this.cmdSetStateName) {
+      if (!this.adapter.checkUserAuthorization(authCheckTarget, { setStates: true })) {
+        return interaction.respond([]);
+      }
+      choices = this.cmdSetStateChoices;
+    } else if (this.customCommands.has(commandName)) {
+      if (!this.adapter.checkUserAuthorization(authCheckTarget, { useCustomCommands: true })) {
+        return interaction.respond([]);
+      }
+      choices = ((_a = this.customCommands.get(commandName)) == null ? void 0 : _a.get(focused.name)) || [];
+    } else {
+      return interaction.respond([]);
+    }
+    const matchedChoices = choices.filter((choice) => choice.name.toLowerCase().includes(focusedValue) || choice.value.toLowerCase().includes(focusedValue));
+    matchedChoices.splice(25);
+    return interaction.respond(matchedChoices);
   }
   async getObjectAndCfgFromAlias(objAlias, interaction) {
     const cfg = this.commandObjectConfig.find((coc) => coc.alias === objAlias);

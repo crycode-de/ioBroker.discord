@@ -3,6 +3,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { boundMethod } from 'autobind-decorator';
 
 import {
+  AutocompleteInteraction,
   CacheType,
   Collection,
   CommandInteraction,
@@ -36,6 +37,11 @@ export interface CommandObjectConfig {
   set: boolean;
 }
 
+interface CommandOptionChoiceData {
+  name: string;
+  value: string;
+}
+
 /**
  * Class for discord slash commands handling
  */
@@ -62,9 +68,19 @@ export class DiscordAdapterSlashCommands {
   private cmdSetStateName: string = 'iob-set';
 
   /**
-   * Set of the known (registered) custom commands.
+   * Possible choices for get state command state-option.
    */
-  private customCommands: Set<string> = new Set();
+  private cmdGetStateChoices: CommandOptionChoiceData[] = [];
+
+  /**
+   * Possible choices for set state command state-option.
+   */
+  private cmdSetStateChoices: CommandOptionChoiceData[] = [];
+
+  /**
+   * Collection of the known (registered) custom commands and their option choices.
+   */
+  private customCommands: Collection<string, Collection<string, CommandOptionChoiceData[]>> = new Collection();
 
   /**
    * If commands are fully registered including their permissions.
@@ -186,20 +202,12 @@ export class DiscordAdapterSlashCommands {
         .setDefaultPermission(true);
 
       // add options
-      cmdGet.addStringOption((opt) => {
+      cmdGet.addStringOption((opt) => (
         opt.setName('state')
           .setDescription(i18n.getString('The ioBroker state to get'))
-          .setRequired(true);
-        for (const [, objCfg] of this.commandObjectConfig) {
-          if (objCfg.get) {
-            opt.addChoices({
-              name: objCfg.name,
-              value: objCfg.alias,
-            });
-          }
-        }
-        return opt;
-      });
+          .setRequired(true)
+          .setAutocomplete(true)
+      ));
 
       commands.push(cmdGet);
     }
@@ -211,20 +219,12 @@ export class DiscordAdapterSlashCommands {
         .setDescription(i18n.getString('Set an ioBroker state value'))
         .setDefaultPermission(true);
 
-      cmdSet.addStringOption((opt) => {
+      cmdSet.addStringOption((opt) => (
         opt.setName('state')
           .setDescription(i18n.getString('The ioBroker state to set'))
-          .setRequired(true);
-        for (const [, objCfg] of this.commandObjectConfig) {
-          if (objCfg.set) {
-            opt.addChoices({
-              name: objCfg.name,
-              value: objCfg.alias,
-            });
-          }
-        }
-        return opt;
-      });
+          .setRequired(true)
+          .setAutocomplete(true)
+      ));
       cmdSet.addStringOption((opt) => {
         return opt.setName('value')
           .setDescription(i18n.getString('The value to set'))
@@ -233,6 +233,33 @@ export class DiscordAdapterSlashCommands {
 
       commands.push(cmdSet);
     }
+
+    // setup choices for get and set commands
+    this.cmdGetStateChoices = [];
+    this.cmdSetStateChoices = [];
+    for (const [, objCfg] of this.commandObjectConfig) {
+      if (objCfg.get) {
+        this.cmdGetStateChoices.push({
+          name: objCfg.name,
+          value: objCfg.alias,
+        });
+      }
+      if (objCfg.set) {
+        this.cmdSetStateChoices.push({
+          name: objCfg.name,
+          value: objCfg.alias,
+        });
+      }
+    }
+
+    // sort choices for get and set commands
+    const sortFn = (a: CommandOptionChoiceData, b: CommandOptionChoiceData): -1 | 0 | 1 => {
+      if (a.name > b.name) return 1;
+      if (a.name < b.name) return -1;
+      return 0;
+    };
+    this.cmdGetStateChoices.sort(sortFn);
+    this.cmdSetStateChoices.sort(sortFn);
 
     // custom commands
     this.customCommands.clear();
@@ -264,9 +291,17 @@ export class DiscordAdapterSlashCommands {
           .setDescription(customCommandCfg.description)
           .setDefaultPermission(true);
 
+        const optionsChoices = new Collection<string, CommandOptionChoiceData[]>();
+
         // add configured options
         const cmdOpts: Set<string> = new Set();
-        if (!Array.isArray(customCommandCfg.options)) {
+        if (Array.isArray(customCommandCfg.options)) {
+          // max 25 options are allowed
+          if (customCommandCfg.options.length > 25) {
+            this.adapter.log.warn(`Custom command "${customCommandCfg.name}" has more than 25 options configured! Only the first 25 options will be used.`);
+            customCommandCfg.options.splice(25);
+          }
+        } else {
           customCommandCfg.options = [];
         }
 
@@ -288,7 +323,7 @@ export class DiscordAdapterSlashCommands {
           switch (customCommandCfgOpt.type) {
             case 'string':
               // string options may have choices from the ioBroker object
-              let choices: (string | { name: string, value: string })[] = [];
+              let choices: (string | CommandOptionChoiceData)[] = [];
               try {
                 const val = (await this.adapter.getStateAsync(`slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices`))?.val || '[]';
                 if (typeof val !== 'string') {
@@ -300,23 +335,24 @@ export class DiscordAdapterSlashCommands {
                 this.adapter.log.warn(`Could not parse JSON from ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices! ${err}`);
               }
 
-              cmdCustom.addStringOption((opt) => {
-                opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required);
+              optionsChoices.set(customCommandCfgOpt.name, choices.map((choice) => {
+                if (typeof choice === 'string') {
+                  return { name: choice, value: choice };
+                } else if (typeof choice === 'object' && typeof choice.value === 'string' && typeof choice.name === 'string') {
+                  return { name: choice.name, value: choice.value };
+                } else {
+                  this.adapter.log.warn(`Choice ${JSON.stringify(choice)} is not valid for ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices and will be ignored!`);
+                  return null;
+                }
+              }).filter((choice) => choice !== null) as CommandOptionChoiceData[]);
 
-                for (const choice of choices) {
-                  if (typeof choice === 'string') {
-                    opt.addChoices({
-                      name: choice,
-                      value: choice,
-                    });
-                  } else if (typeof choice === 'object' && typeof choice.value === 'string' && typeof choice.name === 'string') {
-                    opt.addChoices({
-                      name: choice.name,
-                      value: choice.value,
-                    });
-                  } else {
-                    this.adapter.log.warn(`Choice ${JSON.stringify(choice)} is not valid for ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices and will be ignored!`);
-                  }
+              cmdCustom.addStringOption((opt) => {
+                opt.setName(customCommandCfgOpt.name)
+                  .setDescription(customCommandCfgOpt.description)
+                  .setRequired(!!customCommandCfgOpt.required);
+
+                if (choices.length > 0) {
+                  opt.setAutocomplete(true);
                 }
 
                 return opt;
@@ -355,7 +391,7 @@ export class DiscordAdapterSlashCommands {
 
         // add custom command to the commands
         commands.push(cmdCustom);
-        this.customCommands.add(customCommandCfg.name);
+        this.customCommands.set(customCommandCfg.name, optionsChoices);
       }
 
       /*
@@ -690,8 +726,9 @@ export class DiscordAdapterSlashCommands {
       if (m) {
         const oldoptName = m[1];
         if (!cmdCfg.options.find((o) => o.name === oldoptName)) {
-          // option does not exist... delete the object
+          // option does not exist... delete the object and custom command option choices cache
           proms.push(this.adapter.delObjectAsyncCached(`slashCommands.${cmdName}.option-${oldoptName}`, { recursive: true }));
+          this.customCommands.get(cmdName)?.delete(oldoptName);
         }
       }
     }
@@ -760,7 +797,7 @@ export class DiscordAdapterSlashCommands {
   }
 
   /**
-   * Handle interaction commands.
+   * Handle interactions.
    */
   @boundMethod
   private async onInteractionCreate (interaction: Interaction<CacheType>): Promise<void> {
@@ -775,9 +812,17 @@ export class DiscordAdapterSlashCommands {
       this.adapter.setState('raw.interactionJson', JSON.stringify(interactionJson, (_key, value) => typeof value === 'bigint' ? value.toString() : value), true);
     }
 
-    // is it a command?
-    if (!interaction.isCommand()) return;
+    if (interaction.isCommand()) {
+      this.handleCommandInteraction(interaction);
+    } else if (interaction.isAutocomplete()) {
+      this.handleAutocompleteInteraction(interaction);
+    }
+  }
 
+  /**
+   * Handle command interactions.
+   */
+  private async handleCommandInteraction (interaction: CommandInteraction<CacheType>): Promise<void> {
     const { commandName, user } = interaction;
 
     if (!this.registerCommandsDone) {
@@ -835,6 +880,63 @@ export class DiscordAdapterSlashCommands {
       this.adapter.log.warn(`Got unknown command ${commandName}!`);
       await interaction.editReply(i18n.getString('Unknown command!'));
     }
+  }
+
+  /**
+   * Handle autocomplete for command interactions.
+   */
+  private async handleAutocompleteInteraction (interaction: AutocompleteInteraction<CacheType>): Promise<void> {
+    const { commandName, user } = interaction;
+
+    const focused = interaction.options.getFocused(true);
+    let focusedValue: string;
+    if (typeof focused.value !== 'string') {
+      return interaction.respond([]);
+    } else {
+      focusedValue = focused.value.toLowerCase();
+    }
+
+    // check authorization
+    const authCheckTarget = interaction.member instanceof GuildMember ? interaction.member : user;
+
+    let choices: CommandOptionChoiceData[];
+
+    if (commandName === this.cmdGetStateName) {
+      // get state command
+      if (!this.adapter.checkUserAuthorization(authCheckTarget, { getStates: true })) {
+        return interaction.respond([]);
+      }
+
+      choices = this.cmdGetStateChoices;
+
+    } else if (commandName === this.cmdSetStateName) {
+      // set state command
+      if (!this.adapter.checkUserAuthorization(authCheckTarget, { setStates: true })) {
+        return interaction.respond([]);
+      }
+
+      choices = this.cmdSetStateChoices;
+
+    } else if (this.customCommands.has(commandName)) {
+      // custom command
+      if (!this.adapter.checkUserAuthorization(authCheckTarget, { useCustomCommands: true })) {
+        return interaction.respond([]);
+      }
+
+      choices = this.customCommands.get(commandName)?.get(focused.name) || [];
+
+    } else {
+      // unknown command
+      return interaction.respond([]);
+    }
+
+    // filter for given input
+    const matchedChoices = choices.filter((choice) => (choice.name.toLowerCase().includes(focusedValue) || choice.value.toLowerCase().includes(focusedValue)));
+
+    // max. 25 choices are allowed
+    matchedChoices.splice(25);
+
+    return interaction.respond(matchedChoices);
   }
 
   /**
