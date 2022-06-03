@@ -357,7 +357,7 @@
           "help": "Custom name for the get state command. Defaults to 'iob-get'.",
           "default": "",
           "placeholder": "iob-get",
-          "validator": "data.cmdGetStateName.match(/^([a-z][0-9a-z-_]{0,49})?$/)",
+          "validator": "data.cmdGetStateName.match(/^([a-z][0-9a-z-_]{0,32})?$/)",
           "validatorNoSaveOnError": true,
           "onChange": {
             "calculateFunc": "data.cmdGetStateName.toLowerCase().replace(/(^[^a-z]|[^0-9a-z-_])/g, '')"
@@ -373,7 +373,7 @@
           "help": "Custom name for the set state command. Defaults to 'iob-get'.",
           "default": "",
           "placeholder": "iob-set",
-          "validator": "data.cmdSetStateName.match(/^([a-z][0-9a-z-_]{0,49})?$/)",
+          "validator": "data.cmdSetStateName.match(/^([a-z][0-9a-z-_]{0,32})?$/)",
           "validatorNoSaveOnError": true,
           "onChange": {
             "calculateFunc": "data.cmdSetStateName.toLowerCase().replace(/(^[^a-z]|[^0-9a-z-_])/g, '')"
@@ -453,7 +453,7 @@
               "sort": false,
               "default": "",
               "placeholder": "iob-xyz",
-              "validator": "data.name.match(/^[a-z][0-9a-z-_]{0,49}$/)",
+              "validator": "data.name.match(/^[a-z][0-9a-z-_]{1,32}$/)",
               "validatorNoSaveOnError": true,
               "onChange": {
                 "calculateFunc": "data.name.toLowerCase().replace(/(^[^a-z]|[^0-9a-z-_])/g, '')"
@@ -468,7 +468,7 @@
               "sort": false,
               "default": "",
               "placeholder": "Do something usefull",
-              "validator": "data.description.length > 0",
+              "validator": "data.description.length > 0 && data.description.length <= 100",
               "validatorNoSaveOnError": true
             },
             {
@@ -504,7 +504,7 @@
                   "sort": false,
                   "default": "",
                   "placeholder": "option-1",
-                  "validator": "data.name.match(/^[a-z][0-9a-z-_]{0,49}$/)",
+                  "validator": "data.name.match(/^[a-z][0-9a-z-_]{1,32}$/)",
                   "validatorNoSaveOnError": true,
                   "onChange": {
                     "calculateFunc": "data.name.toLowerCase().replace(/(^[^a-z]|[^0-9a-z-_])/g, '')"
@@ -519,7 +519,7 @@
                   "sort": false,
                   "default": "",
                   "placeholder": "Option 1",
-                  "validator": "data.description.length > 0",
+                  "validator": "data.description.length > 0 && data.description.length <= 100",
                   "validatorNoSaveOnError": true
                 },
                 {
