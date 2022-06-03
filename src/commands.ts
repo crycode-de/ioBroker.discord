@@ -127,7 +127,7 @@ export class DiscordAdapterSlashCommands {
   public async onReady (): Promise<void> {
     // apply custom command names if configured
     if (this.adapter.config.cmdGetStateName) {
-      if (this.adapter.config.cmdGetStateName.match(/^[a-z][0-9a-z-_]{0,49}$/)) {
+      if (this.adapter.config.cmdGetStateName.match(/^[a-z][0-9a-z-_]{1,32}$/)) {
         this.cmdGetStateName = this.adapter.config.cmdGetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom get state command name '${this.adapter.config.cmdGetStateName}' provied! Using default 'iob-get'.`);
@@ -135,7 +135,7 @@ export class DiscordAdapterSlashCommands {
     }
     if (this.adapter.config.cmdSetStateName) {
       this.cmdSetStateName = this.adapter.config.cmdSetStateName;
-      if (this.adapter.config.cmdSetStateName.match(/^[a-z][0-9a-z-_]{0,49}$/)) {
+      if (this.adapter.config.cmdSetStateName.match(/^[a-z][0-9a-z-_]{1,32}$/)) {
         this.cmdSetStateName = this.adapter.config.cmdSetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom set state command name '${this.adapter.config.cmdSetStateName}' provied! Using default 'iob-set'.`);
@@ -266,7 +266,7 @@ export class DiscordAdapterSlashCommands {
     if (this.adapter.config.enableCustomCommands) {
       loopCustomCommands:
       for (const customCommandCfg of this.adapter.config.customCommands) {
-        if (!customCommandCfg.name.match(/^[a-z][0-9a-z-_]{0,49}$/) || customCommandCfg.description.length === 0) {
+        if (!customCommandCfg.name.match(/^[a-z][0-9a-z-_]{1,32}$/) || customCommandCfg.description.length === 0 || customCommandCfg.description.length > 100) {
           this.adapter.log.warn(`Custom command "${customCommandCfg.name}" has an invalid name or description configured!`);
           continue;
         }
@@ -309,7 +309,7 @@ export class DiscordAdapterSlashCommands {
         await this.setupCustomCommandIobObjects(customCommandCfg);
 
         for (const customCommandCfgOpt of customCommandCfg.options) {
-          if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-z-_]{0,49}$/) || customCommandCfgOpt.description.length === 0) {
+          if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-z-_]{1,32}$/) || customCommandCfgOpt.description.length === 0 || customCommandCfgOpt.description.length > 100) {
             this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" has an invalid name or description configured!`);
             continue loopCustomCommands;
           }
