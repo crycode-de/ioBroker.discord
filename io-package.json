@@ -101,6 +101,7 @@
         "loglevel": "info",
         "mode": "daemon",
         "type": "messaging",
+        "blockly": true,
         "compact": true,
         "connectionType": "cloud",
         "dataSource": "push",

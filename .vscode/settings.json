@@ -19,9 +19,12 @@
         }
     ],
     "cSpell.words": [
+        "Blockly",
         "discordjs",
+        "goog",
         "Instanzkonfiguration",
         "Integrationen",
+        "Sendto",
         "undeafen"
     ]
 }
