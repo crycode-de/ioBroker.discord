@@ -9,7 +9,9 @@ if (typeof goog !== 'undefined') {
 Blockly.Words['Discord'] = { 'en': 'Discord', 'de': 'Discord', 'ru': 'Discord', 'pt': 'Discord', 'nl': 'Discord', 'fr': 'Discord', 'it': 'Discord', 'es': 'Discord', 'pl': 'Discord', 'zh-cn': 'Discord' };
 Blockly.Words['discord_sendto_tooltip'] = { 'en': 'Send a message via Discord', 'de': 'Eine Nachricht über Discord senden', 'ru': 'Отправить сообщение через Discord', 'pt': 'Envie uma mensagem pelo Discord', 'nl': 'Stuur een bericht via Discord', 'fr': 'Envoyer un message via Discord', 'it': 'Invia un messaggio tramite Discord', 'es': 'Enviar un mensaje a través de Discord', 'pl': 'Wyślij wiadomość przez Discord', 'zh-cn': '通过 Discord 发送消息' };
 Blockly.Words['discord_send_message'] = { 'en': 'Send Discord message', 'de': 'Discord-Nachricht senden', 'ru': 'Отправить сообщение в дискорде', 'pt': 'Enviar mensagem do Discord', 'nl': 'Discord-bericht verzenden', 'fr': 'Envoyer un message Discord', 'it': 'Invia messaggio Discordia', 'es': 'Enviar mensaje de discordia', 'pl': 'Wyślij wiadomość na Discordzie', 'zh-cn': '发送不和谐消息' };
+Blockly.Words['discord_edit_message'] = { 'en': 'Edit Discord message', 'de': 'Discord-Nachricht bearbeiten', 'ru': 'Изменить сообщение Discord', 'pt': 'Editar mensagem do Discord', 'nl': 'Discord-bericht bewerken', 'fr': 'Modifier le message Discord', 'it': 'Modifica messaggio Discord', 'es': 'Editar mensaje de discordia', 'pl': 'Edytuj wiadomość na Discordzie', 'zh-cn': '编辑 Discord 消息' };
 Blockly.Words['discord_message'] = { 'en': 'Nachricht', 'de': 'Nachricht', 'ru': 'Нахрихт', 'pt': 'Nachricht', 'nl': 'Nachricht', 'fr': 'Nachricht', 'it': 'Nachricht', 'es': 'Nachricht', 'pl': 'Nachricht', 'zh-cn': '纳赫里赫特' };
+Blockly.Words['discord_message_id'] = { 'en': 'Message ID', 'de': 'Nachrichten-ID', 'ru': 'Идентификатор сообщения', 'pt': 'ID da mensagem', 'nl': 'Bericht-ID', 'fr': 'ID du message', 'it': 'ID messaggio', 'es': 'ID de mensaje', 'pl': 'ID wiadomości', 'zh-cn': '消息 ID' };
 Blockly.Words['discord_save_messageId_in'] = { 'en': 'Save message ID in', 'de': 'Nachrichten-ID speichern in', 'ru': 'Сохранить идентификатор сообщения в', 'pt': 'Salvar ID da mensagem em', 'nl': 'Bericht-ID opslaan in', 'fr': 'Enregistrer l\'identifiant du message dans', 'it': 'Salva l\'ID del messaggio in', 'es': 'Guardar ID de mensaje en', 'pl': 'Zapisz identyfikator wiadomości w', 'zh-cn': '将消息 ID 保存在' };
 Blockly.Words['discord_save_error_in'] = {  'en': 'Save error in', 'de': 'Fehler speichern in', 'ru': 'Сохранить ошибку в', 'pt': 'Salvar erro em', 'nl': 'Fout opslaan in', 'fr': 'Enregistrer l\'erreur dans', 'it': 'Salva errore in', 'es': 'Guardar error en', 'pl': 'Zapisz błąd w', 'zh-cn': '将错误保存在' };
 Blockly.Words['discord_log_result_ok'] = { 'en': 'Log result if sent', 'de': 'Ergebnis protokollieren, wenn gesendet', 'ru': 'Результат журнала, если он отправлен', 'pt': 'Log do resultado se enviado', 'nl': 'Log resultaat indien verzonden', 'fr': 'Consigner le résultat si envoyé', 'it': 'Registra il risultato se inviato', 'es': 'Registrar resultado si se envía', 'pl': 'Zaloguj wynik, jeśli został wysłany', 'zh-cn': '记录结果（如果已发送）' };
@@ -41,7 +43,7 @@ Blockly.CustomBlocks.push('Discord');
 
 Blockly.Discord = {
   HUE: 235,
-  blocks: {}
+  blocks: {},
 };
 
 const DiscordHelpers = {
@@ -71,21 +73,21 @@ const DiscordHelpers = {
     return options;
   },
 
-  createSendMessageJs: (instance, target, content, varMessageId, varError, logResultOk) => {
+  createSendMessageJs: (opts) => {
     let resultCode = '';
-    if (varMessageId && varMessageId !== 'null') {
-      resultCode += `\n        ${varMessageId} = result.messageId || null;`;
+    if (opts.varMessageId && opts.varMessageId !== 'null') {
+      resultCode += `\n        ${opts.varMessageId} = result.messageId || null;`;
     }
-    if (varError && varError !== 'null') {
-      resultCode += `\n        ${varError} = result.error || null;`;
+    if (opts.varError && opts.varError !== 'null') {
+      resultCode += `\n        ${opts.varError} = result.error || null;`;
     }
 
-    if (logResultOk === true || logResultOk === 'true' || logResultOk === 'TRUE') {
-      resultCode += `\n        log(\`discord${instance} send message result: \${result.result}\`)`;
+    if (opts.logResultOk === true || opts.logResultOk === 'true' || opts.logResultOk === 'TRUE') {
+      resultCode += `\n        log(\`discord${opts.instance} send message result: \${result.result}\`)`;
     }
 
     return `await new Promise((resolve) => {
-      const content = ${content};
+      const content = ${opts.content};
 
       if (typeof content === 'object') {
         // remove empty content
@@ -133,12 +135,13 @@ const DiscordHelpers = {
         }
       }
 
-      sendTo('discord${instance}', 'sendMessage', {
-        ${target},
+      sendTo('discord${opts.instance}', '${opts.action}', {
+        ${opts.target},
+        ${opts.messageId ? `messageId: ${opts.messageId},` : ''}
         content: content,
       }, (result) => {
         if (result.error) {
-          log(\`discord${instance} send message error: \${result.error}\\n\${JSON.stringify(result)}\`, 'warn');
+          log(\`discord${opts.instance} send message error: \${result.error}\\n\${JSON.stringify(result)}\`, 'warn');
           resolve();
           return;
         }
@@ -172,9 +175,8 @@ const DiscordHelpers = {
     block.setColour(Blockly.Sendto.HUE);
     block.setTooltip(Blockly.Translate('discord_sendto_tooltip'));
     block.setHelpUrl(DiscordHelpers.helpUrl);
-  }
-}
-
+  },
+};
 
 // --- Block send message to user ----------------------------------------------
 Blockly.Discord.blocks['discord_sendto_user'] =
@@ -203,7 +205,7 @@ Blockly.Discord.blocks['discord_sendto_user'] =
 
 Blockly.Blocks['discord_sendto_user'] = {
   init: function () {
-    this.appendDummyInput('title')
+    this.appendDummyInput('_title')
       .appendField(Blockly.Translate('discord_send_message'));
 
     this.appendDummyInput('instance')
@@ -219,16 +221,17 @@ Blockly.Blocks['discord_sendto_user'] = {
 };
 
 Blockly.JavaScript['discord_sendto_user'] = (block) => {
-  const instance = block.getFieldValue('instance');
-  const content = Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC);
   const user = Blockly.JavaScript.valueToCode(block, 'user', Blockly.JavaScript.ORDER_ATOMIC);
-  const varMessageId = Blockly.JavaScript.valueToCode(block, 'varMessageId', Blockly.JavaScript.ORDER_ATOMIC);
-  const varError = Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC);
-  const logResultOk = block.getFieldValue('logResultOk');
 
-  const target = user.match(/^["']\d+["']$/) ? `userId: ${user}` : `userTag: ${user}`;
-
-  return DiscordHelpers.createSendMessageJs(instance, target, content, varMessageId, varError, logResultOk);
+  return DiscordHelpers.createSendMessageJs({
+    action: 'sendMessage',
+    instance: block.getFieldValue('instance'),
+    target: user.match(/^["']\d+["']$/) ? `userId: ${user}` : `userTag: ${user}`,
+    content: Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC),
+    varMessageId: Blockly.JavaScript.valueToCode(block, 'varMessageId', Blockly.JavaScript.ORDER_ATOMIC),
+    varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
+    logResultOk: block.getFieldValue('logResultOk'),
+  });
 };
 
 // --- Block send message to server channel ------------------------------------
@@ -263,7 +266,7 @@ Blockly.Discord.blocks['discord_sendto_server_channel'] =
 
 Blockly.Blocks['discord_sendto_server_channel'] = {
   init: function () {
-    this.appendDummyInput('title')
+    this.appendDummyInput('_title')
       .appendField(Blockly.Translate('discord_send_message'));
 
     this.appendDummyInput('instance')
@@ -283,17 +286,160 @@ Blockly.Blocks['discord_sendto_server_channel'] = {
 };
 
 Blockly.JavaScript['discord_sendto_server_channel'] = (block) => {
-  const instance = block.getFieldValue('instance');
-  const content = Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC);
   const serverId = Blockly.JavaScript.valueToCode(block, 'serverId', Blockly.JavaScript.ORDER_ATOMIC);
   const channelId = Blockly.JavaScript.valueToCode(block, 'channelId', Blockly.JavaScript.ORDER_ATOMIC);
-  const varMessageId = Blockly.JavaScript.valueToCode(block, 'varMessageId', Blockly.JavaScript.ORDER_ATOMIC);
-  const varError = Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC);
-  const logResultOk = block.getFieldValue('logResultOk');
 
-  const target = `serverId: ${serverId}, channelId: ${channelId}`;
+  return DiscordHelpers.createSendMessageJs({
+    action: 'sendMessage',
+    instance: block.getFieldValue('instance'),
+    target: `serverId: ${serverId}, channelId: ${channelId}`,
+    content: Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC),
+    varMessageId: Blockly.JavaScript.valueToCode(block, 'varMessageId', Blockly.JavaScript.ORDER_ATOMIC),
+    varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
+    logResultOk: block.getFieldValue('logResultOk'),
+  });
+};
 
-  return DiscordHelpers.createSendMessageJs(instance, target, content, varMessageId, varError, logResultOk);
+// --- Block edit message to user ----------------------------------------------
+Blockly.Discord.blocks['discord_edit_message_user'] =
+  `<block type="discord_edit_message_user">
+    <value name="instance">
+    </value>
+    <value name="user">
+      <shadow type="text">
+        <field name="TEXT">User ID or tag</field>
+      </shadow>
+    </value>
+    <value name="messageId">
+      <shadow type="text">
+        <field name="TEXT">Message ID to edit</field>
+      </shadow>
+    </value>
+    <value name="content">
+      <shadow type="text">
+        <field name="TEXT">The message to send.</field>
+      </shadow>
+    </value>
+    <value name="varMessageId">
+      <shadow type="logic_null"></shadow>
+    </value>
+    <value name="varError">
+      <shadow type="logic_null"></shadow>
+    </value>
+    <value name="logResultOk">
+    </value>
+  </block>`;
+
+Blockly.Blocks['discord_edit_message_user'] = {
+  init: function () {
+    this.appendDummyInput('_title')
+      .appendField(Blockly.Translate('discord_edit_message'));
+
+    this.appendDummyInput('instance')
+      .appendField(Blockly.Translate('discord_instance'))
+      .appendField(new Blockly.FieldDropdown(DiscordHelpers.getInstancesOptions()), 'instance');
+
+    this.appendValueInput('user')
+      .setCheck('String')
+      .appendField(Blockly.Translate('discord_user'));
+
+    this.appendValueInput('messageId')
+      .setCheck('String')
+      .appendField(Blockly.Translate('discord_message_id'));
+
+    DiscordHelpers.setupSendToMessageBlock(this);
+  },
+};
+
+Blockly.JavaScript['discord_edit_message_user'] = (block) => {
+  const user = Blockly.JavaScript.valueToCode(block, 'user', Blockly.JavaScript.ORDER_ATOMIC);
+
+  return DiscordHelpers.createSendMessageJs({
+    action: 'editMessage',
+    instance: block.getFieldValue('instance'),
+    target: user.match(/^["']\d+["']$/) ? `userId: ${user}` : `userTag: ${user}`,
+    messageId: Blockly.JavaScript.valueToCode(block, 'messageId', Blockly.JavaScript.ORDER_ATOMIC),
+    content: Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC),
+    varMessageId: Blockly.JavaScript.valueToCode(block, 'varMessageId', Blockly.JavaScript.ORDER_ATOMIC),
+    varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
+    logResultOk: block.getFieldValue('logResultOk'),
+  });
+};
+
+// --- Block edit message to server channel ------------------------------------
+Blockly.Discord.blocks['discord_edit_message_server_channel'] =
+  `<block type="discord_edit_message_server_channel">
+    <value name="instance">
+    </value>
+    <value name="serverId">
+      <shadow type="text">
+        <field name="TEXT">Server ID</field>
+      </shadow>
+    </value>
+    <value name="channelId">
+      <shadow type="text">
+        <field name="TEXT">Channel ID</field>
+      </shadow>
+    </value>
+    <value name="messageId">
+      <shadow type="text">
+        <field name="TEXT">Message ID to edit</field>
+      </shadow>
+    </value>
+    <value name="content">
+      <shadow type="text">
+        <field name="TEXT">The message to send.</field>
+      </shadow>
+    </value>
+    <value name="varMessageId">
+      <shadow type="logic_null"></shadow>
+    </value>
+    <value name="varError">
+      <shadow type="logic_null"></shadow>
+    </value>
+    <value name="logResultOk">
+    </value>
+  </block>`;
+
+Blockly.Blocks['discord_edit_message_server_channel'] = {
+  init: function () {
+    this.appendDummyInput('_title')
+      .appendField(Blockly.Translate('discord_edit_message'));
+
+    this.appendDummyInput('instance')
+      .appendField(Blockly.Translate('discord_instance'))
+      .appendField(new Blockly.FieldDropdown(DiscordHelpers.getInstancesOptions()), 'instance');
+
+    this.appendValueInput('serverId')
+      .setCheck('String')
+      .appendField(Blockly.Translate('discord_server_id'));
+
+    this.appendValueInput('channelId')
+      .setCheck('String')
+      .appendField(Blockly.Translate('discord_channel_id'));
+
+    this.appendValueInput('messageId')
+      .setCheck('String')
+      .appendField(Blockly.Translate('discord_message_id'));
+
+    DiscordHelpers.setupSendToMessageBlock(this);
+  },
+};
+
+Blockly.JavaScript['discord_edit_message_server_channel'] = (block) => {
+  const serverId = Blockly.JavaScript.valueToCode(block, 'serverId', Blockly.JavaScript.ORDER_ATOMIC);
+  const channelId = Blockly.JavaScript.valueToCode(block, 'channelId', Blockly.JavaScript.ORDER_ATOMIC);
+
+  return DiscordHelpers.createSendMessageJs({
+    action: 'editMessage',
+    instance: block.getFieldValue('instance'),
+    target: `serverId: ${serverId}, channelId: ${channelId}`,
+    messageId: Blockly.JavaScript.valueToCode(block, 'messageId', Blockly.JavaScript.ORDER_ATOMIC),
+    content: Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC),
+    varMessageId: Blockly.JavaScript.valueToCode(block, 'varMessageId', Blockly.JavaScript.ORDER_ATOMIC),
+    varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
+    logResultOk: block.getFieldValue('logResultOk'),
+  });
 };
 
 // --- Block create content ----------------------------------------------------
@@ -317,7 +463,7 @@ Blockly.Discord.blocks['discord_create_content'] =
 
 Blockly.Blocks['discord_create_content'] = {
   init: function () {
-    this.appendDummyInput('title')
+    this.appendDummyInput('_title')
       .appendField(Blockly.Translate('discord_message_content'));
 
     this.appendValueInput('content')
@@ -367,7 +513,7 @@ Blockly.Discord.blocks['discord_create_embed'] =
   `<block type="discord_create_embed">
     <value name="description">
       <shadow type="text">
-        <field name="TEXT">Embed content</field>
+        <field name="TEXT">Embeded content</field>
       </shadow>
     </value>
     <value name="title">
@@ -396,7 +542,7 @@ Blockly.Discord.blocks['discord_create_embed'] =
 Blockly.Blocks['discord_create_embed'] = {
   init: function () {
 
-    this.appendDummyInput('title')
+    this.appendDummyInput('_title')
       .appendField(Blockly.Translate('discord_message_embed'));
 
     this.appendValueInput('description')
@@ -489,7 +635,7 @@ Blockly.Discord.blocks['discord_create_file'] =
 Blockly.Blocks['discord_create_file'] = {
   init: function () {
 
-    this.appendDummyInput('title')
+    this.appendDummyInput('_title')
       .appendField(Blockly.Translate('discord_file_attachment'));
 
     this.appendValueInput('attachment')
