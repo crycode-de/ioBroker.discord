@@ -52,6 +52,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 * Support for [text2command](https://github.com/ioBroker/ioBroker.text2command) (has to be enabled for each `.message` state where it should be used)
 * Send, edit and delete messages, add and await message reactions using Scripts
 * Optional raw states to allow more flexibility in custom scripts
+* Support for Blockly with custom blocks to send and edit messages and to handle custom slash commands
 
 ## Changelog
 

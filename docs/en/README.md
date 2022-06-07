@@ -72,6 +72,7 @@ Additionally, the adapter can register Discord slash commands to get and set ioB
 * Support for [text2command] (has to be enabled for each `.message` state where it should be used)
 * Send, edit and delete messages, add and await message reactions using Scripts
 * Optional raw states to allow more flexibility in custom scripts
+* Support for Blockly with custom blocks to send and edit messages and to handle custom slash commands
 
 Missing some feature? Feel free to submit a feature request on [GitHub][GitHub New Issue].
 

@@ -74,6 +74,7 @@ Zusätzlich kann der Adapter Discord Slash-Befehle registrieren.
 * Unterstützung von [text2command] (muss für jeden `.message`-Zustand einzeln aktiviert werden)
 * Senden, bearbeiten und löschen von Nachrichten, Senden von und warten auf Reaktionen auf Nachrichten in eigenen Skripten
 * Optional raw-Zustände für mehr Flexibilität in eigenen Skripten
+* Unterstützung von Blockly mit eigenen Blöcken zum Senden und Bearbeiten von Nachrichten und zum handhaben von eigenen Slash-Befehlen
 
 Es fehlt ein Feature? Erstelle einfach ein Feature-Request auf [GitHub][GitHub New Issue].
 
