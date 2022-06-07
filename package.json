@@ -34,6 +34,7 @@
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
+    "@alcalzone/release-script": "^3.5.9",
     "@iobroker/adapter-dev": "^1.0.0",
     "@iobroker/testing": "^3.0.2",
     "@types/chai": "^4.3.1",
@@ -78,7 +79,8 @@
     "test": "npm run test:ts && npm run test:package",
     "check": "tsc --noEmit",
     "lint": "eslint --ext .ts src/",
-    "translate": "translate-adapter -b admin/i18n/en.json"
+    "translate": "translate-adapter -b admin/i18n/en.json",
+    "release": "release-script"
   },
   "bugs": {
     "url": "https://github.com/crycode-de/ioBroker.discord/issues"

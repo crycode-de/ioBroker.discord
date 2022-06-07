@@ -55,9 +55,15 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 
 ## Changelog
 
-### Work in progress
+<!--
+    Placeholder for the next version (at the beginning of the line):
+    ### **WORK IN PROGRESS**
+-->
+
+### **WORK IN PROGRESS**
 
 * (crycode-de) Added support for custom slash commands
+* (crycode-de) Added Blockly support whit special custom blocks
 * (crycode-de) Send error replies on slash commands as ephemeral
 * (crycode-de) Added config option to send all slash command replies as ephemeral
 * (crycode-de) Register get/set commands only if states are configured for this
