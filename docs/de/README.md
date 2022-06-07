@@ -11,7 +11,7 @@ Zudem wird ein Objektbaum für alle Benutzer, die vom Bot gesehen werden, erstel
 und Nachrichten sowie Dateien zu versenden.
 
 Zusätzlich kann der Adapter Discord Slash-Befehle registrieren.
-Über diese ist es dann möglich, ioBroker-Zustände abzufragen oder zu festzulegen.
+Über diese ist es dann möglich, ioBroker-Zustände abzufragen oder festzulegen.
 
 * [Funktionen](#funktionen)
 * [Erstellen eines Discord Bots](#erstellen-eines-discord-bots)
@@ -136,8 +136,8 @@ Funktionen des Adapters nicht funktionieren.
 
 Um den Bot wieder von einem Server zu entfernen, gibt es weiter unten auf der
 gleichen Seite der Instanzkonfiguration des Adapters die Möglichkeit einen
-Server auszuwählen und dann Button dem Bot zu sagen, dass er den Server
-verlassen soll.
+Server auszuwählen und dann den Button _Server verlassen!_ zu klicken, um dem
+Bot zu sagen, dass er den Server verlassen soll.
 
 ## Zustände (States)
 
@@ -494,7 +494,7 @@ müssen individuell konfiguriert werden. Siehe dazu weiter unten.
 Discord-Slash-Befehle können vom Adapter als Server-Befehle (Standard) oder als
 globale Befehle registriert werden. Dies kann in der Instanzkonfiguration des
 Adapters eingestellt werden.  
-Die Nutzung von Server-Befehlen hat den Vorteil, dass Änderungen denBefehlen
+Die Nutzung von Server-Befehlen hat den Vorteil, dass Änderungen an den Befehlen
 (z.B. das Hinzufügen von Zuständen) sofort und ohne Verzögerung übernommen werden.
 Jedoch können Server-Befehle nicht in Direktnachrichten zwischen einem Benutzer
 und dem Bot verwendet werden.  
@@ -581,7 +581,7 @@ diese ebenfalls geprüft.
 ### Einen Überblick über Zustände mit Konfigurationen für Slash-Befehle erhalten
 
 Um einen Überblick über alle Zustände mit aktiver Konfiguration für
-Slash-Befehle zu erhalten, kann in der Instanzkonfiguration des Adapter der
+Slash-Befehle zu erhalten, kann in der Instanzkonfiguration des Adapters der
 Button _Für Befehle konfigurierte Zustandsobjekte protokollieren_ angeklickt
 werden. Die Ausgabe erfolgt dann im Log der ioBroker-Installation.
 
@@ -796,7 +796,7 @@ Natürlich können nur Nachrichten gelöscht werden, die vom Bot gesendet wurden
 
 Der `message` Teil von `sendTo(...)` ist der gleiche wie bei `sendMessage` (siehe oben),
 jedoch ohne den `content`, aber dafür zusätzlich mit der `messageId` der
-Nachricht, die bearbeitet werden soll.
+Nachricht, die gelöscht werden soll.
 
 Der Rückgabewert ist der gleiche wie bei `sendMessage`.
 
