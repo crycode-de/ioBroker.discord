@@ -151,10 +151,43 @@ const DiscordHelpers = {
     });\n`;
   },
 
-  setupSendToMessageBlock: (block) => {
-    block.appendValueInput('content')
-      .setCheck(['String', 'DiscordMessageContent'])
-      .appendField(Blockly.Translate('discord_message'));
+  setupSendToMessageBlock: (block, opts) => {
+    if (opts.label) {
+      block.appendDummyInput('_label')
+        .appendField(Blockly.Translate(opts.label));
+    }
+
+    block.appendDummyInput('instance')
+      .appendField(Blockly.Translate('discord_instance'))
+      .appendField(new Blockly.FieldDropdown(DiscordHelpers.getInstancesOptions()), 'instance');
+
+    if (opts.inputUser) {
+      block.appendValueInput('user')
+        .setCheck('String')
+        .appendField(Blockly.Translate('discord_user'));
+    }
+
+    if (opts.inputServerChannel) {
+      block.appendValueInput('serverId')
+        .setCheck('String')
+        .appendField(Blockly.Translate('discord_server_id'));
+
+      block.appendValueInput('channelId')
+        .setCheck('String')
+        .appendField(Blockly.Translate('discord_channel_id'));
+    }
+
+    if (opts.inputMessageId) {
+      block.appendValueInput('messageId')
+        .setCheck('String')
+        .appendField(Blockly.Translate('discord_message_id'));
+    }
+
+    if (opts.inputContent) {
+      block.appendValueInput('content')
+        .setCheck(['String', 'DiscordMessageContent'])
+        .appendField(Blockly.Translate('discord_message'));
+    }
 
     block.appendValueInput('varMessageId')
       .appendField(Blockly.Translate('discord_save_messageId_in'))
@@ -173,8 +206,11 @@ const DiscordHelpers = {
     block.setNextStatement(true, null);
 
     block.setColour(Blockly.Sendto.HUE);
-    block.setTooltip(Blockly.Translate('discord_sendto_tooltip'));
     block.setHelpUrl(DiscordHelpers.helpUrl);
+
+    if (opts.tooltip) {
+      block.setTooltip(Blockly.Translate(opts.tooltip));
+    }
   },
 };
 
@@ -205,18 +241,12 @@ Blockly.Discord.blocks['discord_sendto_user'] =
 
 Blockly.Blocks['discord_sendto_user'] = {
   init: function () {
-    this.appendDummyInput('_title')
-      .appendField(Blockly.Translate('discord_send_message'));
-
-    this.appendDummyInput('instance')
-      .appendField(Blockly.Translate('discord_instance'))
-      .appendField(new Blockly.FieldDropdown(DiscordHelpers.getInstancesOptions()), 'instance');
-
-    this.appendValueInput('user')
-      .setCheck('String')
-      .appendField(Blockly.Translate('discord_user'));
-
-    DiscordHelpers.setupSendToMessageBlock(this);
+    DiscordHelpers.setupSendToMessageBlock(this, {
+      label: 'discord_send_message',
+      inputUser: true,
+      inputContent: true,
+      tooltip: 'discord_sendto_tooltip',
+    });
   },
 };
 
@@ -266,22 +296,12 @@ Blockly.Discord.blocks['discord_sendto_server_channel'] =
 
 Blockly.Blocks['discord_sendto_server_channel'] = {
   init: function () {
-    this.appendDummyInput('_title')
-      .appendField(Blockly.Translate('discord_send_message'));
-
-    this.appendDummyInput('instance')
-      .appendField(Blockly.Translate('discord_instance'))
-      .appendField(new Blockly.FieldDropdown(DiscordHelpers.getInstancesOptions()), 'instance');
-
-    this.appendValueInput('serverId')
-      .setCheck('String')
-      .appendField(Blockly.Translate('discord_server_id'));
-
-    this.appendValueInput('channelId')
-      .setCheck('String')
-      .appendField(Blockly.Translate('discord_channel_id'));
-
-    DiscordHelpers.setupSendToMessageBlock(this);
+    DiscordHelpers.setupSendToMessageBlock(this, {
+      label: 'discord_send_message',
+      inputServerChannel: true,
+      inputContent: true,
+      tooltip: 'discord_sendto_tooltip',
+    });
   },
 };
 
@@ -332,22 +352,12 @@ Blockly.Discord.blocks['discord_edit_message_user'] =
 
 Blockly.Blocks['discord_edit_message_user'] = {
   init: function () {
-    this.appendDummyInput('_title')
-      .appendField(Blockly.Translate('discord_edit_message'));
-
-    this.appendDummyInput('instance')
-      .appendField(Blockly.Translate('discord_instance'))
-      .appendField(new Blockly.FieldDropdown(DiscordHelpers.getInstancesOptions()), 'instance');
-
-    this.appendValueInput('user')
-      .setCheck('String')
-      .appendField(Blockly.Translate('discord_user'));
-
-    this.appendValueInput('messageId')
-      .setCheck('String')
-      .appendField(Blockly.Translate('discord_message_id'));
-
-    DiscordHelpers.setupSendToMessageBlock(this);
+    DiscordHelpers.setupSendToMessageBlock(this, {
+      label: 'discord_edit_message',
+      inputUser: true,
+      inputMessageId: true,
+      inputContent: true,
+    });
   },
 };
 
@@ -403,26 +413,12 @@ Blockly.Discord.blocks['discord_edit_message_server_channel'] =
 
 Blockly.Blocks['discord_edit_message_server_channel'] = {
   init: function () {
-    this.appendDummyInput('_title')
-      .appendField(Blockly.Translate('discord_edit_message'));
-
-    this.appendDummyInput('instance')
-      .appendField(Blockly.Translate('discord_instance'))
-      .appendField(new Blockly.FieldDropdown(DiscordHelpers.getInstancesOptions()), 'instance');
-
-    this.appendValueInput('serverId')
-      .setCheck('String')
-      .appendField(Blockly.Translate('discord_server_id'));
-
-    this.appendValueInput('channelId')
-      .setCheck('String')
-      .appendField(Blockly.Translate('discord_channel_id'));
-
-    this.appendValueInput('messageId')
-      .setCheck('String')
-      .appendField(Blockly.Translate('discord_message_id'));
-
-    DiscordHelpers.setupSendToMessageBlock(this);
+    DiscordHelpers.setupSendToMessageBlock(this, {
+      label: 'discord_edit_message',
+      inputServerChannel: true,
+      inputMessageId: true,
+      inputContent: true,
+    });
   },
 };
 
