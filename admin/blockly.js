@@ -57,6 +57,7 @@ Blockly.Words['discord_custom_cmd_option_tooltip'] = { 'en': 'Options for the cu
 Blockly.Words['discord_send_custom_command_reply'] = { 'en': 'Send reply to a custom Discord slash command', 'de': 'Antwort auf benutzerdefinierten Discord-Slash-Befehl senden', 'ru': 'Отправить ответ на специальную косую черту Discord', 'pt': 'Enviar resposta a um comando de barra personalizado do Discord', 'nl': 'Stuur antwoord op een aangepast Discord-slash-commando', 'fr': 'Envoyer une réponse à une commande slash Discord personnalisée', 'it': 'Invia risposta a un comando slash Discord personalizzato', 'es': 'Enviar respuesta a un comando de barra diagonal personalizado de Discord', 'pl': 'Wyślij odpowiedź na niestandardowe polecenie ukośnika Discord', 'zh-cn': '发送对自定义 Discord 斜杠命令的回复' };
 Blockly.Words['discord_send_custom_command_reply_tooltip'] = { 'en': 'Send a reply to a custom Discord slash command.', 'de': 'Senden einer Antwort auf einen benutzerdefinierten Discord-Slash-Befehl.', 'ru': 'Отправьте ответ на пользовательскую косую черту Discord.', 'pt': 'Envie uma resposta a um comando de barra personalizado do Discord.', 'nl': 'Stuur een antwoord op een aangepast Discord-slash-commando.', 'fr': 'Envoyez une réponse à une commande slash Discord personnalisée.', 'it': 'Invia una risposta a un comando slash Discord personalizzato.', 'es': 'Envíe una respuesta a un comando de barra inclinada de Discord personalizado.', 'pl': 'Wyślij odpowiedź na niestandardowe polecenie ukośnika Discorda.', 'zh-cn': '发送对自定义 Discord 斜杠命令的回复。' };
 Blockly.Words['discord_interaction_id'] = { 'en': 'Interaction ID', 'de': 'Interaktions-ID', 'ru': 'Идентификатор взаимодействия', 'pt': 'Código de interação', 'nl': 'Interactie-ID', 'fr': 'ID d\'interaction', 'it': 'ID interazione', 'es': 'ID de interacción', 'pl': 'Identyfikator interakcji', 'zh-cn': '交互 ID' };
+Blockly.Words['discord_help_url'] = { 'en': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blocky', 'de': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/de/README.md#blocky', 'ru': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blocky', 'pt': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blocky', 'nl': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blocky', 'fr': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blocky', 'it': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blocky', 'es': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blocky', 'pl': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blocky', 'zh-cn': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blocky' };
 
 Blockly.CustomBlocks = Blockly.CustomBlocks || [];
 Blockly.CustomBlocks.push('Discord');
@@ -67,7 +68,7 @@ Blockly.Discord = {
 };
 
 const DiscordHelpers = {
-  helpUrl: 'https://github.com/crycode-de/ioBroker.discord/blob/main/README.md',
+  helpUrl: Blockly.Translate('discord_help_url'),
 
   getInstancesOptions: () => {
     const options = [];
