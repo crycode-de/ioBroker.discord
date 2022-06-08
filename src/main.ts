@@ -1361,18 +1361,18 @@ class DiscordAdapter extends Adapter {
       }
     }
 
-    if (!mentioned && channel.type === 'GUILD_TEXT' && !this.config.processAllMessagesInServerChannel) {
+    if (!mentioned && (channel.type === 'GUILD_TEXT' || channel.type === 'GUILD_VOICE') && !this.config.processAllMessagesInServerChannel) {
       this.log.debug('Server channel message without mention ignored');
       return;
     }
 
     let msgStateIdPrefix: string;
-    if (channel.type === 'GUILD_TEXT') {
+    if (channel.type === 'GUILD_TEXT' || channel.type === 'GUILD_VOICE') {
       msgStateIdPrefix = channel.parentId ? `${this.namespace}.servers.${message.guildId}.channels.${channel.parentId}.channels.${channel.id}` : `${this.namespace}.servers.${message.guildId}.channels.${channel.id}`;
     } else if (channel.type === 'DM') {
       msgStateIdPrefix = `${this.namespace}.users.${author.id}`;
     } else {
-      this.log.warn('Received unexpected message!');
+      this.log.warn(`Received message from unsupported channel type ${channel.type}!`);
       return;
     }
 
