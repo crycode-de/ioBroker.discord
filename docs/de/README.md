@@ -42,6 +42,10 @@ Zusätzlich kann der Adapter Discord Slash-Befehle registrieren.
   * [Einen Überblick über Zustände mit Konfigurationen für Slash-Befehle erhalten](#einen-überblick-über-zustände-mit-konfigurationen-für-slash-befehle-erhalten)
   * [Benutzerdefinierte Slash-Befehle](#benutzerdefinierte-slash-befehle)
     * [Struktur eines json-Zustands von benutzerdefinierten Slash-Befehlen](#struktur-eines-json-zustands-von-benutzerdefinierten-slash-befehlen)
+* [Blocky](#blocky)
+  * [Blockly Beispiel: Senden einer Nachricht an einen Benutzer und diese nach drei Sekunden bearbeiten](#blockly-beispiel-senden-einer-nachricht-an-einen-benutzer-und-diese-nach-drei-sekunden-bearbeiten)
+  * [Blockly Beispiel: Senden einer zusammengesetzten Nachricht mit einer Einbettung und zwei Dateianhängen](#blockly-beispiel-senden-einer-zusammengesetzten-nachricht-mit-einer-einbettung-und-zwei-dateianhängen)
+  * [Blockly Beispiel: Auf benutzerdefinierten Slash-Befehl reagieren und Bild der angefragten IP-Cam senden](#blockly-beispiel-auf-benutzerdefinierten-slash-befehl-reagieren-und-bild-der-angefragten-ip-cam-senden)
 * [Verwendung in Skripten](#verwendung-in-skripten)
   * [Senden einer Nachricht in einem Skript](#senden-einer-nachricht-in-einem-skript)
   * [Bearbeiten einer Nachricht in einem Skript](#bearbeiten-einer-nachricht-in-einem-skript)
@@ -666,6 +670,315 @@ Dabei wird die Antwort editiert und mit dem neuen Inhalt überschrieben.
   }
 }
 ```
+
+## Blocky
+
+Der Adapter bringt eigene Blockly-Blöcke mit, zum ...
+
+* Senden von Nachrichten an Benutzer oder Serverkanäle
+* Bearbeiten von Nachrichten in Direktnachrichten oder Serverkanälen
+* Hinzufügen von Emoji-Reaktionen zu Nachrichten
+* Zusammensetzen von Nachrichteninhalten mit optionalen Einbettungen, Anhängen und Antwort-Referenzen
+* Zusammensetzen von Nachrichteneinbettungen
+* Zusammensetzen von Nachrichtenanhängen
+* Reagieren auf benutzerdefinierte Slash-Befehle
+* Antworten auf benutzerdefinierte Slash-Befehle
+
+### Blockly Beispiel: Senden einer Nachricht an einen Benutzer und diese nach drei Sekunden bearbeiten
+
+[![Blockly Nachricht senden und bearbeiten](./media/blockly-1.png)](./media/blockly-1.png)
+
+<details>
+<summary>Blockly Code</summary>
+
+```xml
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="KIILW$,(eB?pT`;GDuMF">messageId</variable>
+  </variables>
+  <block type="discord_send_message_user" id="?xkCV};-Lk_-|Q`]%(Gt" x="63" y="38">
+    <field name="instance">.0</field>
+    <field name="logResultOk">FALSE</field>
+    <value name="user">
+      <shadow type="text" id="jXN@CluUy_M/ig@4[(Uk">
+        <field name="TEXT">cryCode#9911</field>
+      </shadow>
+    </value>
+    <value name="content">
+      <shadow type="text" id="uLWu1CJ$;k}|VTyw1-8}">
+        <field name="TEXT">Hallo!</field>
+      </shadow>
+    </value>
+    <value name="varMessageId">
+      <shadow type="logic_null" id="bJ2lJW0qOa@Zjv%(]mFU"></shadow>
+      <block type="variables_get" id="xkJ(vH/;@7%)cDo0HU/~">
+        <field name="VAR" id="KIILW$,(eB?pT`;GDuMF">messageId</field>
+      </block>
+    </value>
+    <value name="varError">
+      <shadow type="logic_null" id="H:f+1-:p9-YkmpehJoco"></shadow>
+    </value>
+    <next>
+      <block type="timeouts_wait" id="OM8gv}Pl#_mHQ|)([mUe">
+        <field name="DELAY">3</field>
+        <field name="UNIT">sec</field>
+        <next>
+          <block type="discord_edit_message_user" id="|L3A+9{s_H8j`AF@,*VF">
+            <field name="instance">.0</field>
+            <field name="logResultOk">FALSE</field>
+            <value name="user">
+              <shadow type="text" id="voJ:{uuYtbBZ!Xe,rtV|">
+                <field name="TEXT">cryCode#9911</field>
+              </shadow>
+            </value>
+            <value name="messageId">
+              <shadow type="text" id="64L=tOKvKwoqGHadRgDm">
+                <field name="TEXT"></field>
+              </shadow>
+              <block type="variables_get" id="(M^6xk74LUEsPdH=LagL">
+                <field name="VAR" id="KIILW$,(eB?pT`;GDuMF">messageId</field>
+              </block>
+            </value>
+            <value name="content">
+              <shadow type="text" id="rvnV^RF,g$M/3+(npHNC">
+                <field name="TEXT">Moin!</field>
+              </shadow>
+            </value>
+            <value name="varError">
+              <shadow type="logic_null" id="{H4Q^vl400kxRKrffDz)"></shadow>
+            </value>
+          </block>
+        </next>
+      </block>
+    </next>
+  </block>
+</xml>
+```
+
+</details>
+
+### Blockly Beispiel: Senden einer zusammengesetzten Nachricht mit einer Einbettung und zwei Dateianhängen
+
+[![Blockly zusammengesetzte Nachricht senden](./media/blockly-2.png)](./media/blockly-2.png)
+
+<details>
+<summary>Blockly Code</summary>
+
+```xml
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <block type="discord_send_message_server_channel" id="Mnc=pB-8%Dr/nsen|SC`" x="63" y="38">
+    <field name="instance">.0</field>
+    <field name="logResultOk">FALSE</field>
+    <value name="serverId">
+      <shadow type="text" id="PA4]t;7CuDrKtwa|oB?L">
+        <field name="TEXT">813364154118963251</field>
+      </shadow>
+    </value>
+    <value name="channelId">
+      <shadow type="text" id="x^vm,CRT`z2AhDT#ZcUC">
+        <field name="TEXT">813364154559102998</field>
+      </shadow>
+    </value>
+    <value name="content">
+      <shadow type="text" id="ebdEp~G?:_gInjN47g@f">
+        <field name="TEXT"></field>
+      </shadow>
+      <block type="discord_create_content" id="kY,/zwmwkjo:U;cT?eN*">
+        <value name="content">
+          <shadow type="text" id="D|y(g`oE@H#gu+deGbv2">
+            <field name="TEXT"></field>
+          </shadow>
+        </value>
+        <value name="embeds">
+          <shadow type="logic_null" id="Qt[pG25wLoI8+3/jN66C"></shadow>
+          <block type="discord_create_embed" id="cXAWtP-36uYlAxLhIBhN">
+            <value name="description">
+              <shadow type="text" id="^D%m:ic9]AcUUQP8~U#6">
+                <field name="TEXT">Eingebetteter Anhang</field>
+              </shadow>
+            </value>
+            <value name="title">
+              <shadow type="logic_null" id="_Wm.(^Ff6^u%K+gVz$^Z"></shadow>
+            </value>
+            <value name="url">
+              <shadow type="logic_null" id="0,08A!7[kJ-nJPnPH$L5"></shadow>
+            </value>
+            <value name="color">
+              <shadow type="colour_picker" id="V0}MlQJvN._LHFhG2K%@">
+                <field name="COLOUR">#5865f2</field>
+              </shadow>
+            </value>
+            <value name="imageUrl">
+              <shadow type="logic_null" id="xXr:E++u0;@2#e]r;_`]"></shadow>
+              <block type="text" id="76;;p-5{pls%KmrI!ar{">
+                <field name="TEXT">attachment://datei1.jpg</field>
+              </block>
+            </value>
+            <value name="footerText">
+              <shadow type="logic_null" id="#BS`MgkNWbrQ@*m/kNdw"></shadow>
+            </value>
+          </block>
+        </value>
+        <value name="files">
+          <shadow type="logic_null" id="4u@7^DXCI~J$r{Qx}1Ql"></shadow>
+          <block type="lists_create_with" id="42g8r-+[xWw`|^.qOF!*">
+            <mutation items="2"></mutation>
+            <value name="ADD0">
+              <block type="discord_create_file" id="EzK4NA^+bu4vChH/vj-b">
+                <value name="attachment">
+                  <shadow type="text" id="=OEkBZ:LFXvT2$S++21(">
+                    <field name="TEXT">/tmp/datei1.jpg</field>
+                  </shadow>
+                </value>
+                <value name="name">
+                  <shadow type="text" id="zum#q*|`aD%A2s/N@/Ow">
+                    <field name="TEXT">datei1.jpg</field>
+                  </shadow>
+                </value>
+                <value name="description">
+                  <shadow type="text" id="#ZZOq%3EHO/_GC+w.,-^">
+                    <field name="TEXT"></field>
+                  </shadow>
+                </value>
+              </block>
+            </value>
+            <value name="ADD1">
+              <block type="discord_create_file" id="wIKo-2??SX@WcYc7e/5s">
+                <value name="attachment">
+                  <shadow type="text" id=")4lvYv.)IhU/p+~KUDym">
+                    <field name="TEXT">/tmp/logdatei.txt</field>
+                  </shadow>
+                </value>
+                <value name="name">
+                  <shadow type="text" id="#)t#lK6{$RuZt34O;@Ag">
+                    <field name="TEXT">log.txt</field>
+                  </shadow>
+                </value>
+                <value name="description">
+                  <shadow type="text" id="^UKzs+$TQ!tiE:`(=%}}">
+                    <field name="TEXT"></field>
+                  </shadow>
+                </value>
+              </block>
+            </value>
+          </block>
+        </value>
+        <value name="replyToId">
+          <shadow type="logic_null" id="#1:[?d^x=)ZH.!uyxRI:"></shadow>
+        </value>
+      </block>
+    </value>
+    <value name="varMessageId">
+      <shadow type="logic_null" id="@D^#9^84UknOfV|c$NK~"></shadow>
+    </value>
+    <value name="varError">
+      <shadow type="logic_null" id="mJu{Fa9+]+Ml,{_OqIOh"></shadow>
+    </value>
+  </block>
+</xml>
+```
+
+</details>
+
+### Blockly Beispiel: Auf benutzerdefinierten Slash-Befehl reagieren und Bild der angefragten IP-Cam senden
+
+[![Blockly benutzerdefinierter Slash-Befehl](./media/blockly-3.png)](./media/blockly-3.png)
+
+<details>
+<summary>Blockly Code</summary>
+
+```xml
+<xml xmlns="https://developers.google.com/blockly/xml">
+  <variables>
+    <variable id="Wcj[Gmy,vX]b,)s,O)`U">interactionId</variable>
+    <variable id="ULmVI=-QcXLnD!e60KTV">camID</variable>
+  </variables>
+  <block type="discord_on_custom_cmd" id="?Z9}#a^xoK9FCC0.DV;Q" x="38" y="13">
+    <mutation xmlns="http://www.w3.org/1999/xhtml" options="cam"></mutation>
+    <field name="instance">.0</field>
+    <field name="varInteractionId" id="Wcj[Gmy,vX]b,)s,O)`U">interactionId</field>
+    <field name="log">FALSE</field>
+    <field name="commandName">super-command</field>
+    <value name="option0">
+      <shadow type="logic_null" id="(SocCW3g`x[w/?0o~;cZ"></shadow>
+      <block type="variables_get" id="z/Lf|chD)~Ge0N~@EWG%">
+        <field name="VAR" id="ULmVI=-QcXLnD!e60KTV">camID</field>
+      </block>
+    </value>
+    <statement name="STATEMENT">
+      <block type="discord_send_custom_command_reply" id="zJXF!F=|Xt4.kG/6ctl(">
+        <field name="instance">.0</field>
+        <field name="interactionId" id="Wcj[Gmy,vX]b,)s,O)`U">interactionId</field>
+        <field name="logResultOk">FALSE</field>
+        <value name="content">
+          <shadow type="text" id="bdVm59S9_U*GFB(IBO6x">
+            <field name="TEXT"></field>
+          </shadow>
+          <block type="discord_create_content" id="6m8gBtp;K@t8}{`9gPd1">
+            <value name="content">
+              <shadow type="text" id=".c}Z71nQ8LlQ@h}_Z?qR">
+                <field name="TEXT"></field>
+              </shadow>
+            </value>
+            <value name="embeds">
+              <shadow type="logic_null" id="p8S?*FLv4a6aIJogCKU;"></shadow>
+            </value>
+            <value name="files">
+              <shadow type="logic_null" id="y#a8q/mr^)Ymt*j)S:H/"></shadow>
+              <block type="discord_create_file" id="vN%eoP74=*)f63CQiJ__">
+                <value name="attachment">
+                  <shadow type="text" id="2$9y5yj3.GHx.ms*:Ce2">
+                    <field name="TEXT"></field>
+                  </shadow>
+                  <block type="text_join" id="K9zuKTz?-b8VT$8XUVQ8">
+                    <mutation items="3"></mutation>
+                    <value name="ADD0">
+                      <block type="text" id="p3f^[{6t+UuDJN=49+#Z">
+                        <field name="TEXT">/tmp/cam</field>
+                      </block>
+                    </value>
+                    <value name="ADD1">
+                      <block type="variables_get" id="oVmVHEX[iT(-X#]m=[U@">
+                        <field name="VAR" id="ULmVI=-QcXLnD!e60KTV">camID</field>
+                      </block>
+                    </value>
+                    <value name="ADD2">
+                      <block type="text" id="wUXx)@u6*2,+9!q{W`n`">
+                        <field name="TEXT">.jpg</field>
+                      </block>
+                    </value>
+                  </block>
+                </value>
+                <value name="name">
+                  <shadow type="text" id="L5fO_+by.^Z:se~6|xCj">
+                    <field name="TEXT">cam.jpg</field>
+                  </shadow>
+                </value>
+                <value name="description">
+                  <shadow type="text" id="ku}h+v)9oY;1`[9Rr)w%">
+                    <field name="TEXT"></field>
+                  </shadow>
+                </value>
+              </block>
+            </value>
+            <value name="replyToId">
+              <shadow type="logic_null" id="Ou%Gd6C*+2OaIPUxPp}t"></shadow>
+            </value>
+          </block>
+        </value>
+        <value name="varMessageId">
+          <shadow type="logic_null" id="RUb!i][5`[t0*mzLwBvN"></shadow>
+        </value>
+        <value name="varError">
+          <shadow type="logic_null" id="SLsj^+8=[Bp%/X8n]$?Z"></shadow>
+        </value>
+      </block>
+    </statement>
+  </block>
+</xml>
+```
+
+</details>
 
 ## Verwendung in Skripten
 
