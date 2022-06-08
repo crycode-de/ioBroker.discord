@@ -85,6 +85,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
   async onReady() {
     var _a, _b;
     await this.setInfoConnectionState(false, true);
+    this.log.debug(`Version of discord.js: ${import_discord.version}`);
     const systemConfig = await this.getForeignObjectAsync("system.config");
     import_i18n.i18n.language = (systemConfig == null ? void 0 : systemConfig.common.language) || "en";
     import_i18n.i18n.isFloatComma = (systemConfig == null ? void 0 : systemConfig.common.isFloatComma) || false;

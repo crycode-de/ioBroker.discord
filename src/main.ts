@@ -27,6 +27,7 @@ import {
   PresenceStatusData,
   Snowflake,
   User,
+  version as djsVersion,
   VoiceState,
 } from 'discord.js';
 
@@ -160,6 +161,9 @@ class DiscordAdapter extends Adapter {
 
     // Reset the connection indicator during startup
     await this.setInfoConnectionState(false, true);
+
+    // log version of discord.js
+    this.log.debug(`Version of discord.js: ${djsVersion}`);
 
     // try to get the system language
     const systemConfig = await this.getForeignObjectAsync('system.config');

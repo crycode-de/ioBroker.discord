@@ -63,6 +63,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 
 ### **WORK IN PROGRESS**
 
+* (crycode-de) Added support for text messages in voice channels
 * (crycode-de) Added support for custom slash commands
 * (crycode-de) Added Blockly support whit special custom blocks
 * (crycode-de) Send error replies on slash commands as ephemeral
