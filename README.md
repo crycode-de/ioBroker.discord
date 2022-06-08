@@ -73,6 +73,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 * (crycode-de) Added command options to `raw.interactionJson` json content
 * (crycode-de) Fixed command name checks
 * (crycode-de) Fixed some crashes / stuck conditions when network is not available
+* (crycode-de) Fixed several small bugs
 
 ### 1.0.2 (2022-05-16)
 
