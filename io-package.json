@@ -1,349 +1,361 @@
 {
-    "common": {
-        "name": "discord",
-        "version": "1.1.0",
-        "news": {
-            "1.1.0": {
-                "en": "Custom Discord slash commands, Some bug fixes",
-                "de": "Benutzerdefinierte Discord-Slash-Befehle, einige Fehlerbehebungen",
-                "ru": "Пользовательские слэш-команды Discord, некоторые исправления ошибок",
-                "pt": "Comandos de barra personalizados do Discord, algumas correções de bugs",
-                "nl": "Aangepaste Discord-slash-opdrachten, enkele bugfixes",
-                "fr": "Commandes slash Discord personnalisées, quelques corrections de bugs",
-                "it": "Comandi personalizzati Discord slash, alcune correzioni di bug",
-                "es": "Comandos de barra de Discord personalizados, algunas correcciones de errores",
-                "pl": "Niestandardowe polecenia ukośnika Discorda, niektóre poprawki błędów",
-                "zh-cn": "自定义 Discord 斜线命令，一些错误修复"
-            },
-            "1.0.2": {
-                "en": "Fixed some small issues",
-                "de": "Einige kleine Probleme behoben",
-                "ru": "Исправлены некоторые небольшие проблемы",
-                "pt": "Corrigido alguns pequenos problemas",
-                "nl": "Enkele kleine problemen opgelost",
-                "fr": "Correction de quelques petits problèmes",
-                "it": "Risolti alcuni piccoli problemi",
-                "es": "Se corrigieron algunos problemas pequeños",
-                "pl": "Naprawiono kilka drobnych problemów",
-                "zh-cn": "修复了一些小问题"
-            },
-            "1.0.1": {
-                "en": "Added possibility to let the bot leave a Discord server",
-                "de": "Möglichkeit hinzugefügt, den Bot einen Discord-Server verlassen zu lassen",
-                "ru": "Добавлена возможность позволить боту покинуть сервер Discord.",
-                "pt": "Adicionada a possibilidade de deixar o bot sair de um servidor Discord",
-                "nl": "Mogelijkheid toegevoegd om de bot een Discord-server te laten verlaten",
-                "fr": "Ajout de la possibilité de laisser le bot quitter un serveur Discord",
-                "it": "Aggiunta la possibilità di lasciare il bot da un server Discord",
-                "es": "Se agregó la posibilidad de dejar que el bot abandone un servidor Discord",
-                "pl": "Dodano możliwość wypuszczenia bota z serwera Discord",
-                "zh-cn": "增加了让机器人离开 Discord 服务器的可能性"
-            },
-            "1.0.0": {
-                "en": "First release",
-                "de": "Erste Veröffentlichung",
-                "ru": "Первый выпуск",
-                "pt": "Primeiro lançamento",
-                "nl": "Eerste uitgave",
-                "fr": "Première sortie",
-                "it": "Prima uscita",
-                "es": "Primer lanzamiento",
-                "pl": "Pierwsze wydanie",
-                "zh-cn": "首次发布"
-            }
-        },
-        "title": "Discord",
-        "titleLang": {
-            "en": "Discord",
-            "de": "Discord",
-            "ru": "Discord",
-            "pt": "Discord",
-            "nl": "Discord",
-            "fr": "Discord",
-            "it": "Discord",
-            "es": "Discord",
-            "pl": "Discord",
-            "zh-cn": "Discord"
-        },
-        "desc": {
-            "en": "Discord bot integration",
-            "de": "Discord-Bot Integration",
-            "ru": "Интеграция с дискорд-ботом",
-            "pt": "Integração de bot do Discord",
-            "nl": "Discord bot-integratie",
-            "fr": "Intégration du robot Discord",
-            "it": "Integrazione del bot Discord",
-            "es": "Integración de bots de discordia",
-            "pl": "Integracja z botem Discord",
-            "zh-cn": "Discord 机器人集成"
-        },
-        "authors": [
-            "Peter Müller <peter@crycode.de>"
-        ],
-        "keywords": [
-            "bot",
-            "discord",
-            "iobroker",
-            "message",
-            "notification"
-        ],
-        "license": "MIT",
-        "platform": "Javascript/Node.js",
-        "main": "build/main.js",
-        "icon": "discord.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/crycode-de/ioBroker.discord/main/admin/discord.png",
-        "readme": "https://github.com/crycode-de/ioBroker.discord/blob/main/README.md",
-        "docs": {
-            "en": "docs/en/README.md",
-            "de": "docs/de/README.md"
-        },
-        "loglevel": "info",
-        "mode": "daemon",
-        "type": "messaging",
-        "blockly": true,
-        "compact": true,
-        "connectionType": "cloud",
-        "dataSource": "push",
-        "adminUI": {
-            "custom": "json",
-            "config": "json"
-        },
-        "messagebox": true,
-        "supportCustoms": true,
-        "plugins": {
-            "sentry": {
-                "dsn": "https://6ee57be76f2d4df2b592e3dbee37fb89@sentry.cryhost.de/8"
-            }
-        },
-        "dependencies": [
-            {
-                "js-controller": ">=4.0.0"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=5.3.0"
-            }
-        ]
+  "common": {
+    "name": "discord",
+    "version": "1.1.1",
+    "news": {
+      "1.1.1": {
+        "en": "Added support for text messages in voice channels\nAdded support for custom slash commands\nAdded Blockly support with special custom blocks\nSend error replies on slash commands as ephemeral\nAdded config option to send all slash command replies as ephemeral\nRegister get/set commands only if states are configured for this\nChoices for commands are now handled as autocomplete which allows more choices, is more dynamic and shows the choices only to authorized users\nAdded command options to `raw.interactionJson` json content\nFixed command name checks\nFixed some crashes / stuck conditions when network is not available\nFixed several small bugs",
+        "de": "Unterstützung für Textnachrichten in Sprachkanälen hinzugefügt\nUnterstützung für benutzerdefinierte Slash-Befehle hinzugefügt\nUnterstützung für Blockly mit speziellen Blöcken hinzugefügt\nFehlermeldungen auf Slash-Befehle als ephemeral senden\nConfig-Option hinzugefügt, alle Slash-Befehlsantworten als ephemeral zu senden\nget/set-Befehle nur registrieren, wenn dafür Zustände konfiguriert sind\nAuswahlen für Befehle werden jetzt als Autocomplete behandelt, was mehr Auswahlmöglichkeiten erlaubt, dynamischer ist und die Auswahlmöglichkeiten nur für autorisierte Benutzer anzeigt\nBefehlsoptionen zu raw-Interaction json Zuständen hinzugefügt\nBefehlsnamensprüfung korrigiert\nEinige Abstürze / Hänger behoben, wenn Netzwerk nicht verfügbar\nMehrere kleine Fehler behoben",
+        "ru": "Добавлена поддержка текстовых сообщений в голосовых каналах\nДобавлена поддержка пользовательских команд slash\nДобавлена поддержка Blockly при помощи специальных пользовательских блоков\nОтправляйте ответы на ошибки по командам slash как ephemeral\nДобавлена опция config, чтобы отправить все slash командные ответы в качестве ephemeral\nЗарегистрируйтесь, чтобы получить / установить команды, только если государства настроены для этого\nВыборы для команд теперь обрабатываются как автозаполнение, что позволяет больше выбора, является более динамичным и показывает выбор только уполномоченным пользователям\nДобавлены варианты команд в raw.interaction Json json контент\nИсправлены проверки имени команды\nИсправлены некоторые сбои / застряли условия, когда сеть не доступна\nИсправлено несколько небольших багов",
+        "pt": "Adicionado suporte para mensagens de texto em canais de voz\nAdicionado suporte para comandos de slash personalizados\nAdicionado Blockly apoio whit blocos personalizados especiais\nEnviar respostas de erro sobre comandos de slash como ephemeral\nAdicionado opção de configuração para enviar todas as respostas de comando slash como ephemeral\nRegistrar comandos get/set somente se os estados estiverem configurados para isso\nEscolhas para comandos agora são tratadas como autocompleto que permite mais escolhas, é mais dinâmico e mostra as escolhas apenas para usuários autorizados\nAdicionado opções de comando para raw.interaction Json json conteúdo\nVerificações de nome de comando fixo\nCorrigido algumas falhas / condições presas quando a rede não está disponível\nCorrigido vários pequenos bugs",
+        "nl": "Ondersteuning voor berichten in stemkanalen\nToegevoegd ondersteuning voor gebruikelijke bevelen\nVoegde Blockly ondersteuning in speciale straten\nVertaling:\nToegevoegd config optie om alle commando antwoorden te sturen als ephemeral\nRegistreer de commando's alleen als de staat in beslag wordt genomen voor dit\nKeuzes voor commando's worden nu behandeld als autocomplete die meer keuzes toelaat, is meer dynamisch en toont alleen de keuzes om gebruikers toe te geven\nToegevoegd commando opties om te razen. Json tevreden\nVertaling:\nVertaling:\nVerschillende kleine insecten",
+        "fr": "Ajout du support pour les messages texte dans les chaînes vocales\nAjout du support pour les commandes personnalisées slash\nAjouté Blockly support whit special custom blocks\nEnvoyer les réponses d'erreur sur les commandes slash comme éphémère\nAjout de l'option de configuration pour envoyer toutes les réponses de commande slash comme éphémère\nEnregistrer les commandes get/set uniquement si les états sont configurés pour cela\nLes choix pour les commandes sont maintenant gérés comme autocomplet qui permet plus de choix, est plus dynamique et montre les choix uniquement aux utilisateurs autorisés\nAjout d'options de commande à raw.interaction Json json content\nVérifications de nom de commande fixes\nCorrection de certains accidents / conditions bloquées lorsque le réseau n'est pas disponible\nCorrection de plusieurs petits insectes",
+        "it": "Aggiunto supporto per i messaggi di testo in canali vocali\nAggiunto supporto per comandi slash personalizzati\nAggiunto Blockly supporto frusta speciale blocchi personalizzati\nInviare le risposte di errore sui comandi slash come efemeral\nAggiunta opzione di configurazione per inviare tutte le risposte di comando slash come ephemeral\nRegistrare i comandi get/set solo se gli stati sono configurati per questo\nLe scelte per i comandi sono ora gestite come completamento automatico che consente più scelte, è più dinamico e mostra le scelte solo agli utenti autorizzati\nAggiunte opzioni di comando a raw.interaction Contenuto di Json json\nControlli dei nomi dei comandi fissi\nCorretto alcuni crash / condizioni bloccate quando la rete non è disponibile\nRisolto diversi piccoli bug",
+        "es": "Añadido soporte para mensajes de texto en canales de voz\nSoporte añadido para comandos de barras personalizadas\nBloques de apoyo bloqueado bloques personalizados especiales\nEnviar respuestas de error en comandos slash como efímero\nAñadido configuración opción para enviar todas las respuestas de comando slash como efímero\nRegistrar comandos get/set sólo si los estados están configurados para esto\nLas opciones para comandos se manejan ahora como autocompleto que permite más opciones, es más dinámica y muestra las opciones sólo para usuarios autorizados\nAñadido opciones de comando a crudo.interacción Json json content\nControles de nombre de comando fijo\nArreglado algunos fallos / condiciones atascadas cuando la red no está disponible\nArreglado varios pequeños errores",
+        "pl": "Wsparcie dla wiadomości tekstowych w kanałach głosowych\nWsparcie dla obyczajowych poleceń\nStrona dopasowa\nObserwuje się błędy jako efemeryczne\nWykorzystywana opcja polega na wysyłaniu wszystkich poleceń w postaci efemerycznych\nRejestr dokonywany jest tylko wtedy, gdy stany są konfigurowane\nWybór komend jest obecnie obsługiwany jako autokompletny, który pozwala na bardziej dynamiczne wybory, jest bardziej dynamiczne i pokazuje wybór tylko autoryzowanych użytkowników\nZadaniowe opcje dowodzenia na surowo.interaction. Json treści\nFixed command name check\nNiektóre rozbicia / ułożone warunki, gdy sieć nie jest dostępna\nFixed kilka drobnych błędów",
+        "zh-cn": "增加在声音渠道对案文的支持\n增加对习惯冲突指挥的支持\n添加锁定支助,而特殊习俗则\n对手法的错误答复\n增加将所有冲突指挥答复作为电子武断手段\n登记只有当各州为此配置时才获得/指挥。\n指挥方面的选择现在被处理为能够作出更多选择的汽车包件,是更有活力的,并且只表明授权用户选择。\n增加指挥方案以采掘业务。 Json json的内容\n固定指挥名称检查\n当网络无法提供时,确定一些坠落条件\n固定数个小型配件"
+      },
+      "1.1.0": {
+        "en": "Custom Discord slash commands, Some bug fixes",
+        "de": "Benutzerdefinierte Discord-Slash-Befehle, einige Fehlerbehebungen",
+        "ru": "Пользовательские слэш-команды Discord, некоторые исправления ошибок",
+        "pt": "Comandos de barra personalizados do Discord, algumas correções de bugs",
+        "nl": "Aangepaste Discord-slash-opdrachten, enkele bugfixes",
+        "fr": "Commandes slash Discord personnalisées, quelques corrections de bugs",
+        "it": "Comandi personalizzati Discord slash, alcune correzioni di bug",
+        "es": "Comandos de barra de Discord personalizados, algunas correcciones de errores",
+        "pl": "Niestandardowe polecenia ukośnika Discorda, niektóre poprawki błędów",
+        "zh-cn": "自定义 Discord 斜线命令，一些错误修复"
+      },
+      "1.0.2": {
+        "en": "Fixed some small issues",
+        "de": "Einige kleine Probleme behoben",
+        "ru": "Исправлены некоторые небольшие проблемы",
+        "pt": "Corrigido alguns pequenos problemas",
+        "nl": "Enkele kleine problemen opgelost",
+        "fr": "Correction de quelques petits problèmes",
+        "it": "Risolti alcuni piccoli problemi",
+        "es": "Se corrigieron algunos problemas pequeños",
+        "pl": "Naprawiono kilka drobnych problemów",
+        "zh-cn": "修复了一些小问题"
+      },
+      "1.0.1": {
+        "en": "Added possibility to let the bot leave a Discord server",
+        "de": "Möglichkeit hinzugefügt, den Bot einen Discord-Server verlassen zu lassen",
+        "ru": "Добавлена возможность позволить боту покинуть сервер Discord.",
+        "pt": "Adicionada a possibilidade de deixar o bot sair de um servidor Discord",
+        "nl": "Mogelijkheid toegevoegd om de bot een Discord-server te laten verlaten",
+        "fr": "Ajout de la possibilité de laisser le bot quitter un serveur Discord",
+        "it": "Aggiunta la possibilità di lasciare il bot da un server Discord",
+        "es": "Se agregó la posibilidad de dejar que el bot abandone un servidor Discord",
+        "pl": "Dodano możliwość wypuszczenia bota z serwera Discord",
+        "zh-cn": "增加了让机器人离开 Discord 服务器的可能性"
+      },
+      "1.0.0": {
+        "en": "First release",
+        "de": "Erste Veröffentlichung",
+        "ru": "Первый выпуск",
+        "pt": "Primeiro lançamento",
+        "nl": "Eerste uitgave",
+        "fr": "Première sortie",
+        "it": "Prima uscita",
+        "es": "Primer lanzamiento",
+        "pl": "Pierwsze wydanie",
+        "zh-cn": "首次发布"
+      }
     },
-    "protectedNative": [
-        "token"
-    ],
-    "encryptedNative": [
-        "token"
-    ],
-    "native": {
-        "token": "",
-        "botName": "",
-        "processAllMessagesInServerChannel": false,
-        "reactOnMentions": true,
-        "reactOnMentionsEmoji": "👍",
-        "text2commandInstance": "",
-        "text2commandRespondWith": "reply",
-        "dynamicServerUpdates": true,
-        "observeUserPresence": false,
-        "observeUserVoiceState": false,
-        "enableRawStates": false,
-        "enableAuthorization": true,
-        "authorizedUsers": [],
-        "authorizedServerRoles": [],
-        "processMessagesFromUnauthorizedUsers": false,
-        "enableCommands": false,
-        "commandsGlobal": false,
-        "commandRepliesEphemeral": false,
-        "cmdGetStateName": "",
-        "cmdSetStateName": "",
-        "enableCustomCommands": false,
-        "customCommands": []
+    "title": "Discord",
+    "titleLang": {
+      "en": "Discord",
+      "de": "Discord",
+      "ru": "Discord",
+      "pt": "Discord",
+      "nl": "Discord",
+      "fr": "Discord",
+      "it": "Discord",
+      "es": "Discord",
+      "pl": "Discord",
+      "zh-cn": "Discord"
     },
-    "objects": [],
-    "instanceObjects": [
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Information",
-                    "de": "Informationen",
-                    "ru": "Информация",
-                    "pt": "Em formação",
-                    "nl": "Informatie",
-                    "fr": "Information",
-                    "it": "Informazione",
-                    "es": "Información",
-                    "pl": "Informacja",
-                    "zh-cn": "信息"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "role": "indicator.connected",
-                "name": {
-                    "en": "Connected to discord",
-                    "de": "Verbunden mit Discord",
-                    "ru": "Подключен к дискорду",
-                    "pt": "Conectado à discórdia",
-                    "nl": "Verbonden met onenigheid",
-                    "fr": "Connecté à la discorde",
-                    "it": "Collegato alla discordia",
-                    "es": "Conectado a la discordia",
-                    "pl": "Połączony z niezgodą",
-                    "zh-cn": "连接到不和谐"
-                },
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        },
-        {
-            "_id": "bot",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Bot",
-                    "de": "Bot",
-                    "ru": "Бот",
-                    "pt": "Robô",
-                    "nl": "Bot",
-                    "fr": "Robot",
-                    "it": "Bot",
-                    "es": "Bot",
-                    "pl": "Nerw",
-                    "zh-cn": "机器人"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "bot.status",
-            "type": "state",
-            "common": {
-                "name": {
-                    "en": "Presence status",
-                    "de": "Anwesenheitsstatus",
-                    "ru": "Состояние присутствия",
-                    "pt": "Status de presença",
-                    "nl": "Aanwezigheidsstatus",
-                    "fr": "Statut de présence",
-                    "it": "Stato di presenza",
-                    "es": "Estado de presencia",
-                    "pl": "Status obecności",
-                    "zh-cn": "存在状态"
-                },
-                "type": "string",
-                "role": "text",
-                "read": true,
-                "write": true,
-                "def": "online",
-                "states": {
-                    "online": "online",
-                    "idle": "idle",
-                    "dnd": "dnd",
-                    "invisible": "invisible"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "bot.activityType",
-            "type": "state",
-            "common": {
-                "name": {
-                    "en": "Activity type",
-                    "de": "Aktivitätstyp",
-                    "ru": "Тип деятельности",
-                    "pt": "Tipo de atividade",
-                    "nl": "Activiteitstype",
-                    "fr": "Type d'activité",
-                    "it": "Tipo di attività",
-                    "es": "Tipo de actividad",
-                    "pl": "Rodzaj aktywności",
-                    "zh-cn": "活动类型"
-                },
-                "type": "string",
-                "role": "text",
-                "read": true,
-                "write": true,
-                "def": "COMPETING",
-                "states": {
-                    "": "---",
-                    "PLAYING": "playing",
-                    "STREAMING": "streaming",
-                    "LISTENING": "listening",
-                    "WATCHING": "watching",
-                    "COMPETING": "competing"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "bot.activityName",
-            "type": "state",
-            "common": {
-                "name": {
-                    "en": "Activity name",
-                    "de": "Aktivitätsname",
-                    "ru": "Название деятельности",
-                    "pt": "Nome da atividade",
-                    "nl": "Naam activiteit",
-                    "fr": "Nom de l'activité",
-                    "it": "Nome dell'attività",
-                    "es": "Nombre de la actividad",
-                    "pl": "Nazwa działania",
-                    "zh-cn": "活动名称"
-                },
-                "type": "string",
-                "role": "text",
-                "read": true,
-                "write": true,
-                "def": "ioBroker"
-            },
-            "native": {}
-        },
-        {
-            "_id": "servers",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Servers",
-                    "de": "Server",
-                    "ru": "Серверы",
-                    "pt": "Servidores",
-                    "nl": "Servers",
-                    "fr": "Les serveurs",
-                    "it": "Server",
-                    "es": "Servidores",
-                    "pl": "Serwery",
-                    "zh-cn": "服务器"
-                }
-            },
-            "native": {}
-        },
-        {
-            "_id": "users",
-            "type": "channel",
-            "common": {
-                "name": {
-                    "en": "Users",
-                    "de": "Benutzer",
-                    "ru": "Пользователи",
-                    "pt": "Comercial",
-                    "nl": "Gebruikers",
-                    "fr": "Utilisateurs",
-                    "it": "Utenti",
-                    "es": "Usuarios",
-                    "pl": "Użytkownicy",
-                    "zh-cn": "用户"
-                }
-            },
-            "native": {}
-        }
+    "desc": {
+      "en": "Discord bot integration",
+      "de": "Discord-Bot Integration",
+      "ru": "Интеграция с дискорд-ботом",
+      "pt": "Integração de bot do Discord",
+      "nl": "Discord bot-integratie",
+      "fr": "Intégration du robot Discord",
+      "it": "Integrazione del bot Discord",
+      "es": "Integración de bots de discordia",
+      "pl": "Integracja z botem Discord",
+      "zh-cn": "Discord 机器人集成"
+    },
+    "authors": [
+      "Peter Müller <peter@crycode.de>"
+    ],
+    "keywords": [
+      "bot",
+      "discord",
+      "iobroker",
+      "message",
+      "notification"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "build/main.js",
+    "icon": "discord.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/crycode-de/ioBroker.discord/main/admin/discord.png",
+    "readme": "https://github.com/crycode-de/ioBroker.discord/blob/main/README.md",
+    "docs": {
+      "en": "docs/en/README.md",
+      "de": "docs/de/README.md"
+    },
+    "loglevel": "info",
+    "mode": "daemon",
+    "type": "messaging",
+    "blockly": true,
+    "compact": true,
+    "connectionType": "cloud",
+    "dataSource": "push",
+    "adminUI": {
+      "custom": "json",
+      "config": "json"
+    },
+    "messagebox": true,
+    "supportCustoms": true,
+    "plugins": {
+      "sentry": {
+        "dsn": "https://6ee57be76f2d4df2b592e3dbee37fb89@sentry.cryhost.de/8"
+      }
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=4.0.0"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=5.3.0"
+      }
     ]
+  },
+  "protectedNative": [
+    "token"
+  ],
+  "encryptedNative": [
+    "token"
+  ],
+  "native": {
+    "token": "",
+    "botName": "",
+    "processAllMessagesInServerChannel": false,
+    "reactOnMentions": true,
+    "reactOnMentionsEmoji": "👍",
+    "text2commandInstance": "",
+    "text2commandRespondWith": "reply",
+    "dynamicServerUpdates": true,
+    "observeUserPresence": false,
+    "observeUserVoiceState": false,
+    "enableRawStates": false,
+    "enableAuthorization": true,
+    "authorizedUsers": [],
+    "authorizedServerRoles": [],
+    "processMessagesFromUnauthorizedUsers": false,
+    "enableCommands": false,
+    "commandsGlobal": false,
+    "commandRepliesEphemeral": false,
+    "cmdGetStateName": "",
+    "cmdSetStateName": "",
+    "enableCustomCommands": false,
+    "customCommands": []
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Information",
+          "de": "Informationen",
+          "ru": "Информация",
+          "pt": "Em formação",
+          "nl": "Informatie",
+          "fr": "Information",
+          "it": "Informazione",
+          "es": "Información",
+          "pl": "Informacja",
+          "zh-cn": "信息"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": {
+          "en": "Connected to discord",
+          "de": "Verbunden mit Discord",
+          "ru": "Подключен к дискорду",
+          "pt": "Conectado à discórdia",
+          "nl": "Verbonden met onenigheid",
+          "fr": "Connecté à la discorde",
+          "it": "Collegato alla discordia",
+          "es": "Conectado a la discordia",
+          "pl": "Połączony z niezgodą",
+          "zh-cn": "连接到不和谐"
+        },
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    },
+    {
+      "_id": "bot",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Bot",
+          "de": "Bot",
+          "ru": "Бот",
+          "pt": "Robô",
+          "nl": "Bot",
+          "fr": "Robot",
+          "it": "Bot",
+          "es": "Bot",
+          "pl": "Nerw",
+          "zh-cn": "机器人"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "bot.status",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Presence status",
+          "de": "Anwesenheitsstatus",
+          "ru": "Состояние присутствия",
+          "pt": "Status de presença",
+          "nl": "Aanwezigheidsstatus",
+          "fr": "Statut de présence",
+          "it": "Stato di presenza",
+          "es": "Estado de presencia",
+          "pl": "Status obecności",
+          "zh-cn": "存在状态"
+        },
+        "type": "string",
+        "role": "text",
+        "read": true,
+        "write": true,
+        "def": "online",
+        "states": {
+          "online": "online",
+          "idle": "idle",
+          "dnd": "dnd",
+          "invisible": "invisible"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "bot.activityType",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Activity type",
+          "de": "Aktivitätstyp",
+          "ru": "Тип деятельности",
+          "pt": "Tipo de atividade",
+          "nl": "Activiteitstype",
+          "fr": "Type d'activité",
+          "it": "Tipo di attività",
+          "es": "Tipo de actividad",
+          "pl": "Rodzaj aktywności",
+          "zh-cn": "活动类型"
+        },
+        "type": "string",
+        "role": "text",
+        "read": true,
+        "write": true,
+        "def": "COMPETING",
+        "states": {
+          "": "---",
+          "PLAYING": "playing",
+          "STREAMING": "streaming",
+          "LISTENING": "listening",
+          "WATCHING": "watching",
+          "COMPETING": "competing"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "bot.activityName",
+      "type": "state",
+      "common": {
+        "name": {
+          "en": "Activity name",
+          "de": "Aktivitätsname",
+          "ru": "Название деятельности",
+          "pt": "Nome da atividade",
+          "nl": "Naam activiteit",
+          "fr": "Nom de l'activité",
+          "it": "Nome dell'attività",
+          "es": "Nombre de la actividad",
+          "pl": "Nazwa działania",
+          "zh-cn": "活动名称"
+        },
+        "type": "string",
+        "role": "text",
+        "read": true,
+        "write": true,
+        "def": "ioBroker"
+      },
+      "native": {}
+    },
+    {
+      "_id": "servers",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Servers",
+          "de": "Server",
+          "ru": "Серверы",
+          "pt": "Servidores",
+          "nl": "Servers",
+          "fr": "Les serveurs",
+          "it": "Server",
+          "es": "Servidores",
+          "pl": "Serwery",
+          "zh-cn": "服务器"
+        }
+      },
+      "native": {}
+    },
+    {
+      "_id": "users",
+      "type": "channel",
+      "common": {
+        "name": {
+          "en": "Users",
+          "de": "Benutzer",
+          "ru": "Пользователи",
+          "pt": "Comercial",
+          "nl": "Gebruikers",
+          "fr": "Utilisateurs",
+          "it": "Utenti",
+          "es": "Usuarios",
+          "pl": "Użytkownicy",
+          "zh-cn": "用户"
+        }
+      },
+      "native": {}
+    }
+  ]
 }
