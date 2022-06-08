@@ -838,16 +838,26 @@ The adapter ships with it's own Blockly blocks for ...
 <xml xmlns="https://developers.google.com/blockly/xml">
   <variables>
     <variable id="Wcj[Gmy,vX]b,)s,O)`U">interactionId</variable>
+    <variable id="{sXn[Mn@ZN#fWtTV6O^;">userTag</variable>
     <variable id="ULmVI=-QcXLnD!e60KTV">camID</variable>
   </variables>
-  <block type="discord_on_custom_cmd" id="?Z9}#a^xoK9FCC0.DV;Q" x="38" y="13">
+  <block type="discord_on_custom_cmd" id="GE,i32wKhz%KGlBhV$j=" x="63" y="13">
     <mutation xmlns="http://www.w3.org/1999/xhtml" options="cam"></mutation>
     <field name="instance">.0</field>
     <field name="varInteractionId" id="Wcj[Gmy,vX]b,)s,O)`U">interactionId</field>
     <field name="log">FALSE</field>
     <field name="commandName">super-command</field>
+    <value name="varUserId">
+      <shadow type="logic_null" id="/}0,E!Gq=C2U]C^.8m1@"></shadow>
+    </value>
+    <value name="varUserTag">
+      <shadow type="logic_null" id="+r2I4SpfhuW%9DE21,[c"></shadow>
+      <block type="variables_get" id="Q=v?u?yU}Tw*@FH*|x7.">
+        <field name="VAR" id="{sXn[Mn@ZN#fWtTV6O^;">userTag</field>
+      </block>
+    </value>
     <value name="option0">
-      <shadow type="logic_null" id="(SocCW3g`x[w/?0o~;cZ"></shadow>
+      <shadow type="logic_null" id="hL^g}gJg-b.+SOH0s9m1"></shadow>
       <block type="variables_get" id="z/Lf|chD)~Ge0N~@EWG%">
         <field name="VAR" id="ULmVI=-QcXLnD!e60KTV">camID</field>
       </block>
@@ -866,6 +876,24 @@ The adapter ships with it's own Blockly blocks for ...
               <shadow type="text" id=".c}Z71nQ8LlQ@h}_Z?qR">
                 <field name="TEXT"></field>
               </shadow>
+              <block type="text_join" id="Z{wQ$[1g7z?KPMSHB],Y">
+                <mutation items="3"></mutation>
+                <value name="ADD0">
+                  <block type="text" id="cuzUE7GB$#gC*;nOQ|Ke">
+                    <field name="TEXT">Hi </field>
+                  </block>
+                </value>
+                <value name="ADD1">
+                  <block type="variables_get" id="|[[T@|n1Ro{EU56/jJ@P">
+                    <field name="VAR" id="{sXn[Mn@ZN#fWtTV6O^;">userTag</field>
+                  </block>
+                </value>
+                <value name="ADD2">
+                  <block type="text" id="LV$kS:Gzv#cJ#gXe/{4a">
+                    <field name="TEXT">!</field>
+                  </block>
+                </value>
+              </block>
             </value>
             <value name="embeds">
               <shadow type="logic_null" id="p8S?*FLv4a6aIJogCKU;"></shadow>

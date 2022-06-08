@@ -17,7 +17,7 @@ Blockly.Words['discord_add_message_reaction'] = { 'en': 'Add Discord message rea
 Blockly.Words['discord_add_message_reaction_tooltip'] = { 'en': 'Add a reaction (emoji) to a former Discord message', 'de': 'Eine Reaktion (Emoji) zu einer früheren Discord-Nachricht hinzufügen', 'ru': 'Добавить реакцию (эмодзи) на предыдущее сообщение Discord', 'pt': 'Adicionar uma reação (emoji) a uma mensagem anterior do Discord', 'nl': 'Voeg een reactie (emoji) toe aan een eerder Discord-bericht', 'fr': 'Ajouter une réaction (emoji) à un ancien message Discord', 'it': 'Aggiungi una reazione (emoji) a un precedente messaggio Discord', 'es': 'Agregue una reacción (emoji) a un mensaje anterior de Discord', 'pl': 'Dodaj reakcję (emotikon) do poprzedniej wiadomości na Discordzie', 'zh-cn': '向以前的 Discord 消息添加反应（表情符号）' };
 Blockly.Words['discord_message'] = { 'en': 'Message', 'de': 'Nachricht', 'ru': 'Нахрихт', 'pt': 'Nachricht', 'nl': 'Nachricht', 'fr': 'Nachricht', 'it': 'Nachricht', 'es': 'Nachricht', 'pl': 'Nachricht', 'zh-cn': '纳赫里赫特' };
 Blockly.Words['discord_message_id'] = { 'en': 'Message ID', 'de': 'Nachrichten-ID', 'ru': 'Идентификатор сообщения', 'pt': 'ID da mensagem', 'nl': 'Bericht-ID', 'fr': 'ID du message', 'it': 'ID messaggio', 'es': 'ID de mensaje', 'pl': 'ID wiadomości', 'zh-cn': '消息 ID' };
-Blockly.Words['discord_save_messageId_in'] = { 'en': 'Save message ID in', 'de': 'Nachrichten-ID speichern in', 'ru': 'Сохранить идентификатор сообщения в', 'pt': 'Salvar ID da mensagem em', 'nl': 'Bericht-ID opslaan in', 'fr': 'Enregistrer l\'identifiant du message dans', 'it': 'Salva l\'ID del messaggio in', 'es': 'Guardar ID de mensaje en', 'pl': 'Zapisz identyfikator wiadomości w', 'zh-cn': '将消息 ID 保存在' };
+Blockly.Words['discord_save_message_id_in'] = { 'en': 'Save message ID in', 'de': 'Nachrichten-ID speichern in', 'ru': 'Сохранить идентификатор сообщения в', 'pt': 'Salvar ID da mensagem em', 'nl': 'Bericht-ID opslaan in', 'fr': 'Enregistrer l\'identifiant du message dans', 'it': 'Salva l\'ID del messaggio in', 'es': 'Guardar ID de mensaje en', 'pl': 'Zapisz identyfikator wiadomości w', 'zh-cn': '将消息 ID 保存在' };
 Blockly.Words['discord_save_error_in'] = {  'en': 'Save error in', 'de': 'Fehler speichern in', 'ru': 'Сохранить ошибку в', 'pt': 'Salvar erro em', 'nl': 'Fout opslaan in', 'fr': 'Enregistrer l\'erreur dans', 'it': 'Salva errore in', 'es': 'Guardar error en', 'pl': 'Zapisz błąd w', 'zh-cn': '将错误保存在' };
 Blockly.Words['discord_log_result_ok'] = { 'en': 'Log result if sent', 'de': 'Ergebnis protokollieren, wenn gesendet', 'ru': 'Результат журнала, если он отправлен', 'pt': 'Log do resultado se enviado', 'nl': 'Log resultaat indien verzonden', 'fr': 'Consigner le résultat si envoyé', 'it': 'Registra il risultato se inviato', 'es': 'Registrar resultado si se envía', 'pl': 'Zaloguj wynik, jeśli został wysłany', 'zh-cn': '记录结果（如果已发送）' };
 Blockly.Words['discord_instance'] = { 'en': 'Discord instance', 'de': 'Discord-Instanz', 'ru': 'Дискорд-экземпляр', 'pt': 'Instância de discórdia', 'nl': 'Discord-instantie', 'fr': 'Instance de discorde', 'it': 'Istanza di discordia', 'es': 'Instancia de discordia', 'pl': 'Instancja Discord', 'zh-cn': '不和谐实例' };
@@ -46,6 +46,8 @@ Blockly.Words['discord_file_name'] = { 'en': 'File name', 'de': 'Dateiname', 'ru
 Blockly.Words['discord_on_custom_cmd'] = { 'en': 'On custom Discord slash command', 'de': 'Bei benutzerdefiniertem Discord-Slash-Befehl', 'ru': 'В пользовательской команде косой черты Discord', 'pt': 'No comando de barra Discord personalizado', 'nl': 'Op aangepaste Discord slash-opdracht', 'fr': 'Sur la commande personnalisée Discord slash', 'it': 'Sul comando barra Discord personalizzato', 'es': 'En el comando de barra diagonal Discord personalizado', 'pl': 'W niestandardowym poleceniu ukośnika Discord', 'zh-cn': '在自定义 Discord 斜杠命令上' };
 Blockly.Words['discord_on_custom_cmd_tooltip'] = { 'en': 'Do some action when a custom Discord slash command is executed. Set the command name an command options like in the adapter instance configuration to store the given options into local variables. Use the block \'Send custom command reply\' to reply.', 'de': 'Eine Aktion auslösen, wenn ein benutzerdefinierter Discord-Slash-Befehl ausgeführt wurde. Den Befehlsnamen und die Befehlsoptionen wie in der Adapterinstanzkonfiguration festlegen, um die angegebenen Optionen in lokalen Variablen zu speichern. Zum Antworten den Block \'Antwort auf benutzerdefinierten Discord-Slash-Befehl senden\' verwenden.', 'ru': 'Сделайте некоторые действия, когда пользовательская команда Discord slash выполняется. Установите название команды, такие как в конфигурации адаптера, чтобы сохранить эти опции в локальные переменные. Используйте блок \'Отправить пользовательский ответ команды\' для ответа.', 'pt': 'Faça alguma ação quando um comando slash Discord personalizado for executado. Defina o nome do comando uma opção de comando como na configuração da instância do adaptador para armazenar as opções fornecidas em variáveis locais. Use o bloco \'Enviar resposta de comando personalizada\' para responder.', 'nl': 'Doe wat actie als een aangepaste Discord commando wordt geëxecuteerd. Zet de commandopost een commando-opties zoals in het adapter instance configuration om de gegeven opties op te bergen in plaatselijke variabelen. Gebruik het blok \'Stuur de commandopost\' om te antwoorden.', 'fr': 'Faites une action quand une commande personnalisée Discord slash est exécutée. Définir le nom de commande une option de commande comme dans la configuration de l\'instance adaptateur pour stocker les options données dans les variables locales. Utilisez le bloc \'Envoyer la réponse de commande personnalisée\' pour répondre.', 'it': 'Fai qualche azione quando viene eseguito un comando Discord slash personalizzato. Impostare il nome di comando opzioni di comando come nella configurazione dell\'istanza dell\'adattatore per memorizzare le opzioni date in variabili locali. Utilizzare il blocco \'Invia risposta di comando personalizzata\' per rispondere.', 'es': 'Haga alguna acción cuando se ejecute un comando de discordia personalizado. Establecer el nombre de comando una opción de comando como en la configuración de instancia del adaptador para almacenar las opciones dadas en variables locales. Utilice el bloque \'Enviar respuesta de comando personalizada\' para responder.', 'pl': 'Do niektórych działań, gdy zostaje stracony zwyczajowe dowództwo Discord slash. Nazwa komendy jest opcją taka jak w konfiguracji adapterowej, która pozwala na przechowywanie opcji w lokalnych zmiennych. Zastosowanie bloku \'Send customowe polecenie odpowiadania.', 'zh-cn': '实施定制的反弹指挥时,有些行动。 确定指挥名称,如适应组合中的指挥选择,以将特定的选择留给当地变量。 使用封锁的习俗指挥答复。.' };
 Blockly.Words['discord_save_interaction_id_in'] = { 'en': 'Save interaction ID in', 'de': 'Interaktions-ID speichern in', 'ru': 'Сохранить идентификатор взаимодействия в', 'pt': 'Salvar ID de interação em', 'nl': 'Interactie-ID opslaan in', 'fr': 'Enregistrer l\'ID d\'interaction dans', 'it': 'Salva l\'ID interazione in', 'es': 'Guardar ID de interacción en', 'pl': 'Zapisz identyfikator interakcji w', 'zh-cn': '将交互 ID 保存在' };
+Blockly.Words['discord_save_user_id_in'] = { 'en': 'Save user ID in', 'de': 'Benutzer-ID speichern in', 'ru': 'Сохранить ID пользователя в', 'pt': 'Salvar ID de usuário em', 'nl': 'Bewaar gebruiker ID', 'fr': 'Enregistrer l\'ID utilisateur dans', 'it': 'Salva ID utente in', 'es': 'Guardar ID de usuario en', 'pl': 'Save user Identity w bazie IMDb (ang.)', 'zh-cn': '拯救用户协会' };
+Blockly.Words['discord_save_user_tag_in'] = { 'en': 'Save user tag in', 'de': 'Benutzer-Tag speichern in', 'ru': 'Сохранить тег пользователя в', 'pt': 'Salvar tag de usuário em', 'nl': 'Bewaar gebruiker', 'fr': 'Enregistrer le tag utilisateur dans', 'it': 'Salvare il tag utente', 'es': 'Guardar la etiqueta de usuario en', 'pl': 'Tagowanie użytkowników', 'zh-cn': '拯救用户的传染' };
 Blockly.Words['discord_log_command'] = { 'en': 'Log each command execution', 'de': 'Jede Befehlsausführung protokollieren', 'ru': 'Журнал выполнения каждой команды', 'pt': 'Registrar cada execução de comando', 'nl': 'Log elke uitvoering van de opdracht in', 'fr': 'Journaliser chaque exécution de commande', 'it': 'Registra ogni esecuzione di comando', 'es': 'Registrar cada ejecución de comando', 'pl': 'Zaloguj każde wykonanie polecenia', 'zh-cn': '记录每个命令的执行' };
 Blockly.Words['discord_custom_command_name'] = { 'en': 'Custom command name', 'de': 'Benutzerdefinierter Befehlsname', 'ru': 'Пользовательское имя команды', 'pt': 'Nome do comando personalizado', 'nl': 'Naam aangepaste opdracht', 'fr': 'Nom de commande personnalisé', 'it': 'Nome comando personalizzato', 'es': 'Nombre de comando personalizado', 'pl': 'Niestandardowa nazwa polecenia', 'zh-cn': '自定义命令名称' };
 Blockly.Words['discord_on_custom_cmd_options_to_vars'] = { 'en': 'Command options to variables', 'de': 'Befehlsoptionen in Variablen speichern', 'ru': 'Параметры команды для переменных', 'pt': 'Opções de comando para variáveis', 'nl': 'Opdrachtopties voor variabelen', 'fr': 'Options de commande aux variables', 'it': 'Opzioni di comando per le variabili', 'es': 'Opciones de comando a variables', 'pl': 'Opcje poleceń do zmiennych', 'zh-cn': '变量的命令选项' };
@@ -306,7 +308,7 @@ const DiscordHelpers = {
 
     if (opts.inputVarMessageId) {
       block.appendValueInput('varMessageId')
-        .appendField(Blockly.Translate('discord_save_messageId_in'))
+        .appendField(Blockly.Translate('discord_save_message_id_in'))
         .setCheck('Variable');
     }
 
@@ -839,6 +841,14 @@ Blockly.Discord.blocks['discord_on_custom_cmd'] =
     </value>
     <value name='varInteractionId'>
     </value>
+    <value name='varUserId'>
+      <shadow type='logic_null'>
+      </shadow>
+    </value>
+    <value name='varUserTag'>
+      <shadow type='logic_null'>
+      </shadow>
+    </value>
     <value name='log'>
     </value>
     <value name='STATEMENT'>
@@ -894,6 +904,14 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
     this.appendDummyInput('varInteractionId')
       .appendField(Blockly.Translate('discord_save_interaction_id_in'))
       .appendField(new Blockly.FieldVariable('interactionId'), 'varInteractionId');
+
+    this.appendValueInput('varUserId')
+      .appendField(Blockly.Translate('discord_save_user_id_in'))
+      .setCheck('Variable');
+
+    this.appendValueInput('varUserTag')
+      .appendField(Blockly.Translate('discord_save_user_tag_in'))
+      .setCheck('Variable');
 
     this.appendDummyInput('log')
       .appendField(Blockly.Translate('discord_log_command'))
@@ -1091,11 +1109,21 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
 
 Blockly.JavaScript['discord_on_custom_cmd'] = function (block) {
   const instance = block.getFieldValue('instance');
+  const varUserId = Blockly.JavaScript.valueToCode(block, 'varUserId', Blockly.JavaScript.ORDER_ATOMIC);
+  const varUserTag = Blockly.JavaScript.valueToCode(block, 'varUserTag', Blockly.JavaScript.ORDER_ATOMIC);
   const log = block.getFieldValue('log');
   let commandName = block.getFieldValue('commandName').replace(/[^0-9a-z-_]/g, '');
   const statement = Blockly.JavaScript.statementToCode(block, 'STATEMENT');
 
   let varAssigns = '';
+
+  if (varUserId && varUserId !== 'null') {
+    varAssigns += `\n      ${varUserId} = data.user.id;`;
+  }
+  if (varUserTag && varUserTag !== 'null') {
+    varAssigns += `\n      ${varUserTag} = data.user.tag;`;
+  }
+
   for (let n = 0; n < block.itemCount_; n++) {
     const input = this.getInput('option' + n);
     let val = Blockly.JavaScript.valueToCode(block, 'option' + n, Blockly.JavaScript.ORDER_COMMA);
