@@ -78,6 +78,11 @@ Additionally, the adapter can register Discord slash commands to get and set ioB
 * Optional raw states to allow more flexibility in custom scripts
 * Support for Blockly with custom blocks to send and edit messages and to handle custom slash commands
 
+What's *not* supported and *not* intended:
+
+* Messages in threads
+* Send and receive voice messages
+
 Missing some feature? Feel free to submit a feature request on [GitHub][GitHub New Issue].
 
 ## Creating a Discord bot

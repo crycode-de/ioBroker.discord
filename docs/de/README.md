@@ -80,6 +80,11 @@ Zusätzlich kann der Adapter Discord Slash-Befehle registrieren.
 * Optional raw-Zustände für mehr Flexibilität in eigenen Skripten
 * Unterstützung von Blockly mit eigenen Blöcken zum Senden und Bearbeiten von Nachrichten und zum handhaben von eigenen Slash-Befehlen
 
+Was *nicht* unterstützt wird und auch *nicht* vorgesehen ist:
+
+* Nachrichten in Threads
+* Senden und Empfangen von Voice-Nachrichten
+
 Es fehlt ein Feature? Erstelle einfach ein Feature-Request auf [GitHub][GitHub New Issue].
 
 ## Erstellen eines Discord Bots
