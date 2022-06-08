@@ -60,8 +60,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 1.1.1 (2022-06-08)
 
 * (crycode-de) Added support for text messages in voice channels
 * (crycode-de) Added support for custom slash commands
