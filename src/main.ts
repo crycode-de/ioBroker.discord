@@ -1375,6 +1375,9 @@ class DiscordAdapter extends Adapter {
       msgStateIdPrefix = channel.parentId ? `${this.namespace}.servers.${message.guildId}.channels.${channel.parentId}.channels.${channel.id}` : `${this.namespace}.servers.${message.guildId}.channels.${channel.id}`;
     } else if (channel.type === 'DM') {
       msgStateIdPrefix = `${this.namespace}.users.${author.id}`;
+    } else if (channel.isThread()) {
+      this.log.debug('Thread message ignored');
+      return;
     } else {
       this.log.warn(`Received message from unsupported channel type ${channel.type}!`);
       return;
