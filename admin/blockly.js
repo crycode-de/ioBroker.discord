@@ -44,7 +44,7 @@ Blockly.Words['discord_file_attachment_tooltip'] = { 'en': 'Create a Discord fil
 Blockly.Words['discord_file_path'] = { 'en': 'File path', 'de': 'Dateipfad', 'ru': 'Путь к файлу', 'pt': 'Caminho de arquivo', 'nl': 'Bestandspad', 'fr': 'Chemin du fichier', 'it': 'Percorso del file', 'es': 'Ruta de archivo', 'pl': 'Ścieżka pliku', 'zh-cn': '文件路径' };
 Blockly.Words['discord_file_name'] = { 'en': 'File name', 'de': 'Dateiname', 'ru': 'Имя файла', 'pt': 'Nome do arquivo', 'nl': 'Bestandsnaam', 'fr': 'Nom de fichier', 'it': 'Nome del file', 'es': 'Nombre del archivo', 'pl': 'Nazwa pliku', 'zh-cn': '文件名' };
 Blockly.Words['discord_on_custom_cmd'] = { 'en': 'On custom Discord slash command', 'de': 'Bei benutzerdefiniertem Discord-Slash-Befehl', 'ru': 'В пользовательской команде косой черты Discord', 'pt': 'No comando de barra Discord personalizado', 'nl': 'Op aangepaste Discord slash-opdracht', 'fr': 'Sur la commande personnalisée Discord slash', 'it': 'Sul comando barra Discord personalizzato', 'es': 'En el comando de barra diagonal Discord personalizado', 'pl': 'W niestandardowym poleceniu ukośnika Discord', 'zh-cn': '在自定义 Discord 斜杠命令上' };
-Blockly.Words['discord_on_custom_cmd_tooltip'] = { 'en': 'Do some action when a custom Discord slash command is executed. Set the command name an command options like in the adapter instance configuration to store the given options into local variables. Use the block \'Send custom command reply\' to reply.', 'de': 'Eine Aktion auslösen, wenn ein benutzerdefinierter Discord-Slash-Befehl ausgeführt wurde. Den Befehlsnamen und die Befehlsoptionen wie in der Adapterinstanzkonfiguration festlegen, um die angegebenen Optionen in lokalen Variablen zu speichern. Zum Antworten den Block \'Benutzerdefinierte Befehlsantwort senden\' verwenden.', 'ru': 'Выполните какое-либо действие, когда выполняется пользовательская косая черта Discord. ', 'pt': 'Execute alguma ação quando um comando de barra Discord personalizado for executado. ', 'nl': 'Voer een actie uit wanneer een aangepast Discord-slash-commando wordt uitgevoerd. ', 'fr': 'Effectuez une action lorsqu\'une commande slash Discord personnalisée est exécutée. ', 'it': 'Eseguire alcune azioni quando viene eseguito un comando slash Discord personalizzato. ', 'es': 'Realice alguna acción cuando se ejecute un comando de barra diagonal personalizado de Discord. ', 'pl': 'Wykonaj jakąś akcję po wykonaniu niestandardowego polecenia ukośnika Discord. ', 'zh-cn': '在执行自定义 Discord 斜杠命令时执行一些操作。' };
+Blockly.Words['discord_on_custom_cmd_tooltip'] = { 'en': 'Do some action when a custom Discord slash command is executed. Set the command name an command options like in the adapter instance configuration to store the given options into local variables. Use the block \'Send custom command reply\' to reply.', 'de': 'Eine Aktion auslösen, wenn ein benutzerdefinierter Discord-Slash-Befehl ausgeführt wurde. Den Befehlsnamen und die Befehlsoptionen wie in der Adapterinstanzkonfiguration festlegen, um die angegebenen Optionen in lokalen Variablen zu speichern. Zum Antworten den Block \'Antwort auf benutzerdefinierten Discord-Slash-Befehl senden\' verwenden.', 'ru': 'Сделайте некоторые действия, когда пользовательская команда Discord slash выполняется. Установите название команды, такие как в конфигурации адаптера, чтобы сохранить эти опции в локальные переменные. Используйте блок \'Отправить пользовательский ответ команды\' для ответа.', 'pt': 'Faça alguma ação quando um comando slash Discord personalizado for executado. Defina o nome do comando uma opção de comando como na configuração da instância do adaptador para armazenar as opções fornecidas em variáveis locais. Use o bloco \'Enviar resposta de comando personalizada\' para responder.', 'nl': 'Doe wat actie als een aangepaste Discord commando wordt geëxecuteerd. Zet de commandopost een commando-opties zoals in het adapter instance configuration om de gegeven opties op te bergen in plaatselijke variabelen. Gebruik het blok \'Stuur de commandopost\' om te antwoorden.', 'fr': 'Faites une action quand une commande personnalisée Discord slash est exécutée. Définir le nom de commande une option de commande comme dans la configuration de l\'instance adaptateur pour stocker les options données dans les variables locales. Utilisez le bloc \'Envoyer la réponse de commande personnalisée\' pour répondre.', 'it': 'Fai qualche azione quando viene eseguito un comando Discord slash personalizzato. Impostare il nome di comando opzioni di comando come nella configurazione dell\'istanza dell\'adattatore per memorizzare le opzioni date in variabili locali. Utilizzare il blocco \'Invia risposta di comando personalizzata\' per rispondere.', 'es': 'Haga alguna acción cuando se ejecute un comando de discordia personalizado. Establecer el nombre de comando una opción de comando como en la configuración de instancia del adaptador para almacenar las opciones dadas en variables locales. Utilice el bloque \'Enviar respuesta de comando personalizada\' para responder.', 'pl': 'Do niektórych działań, gdy zostaje stracony zwyczajowe dowództwo Discord slash. Nazwa komendy jest opcją taka jak w konfiguracji adapterowej, która pozwala na przechowywanie opcji w lokalnych zmiennych. Zastosowanie bloku \'Send customowe polecenie odpowiadania.', 'zh-cn': '实施定制的反弹指挥时,有些行动。 确定指挥名称,如适应组合中的指挥选择,以将特定的选择留给当地变量。 使用封锁的习俗指挥答复。.' };
 Blockly.Words['discord_save_interaction_id_in'] = { 'en': 'Save interaction ID in', 'de': 'Interaktions-ID speichern in', 'ru': 'Сохранить идентификатор взаимодействия в', 'pt': 'Salvar ID de interação em', 'nl': 'Interactie-ID opslaan in', 'fr': 'Enregistrer l\'ID d\'interaction dans', 'it': 'Salva l\'ID interazione in', 'es': 'Guardar ID de interacción en', 'pl': 'Zapisz identyfikator interakcji w', 'zh-cn': '将交互 ID 保存在' };
 Blockly.Words['discord_log_command'] = { 'en': 'Log each command execution', 'de': 'Jede Befehlsausführung protokollieren', 'ru': 'Журнал выполнения каждой команды', 'pt': 'Registrar cada execução de comando', 'nl': 'Log elke uitvoering van de opdracht in', 'fr': 'Journaliser chaque exécution de commande', 'it': 'Registra ogni esecuzione di comando', 'es': 'Registrar cada ejecución de comando', 'pl': 'Zaloguj każde wykonanie polecenia', 'zh-cn': '记录每个命令的执行' };
 Blockly.Words['discord_custom_command_name'] = { 'en': 'Custom command name', 'de': 'Benutzerdefinierter Befehlsname', 'ru': 'Пользовательское имя команды', 'pt': 'Nome do comando personalizado', 'nl': 'Naam aangepaste opdracht', 'fr': 'Nom de commande personnalisé', 'it': 'Nome comando personalizzato', 'es': 'Nombre de comando personalizado', 'pl': 'Niestandardowa nazwa polecenia', 'zh-cn': '自定义命令名称' };
@@ -92,78 +92,78 @@ const DiscordHelpers = {
   },
 
   createSendToXml: (name, opts) => {
-    let xml = `<block type="${name}">
-      <value name="instance">
+    let xml = `<block type='${name}'>
+      <value name='instance'>
       </value>`;
 
     if (opts.inputUser) {
       xml += `
-      <value name="user">
-        <shadow type="text">
-          <field name="TEXT"></field>
+      <value name='user'>
+        <shadow type='text'>
+          <field name='TEXT'></field>
         </shadow>
       </value>`;
     }
 
     if (opts.inputServerChannel) {
       xml += `
-      <value name="serverId">
-        <shadow type="text">
-          <field name="TEXT"></field>
+      <value name='serverId'>
+        <shadow type='text'>
+          <field name='TEXT'></field>
         </shadow>
       </value>
-      <value name="channelId">
-        <shadow type="text">
-          <field name="TEXT"></field>
+      <value name='channelId'>
+        <shadow type='text'>
+          <field name='TEXT'></field>
         </shadow>
       </value>`;
     }
 
     if (opts.inputMessageId) {
       xml += `
-      <value name="messageId">
-        <shadow type="text">
-          <field name="TEXT"></field>
+      <value name='messageId'>
+        <shadow type='text'>
+          <field name='TEXT'></field>
         </shadow>
       </value>`;
     }
 
     if (opts.inputInteractionId) {
       xml += `
-      <value name="interactionId">
+      <value name='interactionId'>
       </value>`;
     }
 
     if (opts.inputContent) {
       xml += `
-      <value name="content">
-        <shadow type="text">
-          <field name="TEXT"></field>
+      <value name='content'>
+        <shadow type='text'>
+          <field name='TEXT'></field>
         </shadow>
       </value>`;
     }
 
     if (opts.inputEmoji) {
       xml += `
-      <value name="emoji">
-        <shadow type="text">
-          <field name="TEXT">👍</field>
+      <value name='emoji'>
+        <shadow type='text'>
+          <field name='TEXT'>👍</field>
         </shadow>
       </value>`;
     }
 
     if (opts.inputVarMessageId) {
       xml += `
-      <value name="varMessageId">
-        <shadow type="logic_null"></shadow>
+      <value name='varMessageId'>
+        <shadow type='logic_null'></shadow>
       </value>`;
     }
 
     xml += `
-      <value name="varError">
-        <shadow type="logic_null"></shadow>
+      <value name='varError'>
+        <shadow type='logic_null'></shadow>
       </value>
-      <value name="logResultOk">
+      <value name='logResultOk'>
       </value>
     </block>`;
 
@@ -356,7 +356,7 @@ Blockly.JavaScript['discord_send_message_user'] = function (block) {
   return DiscordHelpers.createSendToJs({
     action: 'sendMessage',
     instance: block.getFieldValue('instance'),
-    target: user.match(/^["']\d+["']$/) ? `userId: ${user}` : `userTag: ${user}`,
+    target: user.match(/^['']\d+['']$/) ? `userId: ${user}` : `userTag: ${user}`,
     content: Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC),
     varMessageId: Blockly.JavaScript.valueToCode(block, 'varMessageId', Blockly.JavaScript.ORDER_ATOMIC),
     varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
@@ -423,7 +423,7 @@ Blockly.JavaScript['discord_edit_message_user'] = function (block) {
   return DiscordHelpers.createSendToJs({
     action: 'editMessage',
     instance: block.getFieldValue('instance'),
-    target: user.match(/^["']\d+["']$/) ? `userId: ${user}` : `userTag: ${user}`,
+    target: user.match(/^['']\d+['']$/) ? `userId: ${user}` : `userTag: ${user}`,
     messageId: Blockly.JavaScript.valueToCode(block, 'messageId', Blockly.JavaScript.ORDER_ATOMIC),
     content: Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC),
     varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
@@ -488,7 +488,7 @@ Blockly.JavaScript['discord_delete_message_user'] = function (block) {
   return DiscordHelpers.createSendToJs({
     action: 'deleteMessage',
     instance: block.getFieldValue('instance'),
-    target: user.match(/^["']\d+["']$/) ? `userId: ${user}` : `userTag: ${user}`,
+    target: user.match(/^['']\d+['']$/) ? `userId: ${user}` : `userTag: ${user}`,
     messageId: Blockly.JavaScript.valueToCode(block, 'messageId', Blockly.JavaScript.ORDER_ATOMIC),
     varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
     logResultOk: block.getFieldValue('logResultOk'),
@@ -551,7 +551,7 @@ Blockly.JavaScript['discord_add_message_reaction_user'] = function (block) {
   return DiscordHelpers.createSendToJs({
     action: 'addReaction',
     instance: block.getFieldValue('instance'),
-    target: user.match(/^["']\d+["']$/) ? `userId: ${user}` : `userTag: ${user}`,
+    target: user.match(/^['']\d+['']$/) ? `userId: ${user}` : `userTag: ${user}`,
     messageId: Blockly.JavaScript.valueToCode(block, 'messageId', Blockly.JavaScript.ORDER_ATOMIC),
     emoji: Blockly.JavaScript.valueToCode(block, 'emoji', Blockly.JavaScript.ORDER_ATOMIC),
     varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
@@ -595,20 +595,20 @@ Blockly.JavaScript['discord_add_message_reaction_server_channel'] = function (bl
 
 // --- Block create content ----------------------------------------------------
 Blockly.Discord.blocks['discord_create_content'] =
-  `<block type="discord_create_content">
-    <value name="content">
-      <shadow type="text">
-        <field name="TEXT"></field>
+  `<block type='discord_create_content'>
+    <value name='content'>
+      <shadow type='text'>
+        <field name='TEXT'></field>
       </shadow>
     </value>
-    <value name="embeds">
-      <shadow type="logic_null"></shadow>
+    <value name='embeds'>
+      <shadow type='logic_null'></shadow>
     </value>
-    <value name="files">
-      <shadow type="logic_null"></shadow>
+    <value name='files'>
+      <shadow type='logic_null'></shadow>
     </value>
-    <value name="replyToId">
-      <shadow type="logic_null"></shadow>
+    <value name='replyToId'>
+      <shadow type='logic_null'></shadow>
     </value>
   </block>`;
 
@@ -661,31 +661,31 @@ Blockly.JavaScript['discord_create_content'] = function (block) {
 
 // --- Block create embed -------------------------------------------------------
 Blockly.Discord.blocks['discord_create_embed'] =
-  `<block type="discord_create_embed">
-    <value name="description">
-      <shadow type="text">
-        <field name="TEXT"></field>
+  `<block type='discord_create_embed'>
+    <value name='description'>
+      <shadow type='text'>
+        <field name='TEXT'></field>
       </shadow>
     </value>
-    <value name="title">
-      <shadow type="logic_null">
+    <value name='title'>
+      <shadow type='logic_null'>
       </shadow>
     </value>
-    <value name="url">
-      <shadow type="logic_null">
+    <value name='url'>
+      <shadow type='logic_null'>
       </shadow>
     </value>
-    <value name="color">
-      <shadow type="colour_picker">
-        <field name="COLOUR">#5865f2</field>
+    <value name='color'>
+      <shadow type='colour_picker'>
+        <field name='COLOUR'>#5865f2</field>
       </shadow>
     </value>
-    <value name="imageUrl">
-      <shadow type="logic_null">
+    <value name='imageUrl'>
+      <shadow type='logic_null'>
       </shadow>
     </value>
-    <value name="footerText">
-      <shadow type="logic_null">
+    <value name='footerText'>
+      <shadow type='logic_null'>
       </shadow>
     </value>
   </block>`;
@@ -765,20 +765,20 @@ Blockly.JavaScript['discord_create_embed'] = function (block) {
 
 // --- Block create file -------------------------------------------------------
 Blockly.Discord.blocks['discord_create_file'] =
-  `<block type="discord_create_file">
-    <value name="attachment">
-      <shadow type="text">
-        <field name="TEXT"></field>
+  `<block type='discord_create_file'>
+    <value name='attachment'>
+      <shadow type='text'>
+        <field name='TEXT'></field>
       </shadow>
     </value>
-    <value name="name">
-      <shadow type="text">
-        <field name="TEXT"></field>
+    <value name='name'>
+      <shadow type='text'>
+        <field name='TEXT'></field>
       </shadow>
     </value>
-    <value name="description">
-      <shadow type="text">
-        <field name="TEXT"></field>
+    <value name='description'>
+      <shadow type='text'>
+        <field name='TEXT'></field>
       </shadow>
     </value>
   </block>`;
@@ -832,18 +832,18 @@ Blockly.JavaScript['discord_create_file'] = function (block) {
 
 // --- Block on custom slash command -------------------------------------------
 Blockly.Discord.blocks['discord_on_custom_cmd'] =
-  `<block type="discord_on_custom_cmd">
-    <value name="instance">
+  `<block type='discord_on_custom_cmd'>
+    <value name='instance'>
     </value>
-    <value name="commandName">
+    <value name='commandName'>
     </value>
-    <value name="varInteractionId">
+    <value name='varInteractionId'>
     </value>
-    <value name="log">
+    <value name='log'>
     </value>
-    <value name="STATEMENT">
+    <value name='STATEMENT'>
     </value>
-    <mutation options="${Blockly.Translate('discord_custom_cmd_option').toLowerCase()}1"></mutation>
+    <mutation options='${Blockly.Translate('discord_custom_cmd_option').toLowerCase()}1'></mutation>
   </block>`;
 
 Blockly.Blocks['discord_on_custom_cmd_container'] = {
