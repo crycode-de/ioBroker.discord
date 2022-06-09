@@ -75,6 +75,7 @@ Zusätzlich kann der Adapter Discord Slash-Befehle registrieren.
 * Nachrichten, Dateien, Reaktionen (Emojis), Antworten, oder benutzerdefinierte Nachrichteninhalte mit JSON-Formatierung senden
 * Auflistung der Server- und Kanalmitglieder inklusive der zugeteilten Rollen
 * Unterstützung von Discord Slash-Befehlen zum Abfragen und Festlegen von Zustandswerten
+* Unterstützung von benutzerdefinierten Discord Slash-Befehlen, auf die in eigenen Skripten (inkl. Blockly) reagiert werden kann
 * Unterstützung von [text2command] (muss für jeden `.message`-Zustand einzeln aktiviert werden)
 * Senden, bearbeiten und löschen von Nachrichten, Senden von und warten auf Reaktionen auf Nachrichten in eigenen Skripten
 * Optional raw-Zustände für mehr Flexibilität in eigenen Skripten
