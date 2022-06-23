@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "discord",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "news": {
+      "1.1.2": {
+        "en": "Fixed adapter termination on discord errors to let the js-controller restart the adapter",
+        "de": "Beendigung des Adapters bei Diskord-Fehlern verbessert, damit der js-Controller den Adapter im Fehlerfall automatisch neu startet",
+        "ru": "Исправлено прекращение адаптера на дискордовых ошибках, чтобы позволить js-контроллеру перезапустить адаптер",
+        "pt": "Terminação do adaptador fixo em erros de discórdia para deixar o js-controller reiniciar o adaptador",
+        "nl": "De adapter beëindiging van de fouten om de js-controller te laten herstarten",
+        "fr": "Résiliation de l'adaptateur fixe sur les erreurs de discord pour laisser le js-controller redémarrer l'adaptateur",
+        "it": "Risolto la terminazione dell'adattatore sugli errori di discord per far riavviare l'adattatore",
+        "es": "Terminación del adaptador fijo en errores de discordia para permitir que el js-controller reinicie el adaptador",
+        "pl": "Fixed adapter termination on discord error to let js-controller restartuje adapter",
+        "zh-cn": "对失误的混合适应人员终止,以便控制的行贿者重新启动适应者。"
+      },
       "1.1.1": {
         "en": "Added support for text messages in voice channels\nAdded support for custom slash commands\nAdded Blockly support with special custom blocks\nSend error replies on slash commands as ephemeral\nAdded config option to send all slash command replies as ephemeral\nRegister get/set commands only if states are configured for this\nChoices for commands are now handled as autocomplete which allows more choices, is more dynamic and shows the choices only to authorized users\nAdded command options to `raw.interactionJson` json content\nFixed command name checks\nFixed some crashes / stuck conditions when network is not available\nFixed several small bugs",
         "de": "Unterstützung für Textnachrichten in Sprachkanälen hinzugefügt\nUnterstützung für benutzerdefinierte Slash-Befehle hinzugefügt\nUnterstützung für Blockly mit speziellen Blöcken hinzugefügt\nFehlermeldungen auf Slash-Befehle als ephemeral senden\nConfig-Option hinzugefügt, alle Slash-Befehlsantworten als ephemeral zu senden\nget/set-Befehle nur registrieren, wenn dafür Zustände konfiguriert sind\nAuswahlen für Befehle werden jetzt als Autocomplete behandelt, was mehr Auswahlmöglichkeiten erlaubt, dynamischer ist und die Auswahlmöglichkeiten nur für autorisierte Benutzer anzeigt\nBefehlsoptionen zu raw-Interaction json Zuständen hinzugefügt\nBefehlsnamensprüfung korrigiert\nEinige Abstürze / Hänger behoben, wenn Netzwerk nicht verfügbar\nMehrere kleine Fehler behoben",
