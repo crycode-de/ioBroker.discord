@@ -294,7 +294,7 @@ class DiscordAdapter extends Adapter {
     this.client.on('shardReconnecting', (shardId: number) => this.log.debug(`Discord client websocket reconnecting (shardId:${shardId})`));
     this.client.on('shardError', (err: Error, shardId: number) => {
       this.log.error(`Discord client websocket error (shardId:${shardId}) ${err}`);
-      this.terminate('Discord client websocket error', EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
+      this.terminate('Discord client websocket error', EXIT_CODES.START_IMMEDIATELY_AFTER_STOP);
     });
 
     this.client.on('messageCreate', this.onClientMessageCreate);
@@ -356,8 +356,13 @@ class DiscordAdapter extends Adapter {
     this.initialCustomObjectSetupDone = true;
 
     // try to log in the client, terminate if this was not successfull
-    if (!await this.loginClient()) {
-      this.terminate('No connection to Discord', EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
+    const loginResult = await this.loginClient();
+    if (loginResult !== true) {
+      if (loginResult.includes('TOKEN_INVALID')) {
+        this.terminate('Invalid token, please check your configuration!', EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
+      } else {
+        this.terminate('No connection to Discord', EXIT_CODES.START_IMMEDIATELY_AFTER_STOP);
+      }
       return; // needed!
     }
 
@@ -373,11 +378,11 @@ class DiscordAdapter extends Adapter {
    * The wait time before each retry will be increased for each try, as defined
    * in `LOGIN_WAIT_TIMES`.
    * @param tryNr Number of the login try. Should be `0` when login process is started and is increased internally in each try.
-   * @returns Promise which resolves to `true` if logged in, `false` otherwise.
+   * @returns Promise which resolves to `true` if logged in, or an error name/message otherwise.
    */
-  private async loginClient (tryNr: number = 0): Promise<boolean> {
+  private async loginClient (tryNr: number = 0): Promise<true | string> {
     if (!this.client || this.unloaded) {
-      return false;
+      return 'No Client';
     }
 
     try {
@@ -398,10 +403,11 @@ class DiscordAdapter extends Adapter {
 
           return this.loginClient(tryNr);
         }
+        return err.name;
       } else {
-        this.log.error(`Unknown Discord login error`);
+        this.log.error('Unknown Discord login error');
+        return 'Unknown Discord login error';
       }
-      return false;
     }
   }
 

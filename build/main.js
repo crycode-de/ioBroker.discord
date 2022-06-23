@@ -200,7 +200,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.client.on("shardReconnecting", (shardId) => this.log.debug(`Discord client websocket reconnecting (shardId:${shardId})`));
     this.client.on("shardError", (err, shardId) => {
       this.log.error(`Discord client websocket error (shardId:${shardId}) ${err}`);
-      this.terminate("Discord client websocket error", import_adapter_core.EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
+      this.terminate("Discord client websocket error", import_adapter_core.EXIT_CODES.START_IMMEDIATELY_AFTER_STOP);
     });
     this.client.on("messageCreate", this.onClientMessageCreate);
     if (this.config.dynamicServerUpdates) {
@@ -250,15 +250,20 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     this.log.debug("Getting all objects with custom config done");
     this.initialCustomObjectSetupDone = true;
-    if (!await this.loginClient()) {
-      this.terminate("No connection to Discord", import_adapter_core.EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
+    const loginResult = await this.loginClient();
+    if (loginResult !== true) {
+      if (loginResult.includes("TOKEN_INVALID")) {
+        this.terminate("Invalid token, please check your configuration!", import_adapter_core.EXIT_CODES.ADAPTER_REQUESTED_TERMINATION);
+      } else {
+        this.terminate("No connection to Discord", import_adapter_core.EXIT_CODES.START_IMMEDIATELY_AFTER_STOP);
+      }
       return;
     }
     await this.discordSlashCommands.registerSlashCommands();
   }
   async loginClient(tryNr = 0) {
     if (!this.client || this.unloaded) {
-      return false;
+      return "No Client";
     }
     try {
       await this.client.login(this.config.token);
@@ -275,10 +280,11 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           await this.wait(LOGIN_WAIT_TIMES[tryNr]);
           return this.loginClient(tryNr);
         }
+        return err.name;
       } else {
-        this.log.error(`Unknown Discord login error`);
+        this.log.error("Unknown Discord login error");
+        return "Unknown Discord login error";
       }
-      return false;
     }
   }
   async onClientReady() {
