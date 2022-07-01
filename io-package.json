@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "discord",
-    "version": "1.1.2",
+    "version": "1.1.3",
     "news": {
+      "1.1.3": {
+        "en": "Dependency updates",
+        "de": "Abhängigkeiten aktualisiert",
+        "ru": "Обновление зависимости",
+        "pt": "Atualizações de dependência",
+        "nl": "Afhankelijke updates",
+        "fr": "Mises à jour des dépenses",
+        "it": "Aggiornamenti di dipendenza",
+        "es": "Actualizaciones de dependencia",
+        "pl": "Aktualizacja",
+        "zh-cn": "B. 附属更新"
+      },
       "1.1.2": {
         "en": "Fixed adapter termination on discord errors to let the js-controller restart the adapter",
         "de": "Beendigung des Adapters bei Diskord-Fehlern verbessert, damit der js-Controller den Adapter im Fehlerfall automatisch neu startet",

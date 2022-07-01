@@ -60,7 +60,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 1.1.3 (2022-07-01)
 
 * (crycode-de) Dependency updates
 
