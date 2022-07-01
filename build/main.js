@@ -1,24 +1,8 @@
+"use strict";
 var __defProp = Object.defineProperty;
-var __defProps = Object.defineProperties;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropDescs = Object.getOwnPropertyDescriptors;
 var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getOwnPropSymbols = Object.getOwnPropertySymbols;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __propIsEnum = Object.prototype.propertyIsEnumerable;
-var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
-var __spreadValues = (a, b) => {
-  for (var prop in b || (b = {}))
-    if (__hasOwnProp.call(b, prop))
-      __defNormalProp(a, prop, b[prop]);
-  if (__getOwnPropSymbols)
-    for (var prop of __getOwnPropSymbols(b)) {
-      if (__propIsEnum.call(b, prop))
-        __defNormalProp(a, prop, b[prop]);
-    }
-  return a;
-};
-var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
@@ -63,9 +47,10 @@ const LOGIN_WAIT_TIMES = [
 ];
 class DiscordAdapter extends import_adapter_core.Adapter {
   constructor(options = {}) {
-    super(__spreadProps(__spreadValues({}, options), {
+    super({
+      ...options,
       name: "discord"
-    }));
+    });
     this.infoConnected = false;
     this.client = null;
     this.messageReceiveStates = /* @__PURE__ */ new Set();
@@ -1225,7 +1210,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       return;
     }
     const proms = [];
-    const json = __spreadValues({}, this.jsonStateCache.get(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`));
+    const json = {
+      ...this.jsonStateCache.get(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`)
+    };
     let update = false;
     if (oldState.channelId !== newState.channelId) {
       proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, ((_b = newState.channel) == null ? void 0 : _b.name) || "", true));
@@ -1351,9 +1338,10 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       }
     }
     if (setAck) {
-      await this.setStateAsync(stateId, __spreadProps(__spreadValues({}, state), {
+      await this.setStateAsync(stateId, {
+        ...state,
         ack: true
-      }));
+      });
     }
   }
   async onSendStateChange(stateId, state) {
@@ -1690,43 +1678,43 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         const sendPayload = obj.message;
         if (!sendPayload.content || typeof sendPayload.content !== "string" && typeof sendPayload.content !== "object") {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: "content needs to be a string or a MessageOptions object" }, sendPayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: "content needs to be a string or a MessageOptions object", ...sendPayload }, obj.callback);
           return;
         }
         if (sendPayload.userId || sendPayload.userTag) {
           if (sendPayload.userId) {
             user = (_e = this.client) == null ? void 0 : _e.users.cache.get(sendPayload.userId);
             if (!user) {
-              this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `No user with userId ${sendPayload.userId} found` }, sendPayload), obj.callback);
+              this.sendToIfCb(obj.from, obj.command, { error: `No user with userId ${sendPayload.userId} found`, ...sendPayload }, obj.callback);
               return;
             }
           } else {
             user = (_f = this.client) == null ? void 0 : _f.users.cache.find((u) => u.tag === sendPayload.userTag);
             if (!user) {
-              this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `No user with userTag ${sendPayload.userTag} found` }, sendPayload), obj.callback);
+              this.sendToIfCb(obj.from, obj.command, { error: `No user with userTag ${sendPayload.userTag} found`, ...sendPayload }, obj.callback);
               return;
             }
           }
           try {
             msg = await user.send(sendPayload.content);
-            this.sendToIfCb(obj.from, obj.command, __spreadProps(__spreadValues({ result: `Message sent to user ${user.tag}` }, sendPayload), { messageId: msg.id }), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { result: `Message sent to user ${user.tag}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `Error sending message to user ${user.tag}: ${err}` }, sendPayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to user ${user.tag}: ${err}`, ...sendPayload }, obj.callback);
           }
         } else if (sendPayload.serverId && sendPayload.channelId) {
           channel = (_h = (_g = this.client) == null ? void 0 : _g.guilds.cache.get(sendPayload.serverId)) == null ? void 0 : _h.channels.cache.get(sendPayload.channelId);
           if (!(channel == null ? void 0 : channel.isText())) {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found` }, sendPayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found`, ...sendPayload }, obj.callback);
             return;
           }
           try {
             msg = await channel.send(sendPayload.content);
-            this.sendToIfCb(obj.from, obj.command, __spreadProps(__spreadValues({ result: `Message sent to channel ${channel.name}` }, sendPayload), { messageId: msg.id }), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { result: `Message sent to channel ${channel.name}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `Error sending message to channel ${channel.name}: ${err}` }, sendPayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to channel ${channel.name}: ${err}`, ...sendPayload }, obj.callback);
           }
         } else {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: "userId, userTag or serverId and channelId needs to be set" }, sendPayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: "userId, userTag or serverId and channelId needs to be set", ...sendPayload }, obj.callback);
         }
         break;
       case "editMessage":
@@ -1736,28 +1724,28 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         const editMessagePayload = obj.message;
         if (!editMessagePayload.content || typeof editMessagePayload.content !== "string" && typeof editMessagePayload.content !== "object") {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: "content needs to be a string or a MessageOptions object" }, editMessagePayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: "content needs to be a string or a MessageOptions object", ...editMessagePayload }, obj.callback);
           return;
         }
         try {
           msg = await this.getPreviousMessage(editMessagePayload);
         } catch (err) {
           if (err instanceof Error && err.message) {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: err.message }, editMessagePayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err.message, ...editMessagePayload }, obj.callback);
           } else {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: err }, editMessagePayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err, ...editMessagePayload }, obj.callback);
           }
           return;
         }
         try {
           if (!msg.editable) {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `Message with messageId ${editMessagePayload.messageId} is not editable` }, editMessagePayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `Message with messageId ${editMessagePayload.messageId} is not editable`, ...editMessagePayload }, obj.callback);
             return;
           }
           await msg.edit(editMessagePayload.content);
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ result: `Message edited` }, editMessagePayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { result: `Message edited`, ...editMessagePayload }, obj.callback);
         } catch (err) {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `Error editing message: ${err}` }, editMessagePayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: `Error editing message: ${err}`, ...editMessagePayload }, obj.callback);
         }
         break;
       case "deleteMessage":
@@ -1770,21 +1758,21 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           msg = await this.getPreviousMessage(deleteMessagePayload);
         } catch (err) {
           if (err instanceof Error && err.message) {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: err.message }, deleteMessagePayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err.message, ...deleteMessagePayload }, obj.callback);
           } else {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: err }, deleteMessagePayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err, ...deleteMessagePayload }, obj.callback);
           }
           return;
         }
         try {
           if (!msg.deletable) {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `Message with messageId ${deleteMessagePayload.messageId} is not deletable` }, deleteMessagePayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `Message with messageId ${deleteMessagePayload.messageId} is not deletable`, ...deleteMessagePayload }, obj.callback);
             return;
           }
           await msg.delete();
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ result: `Message deleted` }, deleteMessagePayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { result: `Message deleted`, ...deleteMessagePayload }, obj.callback);
         } catch (err) {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `Error deleting message: ${err}` }, deleteMessagePayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: `Error deleting message: ${err}`, ...deleteMessagePayload }, obj.callback);
         }
         break;
       case "addReaction":
@@ -1794,24 +1782,24 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         const addReactionPayload = obj.message;
         if (typeof addReactionPayload.emoji !== "string") {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: "emoji needs to be a string" }, addReactionPayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: "emoji needs to be a string", ...addReactionPayload }, obj.callback);
           return;
         }
         try {
           msg = await this.getPreviousMessage(addReactionPayload);
         } catch (err) {
           if (err instanceof Error && err.message) {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: err.message }, addReactionPayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err.message, ...addReactionPayload }, obj.callback);
           } else {
-            this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: err }, addReactionPayload), obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: err, ...addReactionPayload }, obj.callback);
           }
           return;
         }
         try {
           await msg.react(addReactionPayload.emoji);
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ result: `Reaction added to message` }, addReactionPayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { result: `Reaction added to message`, ...addReactionPayload }, obj.callback);
         } catch (err) {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `Error adding reaction to message: ${err}` }, addReactionPayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: `Error adding reaction to message: ${err}`, ...addReactionPayload }, obj.callback);
         }
         break;
       case "awaitMessageReaction":
@@ -1825,7 +1813,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         const awaitMessageReactionPayload = obj.message;
         if (typeof awaitMessageReactionPayload.timeout !== "number" || awaitMessageReactionPayload.timeout < 100 || awaitMessageReactionPayload.timeout > 6e4) {
-          this.sendTo(obj.from, obj.command, __spreadValues({ error: "timeout needs to be a number between 100 and 60000" }, awaitMessageReactionPayload), obj.callback);
+          this.sendTo(obj.from, obj.command, { error: "timeout needs to be a number between 100 and 60000", ...awaitMessageReactionPayload }, obj.callback);
           return;
         }
         if (typeof awaitMessageReactionPayload.max !== "number" || awaitMessageReactionPayload.max < 1) {
@@ -1835,9 +1823,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           msg = await this.getPreviousMessage(awaitMessageReactionPayload);
         } catch (err) {
           if (err instanceof Error && err.message) {
-            this.sendTo(obj.from, obj.command, __spreadValues({ error: err.message }, awaitMessageReactionPayload), obj.callback);
+            this.sendTo(obj.from, obj.command, { error: err.message, ...awaitMessageReactionPayload }, obj.callback);
           } else {
-            this.sendTo(obj.from, obj.command, __spreadValues({ error: err }, awaitMessageReactionPayload), obj.callback);
+            this.sendTo(obj.from, obj.command, { error: err, ...awaitMessageReactionPayload }, obj.callback);
           }
           return;
         }
@@ -1851,7 +1839,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         });
         reactionCollector.on("end", (collected) => {
           const reactions = collected.map((r) => ({ emoji: r.emoji.name, emojiId: r.emoji.id, users: r.users.cache.map((u) => ({ id: u.id, tag: u.tag })) }));
-          this.sendTo(obj.from, obj.command, __spreadValues({ reactions }, awaitMessageReactionPayload), obj.callback);
+          this.sendTo(obj.from, obj.command, { reactions, ...awaitMessageReactionPayload }, obj.callback);
         });
         break;
       case "sendCustomCommandReply":
@@ -1861,18 +1849,18 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         const sendCustomCommandReplyPayload = obj.message;
         if (typeof sendCustomCommandReplyPayload.interactionId !== "string") {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: "interactionId needs to be a string" }, sendCustomCommandReplyPayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: "interactionId needs to be a string", ...sendCustomCommandReplyPayload }, obj.callback);
           return;
         }
         if (!sendCustomCommandReplyPayload.content || typeof sendCustomCommandReplyPayload.content !== "string" && typeof sendCustomCommandReplyPayload.content !== "object") {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: "content needs to be a string or a MessageOptions object" }, sendCustomCommandReplyPayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: "content needs to be a string or a MessageOptions object", ...sendCustomCommandReplyPayload }, obj.callback);
           return;
         }
         try {
           const messageId = await this.discordSlashCommands.sendCmdCustomReply(sendCustomCommandReplyPayload.interactionId, sendCustomCommandReplyPayload.content);
-          this.sendToIfCb(obj.from, obj.command, __spreadProps(__spreadValues({ result: `Reply sent` }, sendCustomCommandReplyPayload), { messageId }), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { result: `Reply sent`, ...sendCustomCommandReplyPayload, messageId }, obj.callback);
         } catch (err) {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `Error sending reply: ${err}` }, sendCustomCommandReplyPayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: `Error sending reply: ${err}`, ...sendCustomCommandReplyPayload }, obj.callback);
         }
         break;
       case "leaveServer":
@@ -1882,7 +1870,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         const leaveServerPayload = obj.message;
         if (!leaveServerPayload.serverId) {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: "serverId needs to be set" }, leaveServerPayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: "serverId needs to be set", ...leaveServerPayload }, obj.callback);
           return;
         }
         const guildToLeave = (_i = this.client) == null ? void 0 : _i.guilds.cache.get(leaveServerPayload.serverId);
@@ -1895,7 +1883,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.log.info(`Left server ${guildToLeave.name} (${guildToLeave.id})`);
           this.sendToIfCb(obj.from, obj.command, { result: "ok" }, obj.callback);
         } catch (err) {
-          this.sendToIfCb(obj.from, obj.command, __spreadValues({ error: `Error leaving server ${leaveServerPayload.serverId}: ${err}` }, leaveServerPayload), obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: `Error leaving server ${leaveServerPayload.serverId}: ${err}`, ...leaveServerPayload }, obj.callback);
         }
         break;
       case "getServerInfo":
@@ -1909,12 +1897,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         const getServerInfoPayload = obj.message;
         if (!getServerInfoPayload.serverId) {
-          this.sendTo(obj.from, obj.command, __spreadValues({ error: "serverId needs to be set" }, getServerInfoPayload), obj.callback);
+          this.sendTo(obj.from, obj.command, { error: "serverId needs to be set", ...getServerInfoPayload }, obj.callback);
           return;
         }
         const server = (_j = this.client) == null ? void 0 : _j.guilds.cache.get(getServerInfoPayload.serverId);
         if (!server) {
-          this.sendTo(obj.from, obj.command, __spreadValues({ error: `No server with ID ${getServerInfoPayload.serverId} found` }, getServerInfoPayload), obj.callback);
+          this.sendTo(obj.from, obj.command, { error: `No server with ID ${getServerInfoPayload.serverId} found`, ...getServerInfoPayload }, obj.callback);
           return;
         }
         this.sendTo(obj.from, obj.command, {
@@ -1950,12 +1938,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         const getChannelInfoPayload = obj.message;
         if (!getChannelInfoPayload.serverId || !getChannelInfoPayload.channelId) {
-          this.sendTo(obj.from, obj.command, __spreadValues({ error: "serverId and channelId need to be set" }, getChannelInfoPayload), obj.callback);
+          this.sendTo(obj.from, obj.command, { error: "serverId and channelId need to be set", ...getChannelInfoPayload }, obj.callback);
           return;
         }
         channel = (_l = (_k = this.client) == null ? void 0 : _k.guilds.cache.get(getChannelInfoPayload.serverId)) == null ? void 0 : _l.channels.cache.get(getChannelInfoPayload.channelId);
         if (!channel) {
-          this.sendTo(obj.from, obj.command, __spreadValues({ error: `No channel with ID ${getChannelInfoPayload.channelId} for server with ID ${getChannelInfoPayload.serverId} found` }, getChannelInfoPayload), obj.callback);
+          this.sendTo(obj.from, obj.command, { error: `No channel with ID ${getChannelInfoPayload.channelId} for server with ID ${getChannelInfoPayload.serverId} found`, ...getChannelInfoPayload }, obj.callback);
           return;
         }
         this.sendTo(obj.from, obj.command, {
@@ -1981,20 +1969,20 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         const getServerMemberInfoPayload = obj.message;
         if (!getServerMemberInfoPayload.serverId || !getServerMemberInfoPayload.userId && !getServerMemberInfoPayload.userTag) {
-          this.sendTo(obj.from, obj.command, __spreadValues({ error: "serverId and userlId or userTag need to be set" }, getServerMemberInfoPayload), obj.callback);
+          this.sendTo(obj.from, obj.command, { error: "serverId and userlId or userTag need to be set", ...getServerMemberInfoPayload }, obj.callback);
           return;
         }
         let member;
         if (getServerMemberInfoPayload.userId) {
           member = (_n = (_m = this.client) == null ? void 0 : _m.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _n.members.cache.get(getServerMemberInfoPayload.userId);
           if (!member) {
-            this.sendTo(obj.from, obj.command, __spreadValues({ error: `No member with ID ${getServerMemberInfoPayload.userId} for server with ID ${getServerMemberInfoPayload.serverId} found` }, getServerMemberInfoPayload), obj.callback);
+            this.sendTo(obj.from, obj.command, { error: `No member with ID ${getServerMemberInfoPayload.userId} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
             return;
           }
         } else {
           member = (_p = (_o = this.client) == null ? void 0 : _o.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _p.members.cache.find((m) => m.user.tag === getServerMemberInfoPayload.userTag);
           if (!member) {
-            this.sendTo(obj.from, obj.command, __spreadValues({ error: `No member with tag ${getServerMemberInfoPayload.userTag} for server with ID ${getServerMemberInfoPayload.serverId} found` }, getServerMemberInfoPayload), obj.callback);
+            this.sendTo(obj.from, obj.command, { error: `No member with tag ${getServerMemberInfoPayload.userTag} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
             return;
           }
         }
@@ -2026,19 +2014,19 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         const getUserInfoPayload = obj.message;
         if (!getUserInfoPayload.userId && !getUserInfoPayload.userTag) {
-          this.sendTo(obj.from, obj.command, __spreadValues({ error: "userlId needs to be set" }, getUserInfoPayload), obj.callback);
+          this.sendTo(obj.from, obj.command, { error: "userlId needs to be set", ...getUserInfoPayload }, obj.callback);
           return;
         }
         if (getUserInfoPayload.userId) {
           user = (_q = this.client) == null ? void 0 : _q.users.cache.get(getUserInfoPayload.userId);
           if (!user) {
-            this.sendTo(obj.from, obj.command, __spreadValues({ error: `No user with ID ${getUserInfoPayload.userId} found` }, getUserInfoPayload), obj.callback);
+            this.sendTo(obj.from, obj.command, { error: `No user with ID ${getUserInfoPayload.userId} found`, ...getUserInfoPayload }, obj.callback);
             return;
           }
         } else {
           user = (_r = this.client) == null ? void 0 : _r.users.cache.find((u) => u.tag === getUserInfoPayload.userTag);
           if (!user) {
-            this.sendTo(obj.from, obj.command, __spreadValues({ error: `No user with tag ${getUserInfoPayload.userTag} found` }, getUserInfoPayload), obj.callback);
+            this.sendTo(obj.from, obj.command, { error: `No user with tag ${getUserInfoPayload.userTag} found`, ...getUserInfoPayload }, obj.callback);
             return;
           }
         }
@@ -2064,9 +2052,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           msg = await this.getPreviousMessage(getMessageInfoPayload);
         } catch (err) {
           if (err instanceof Error && err.message) {
-            this.sendTo(obj.from, obj.command, __spreadValues({ error: err.message }, getMessageInfoPayload), obj.callback);
+            this.sendTo(obj.from, obj.command, { error: err.message, ...getMessageInfoPayload }, obj.callback);
           } else {
-            this.sendTo(obj.from, obj.command, __spreadValues({ error: err }, getMessageInfoPayload), obj.callback);
+            this.sendTo(obj.from, obj.command, { error: err, ...getMessageInfoPayload }, obj.callback);
           }
           return;
         }
