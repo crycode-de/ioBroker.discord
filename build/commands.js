@@ -193,9 +193,9 @@ class DiscordAdapterSlashCommands {
                   this.adapter.log.warn(`Could not parse JSON from ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices! ${err}`);
                 }
                 optionsChoices.set(customCommandCfgOpt.name, choices.map((choice) => {
-                  if (typeof choice === "string" && choice.length <= 100) {
+                  if (typeof choice === "string" && choice.length >= 1 && choice.length <= 100) {
                     return { name: choice, value: choice };
-                  } else if (typeof choice === "object" && typeof choice.value === "string" && typeof choice.name === "string" && choice.value.length <= 100 && choice.value.length <= 100) {
+                  } else if (typeof choice === "object" && typeof choice.value === "string" && typeof choice.name === "string" && choice.name.length >= 1 && choice.name.length <= 100 && choice.value.length <= 100) {
                     return { name: choice.name, value: choice.value };
                   } else {
                     this.adapter.log.warn(`Choice ${JSON.stringify(choice)} is not valid for ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices and will be ignored!`);
