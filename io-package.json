@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "discord",
-    "version": "1.1.3",
+    "version": "1.1.4",
     "news": {
+      "1.1.4": {
+        "en": "Fixed crash if custom command choices name was empty",
+        "de": "Absturz behoben, wenn der Name einer Option eines benutzerdefinierten Befehls Name war leer",
+        "ru": "Исправлена ошибка, если пользовательский выбор команды имя было пусто",
+        "pt": "Corrigido acidente se o nome de escolhas de comando personalizado estava vazio",
+        "nl": "Een crash als de gebruikelijke commando-naam leeg was",
+        "fr": "Accident fixe si le nom de la commande personnalisée était vide",
+        "it": "Crash fisso se il nome delle scelte di comando personalizzate era vuoto",
+        "es": "Accidente fijo si las opciones de comando personalizado nombre estaba vacío",
+        "pl": "Szczegółowa katastrofa, jeśli nazwa dowodzenia była pusta",
+        "zh-cn": "如果定制指挥选择名称是空洞,则固定的坠落。"
+      },
       "1.1.3": {
         "en": "Dependency updates",
         "de": "Abhängigkeiten aktualisiert",
@@ -74,18 +86,6 @@
         "es": "Se agregó la posibilidad de dejar que el bot abandone un servidor Discord",
         "pl": "Dodano możliwość wypuszczenia bota z serwera Discord",
         "zh-cn": "增加了让机器人离开 Discord 服务器的可能性"
-      },
-      "1.0.0": {
-        "en": "First release",
-        "de": "Erste Veröffentlichung",
-        "ru": "Первый выпуск",
-        "pt": "Primeiro lançamento",
-        "nl": "Eerste uitgave",
-        "fr": "Première sortie",
-        "it": "Prima uscita",
-        "es": "Primer lanzamiento",
-        "pl": "Pierwsze wydanie",
-        "zh-cn": "首次发布"
       }
     },
     "title": "Discord",
