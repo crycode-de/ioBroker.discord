@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "discord",
-    "version": "1.1.4",
+    "version": "1.1.5",
     "news": {
+      "1.1.5": {
+        "en": "Made token validation less strict",
+        "de": "Validierung des Tokens ist nun weniger streng",
+        "ru": "Произведено подтверждение токена менее строго",
+        "pt": "Validação token feita menos estrita",
+        "nl": "Maakte voorwaardelijk minder strikt",
+        "fr": "Validation des jetons moins stricte",
+        "it": "Convalida dei token meno rigorosa",
+        "es": "Validación de fichas menos estricta",
+        "pl": "Czytelnia ta jest mniej ścisła",
+        "zh-cn": "D. 证据不足"
+      },
       "1.1.4": {
         "en": "Fixed crash if custom command choices name was empty",
         "de": "Absturz behoben, wenn der Name einer Option eines benutzerdefinierten Befehls Name war leer",
@@ -74,18 +86,6 @@
         "es": "Se corrigieron algunos problemas pequeños",
         "pl": "Naprawiono kilka drobnych problemów",
         "zh-cn": "修复了一些小问题"
-      },
-      "1.0.1": {
-        "en": "Added possibility to let the bot leave a Discord server",
-        "de": "Möglichkeit hinzugefügt, den Bot einen Discord-Server verlassen zu lassen",
-        "ru": "Добавлена возможность позволить боту покинуть сервер Discord.",
-        "pt": "Adicionada a possibilidade de deixar o bot sair de um servidor Discord",
-        "nl": "Mogelijkheid toegevoegd om de bot een Discord-server te laten verlaten",
-        "fr": "Ajout de la possibilité de laisser le bot quitter un serveur Discord",
-        "it": "Aggiunta la possibilità di lasciare il bot da un server Discord",
-        "es": "Se agregó la posibilidad de dejar que el bot abandone un servidor Discord",
-        "pl": "Dodano możliwość wypuszczenia bota z serwera Discord",
-        "zh-cn": "增加了让机器人离开 Discord 服务器的可能性"
       }
     },
     "title": "Discord",
