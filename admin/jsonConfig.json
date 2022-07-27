@@ -14,7 +14,7 @@
           "label": "Token",
           "help": "Your bot token from the discord developers portal",
           "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxx.yyyyyy.zzzzzzzzzzzzzzzzzzzzzzzzzzz",
-          "validator": "data.token.match(/^[0-9a-zA-Z-_]{24}\\.[0-9a-zA-Z-_]{6}\\.[0-9a-zA-Z-_]{27,38}$/)",
+          "validator": "data.token.match(/^[0-9a-zA-Z-_]{24,}\\.[0-9a-zA-Z-_]{6}\\.[0-9a-zA-Z-_]{27,}$/)",
           "validatorNoSaveOnError": true
         },
         "_devPortalLink": {

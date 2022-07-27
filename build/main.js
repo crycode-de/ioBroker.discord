@@ -74,7 +74,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     const systemConfig = await this.getForeignObjectAsync("system.config");
     import_i18n.i18n.language = (systemConfig == null ? void 0 : systemConfig.common.language) || "en";
     import_i18n.i18n.isFloatComma = (systemConfig == null ? void 0 : systemConfig.common.isFloatComma) || false;
-    if (typeof this.config.token !== "string" || !this.config.token.match(/^[0-9a-zA-Z-_]{24}\.[0-9a-zA-Z-_]{6}\.[0-9a-zA-Z-_]{27,38}$/)) {
+    if (typeof this.config.token !== "string" || !this.config.token.match(/^[0-9a-zA-Z-_]{24,}\.[0-9a-zA-Z-_]{6}\.[0-9a-zA-Z-_]{27,}$/)) {
       this.log.error(`No or invalid token!`);
       return;
     }

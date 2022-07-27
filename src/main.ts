@@ -171,7 +171,7 @@ class DiscordAdapter extends Adapter {
     i18n.isFloatComma = systemConfig?.common.isFloatComma || false;
 
     // validate config
-    if (typeof this.config.token !== 'string' || !this.config.token.match(/^[0-9a-zA-Z-_]{24}\.[0-9a-zA-Z-_]{6}\.[0-9a-zA-Z-_]{27,38}$/)) {
+    if (typeof this.config.token !== 'string' || !this.config.token.match(/^[0-9a-zA-Z-_]{24,}\.[0-9a-zA-Z-_]{6}\.[0-9a-zA-Z-_]{27,}$/)) {
       this.log.error(`No or invalid token!`);
       return;
     }
