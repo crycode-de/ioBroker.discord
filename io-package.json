@@ -1,8 +1,20 @@
 {
   "common": {
     "name": "discord",
-    "version": "1.1.5",
+    "version": "1.1.6",
     "news": {
+      "1.1.6": {
+        "en": "Fixed voice channel member count/list",
+        "de": "Die Anzahl und Liste der Mitglieder in Sprachkanälen werden nun korrekt aktualisiert",
+        "ru": "Фиксированный счет/список голосового канала",
+        "pt": "Contagem/lista de membro fixo do canal de voz",
+        "nl": "Vertaling:",
+        "fr": "Compte/liste des membres du canal vocal fixe",
+        "it": "Conto/elenco dei membri del canale vocale fisso",
+        "es": "Cuenta/lista miembro del canal de voz fijo",
+        "pl": "Członek grupy głosowej liczy/list",
+        "zh-cn": "固定声音传送成员计票/名单"
+      },
       "1.1.5": {
         "en": "Made token validation less strict",
         "de": "Validierung des Tokens ist nun weniger streng",
@@ -74,18 +86,6 @@
         "es": "Comandos de barra de Discord personalizados, algunas correcciones de errores",
         "pl": "Niestandardowe polecenia ukośnika Discorda, niektóre poprawki błędów",
         "zh-cn": "自定义 Discord 斜线命令，一些错误修复"
-      },
-      "1.0.2": {
-        "en": "Fixed some small issues",
-        "de": "Einige kleine Probleme behoben",
-        "ru": "Исправлены некоторые небольшие проблемы",
-        "pt": "Corrigido alguns pequenos problemas",
-        "nl": "Enkele kleine problemen opgelost",
-        "fr": "Correction de quelques petits problèmes",
-        "it": "Risolti alcuni piccoli problemi",
-        "es": "Se corrigieron algunos problemas pequeños",
-        "pl": "Naprawiono kilka drobnych problemów",
-        "zh-cn": "修复了一些小问题"
       }
     },
     "title": "Discord",
