@@ -60,6 +60,10 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+* (crycode-de) Fixed voice channel member count/list
+
 ### 1.1.5 (2022-07-27)
 
 * (crycode-de) Made token validation less strict

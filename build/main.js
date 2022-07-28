@@ -723,28 +723,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             ]);
             this.messageReceiveStates.add(`${this.namespace}.${channelIdPrefix}.message`);
           }
-          const members = [...channel.members.values()];
-          const json = {
-            id: channel.id,
-            name: channel.name,
-            type: channel.type,
-            memberCount: members.length,
-            members: members.map((m) => ({
-              id: m.user.id,
-              tag: m.user.tag,
-              displayName: m.displayName
-            }))
-          };
-          const proms = [];
-          if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.${channelIdPrefix}.json`))) {
-            proms.push(this.setStateAsync(`${channelIdPrefix}.json`, JSON.stringify(json), true));
-            this.jsonStateCache.set(`${this.namespace}.${channelIdPrefix}.json`, json);
-          }
-          await Promise.all([
-            this.setStateAsync(`${channelIdPrefix}.memberCount`, members.length, true),
-            this.setStateAsync(`${channelIdPrefix}.members`, members.map((m) => m.displayName).join(", "), true),
-            ...proms
-          ]);
+          await this.updateChannelInfoStates(channel);
         }
       }
       const objListMembers = await this.getObjectListAsync({
@@ -1018,6 +997,31 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       }
     }
   }
+  async updateChannelInfoStates(channel) {
+    const channelIdPrefix = channel.parentId ? `servers.${channel.guildId}.channels.${channel.parentId}.channels.${channel.id}` : `servers.${channel.guild.id}.channels.${channel.id}`;
+    const members = [...channel.members.values()];
+    const json = {
+      id: channel.id,
+      name: channel.name,
+      type: channel.type,
+      memberCount: members.length,
+      members: members.map((m) => ({
+        id: m.user.id,
+        tag: m.user.tag,
+        displayName: m.displayName
+      }))
+    };
+    const proms = [];
+    if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.${channelIdPrefix}.json`))) {
+      proms.push(this.setStateAsync(`${channelIdPrefix}.json`, JSON.stringify(json), true));
+      this.jsonStateCache.set(`${this.namespace}.${channelIdPrefix}.json`, json);
+    }
+    await Promise.all([
+      this.setStateAsync(`${channelIdPrefix}.memberCount`, members.length, true),
+      this.setStateAsync(`${channelIdPrefix}.members`, members.map((m) => m.displayName).join(", "), true),
+      ...proms
+    ]);
+  }
   async updateUserPresence(userId, presence, skipJsonStateUpdate = false) {
     var _a, _b, _c, _d;
     if (!this.config.observeUserPresence) {
@@ -1205,43 +1209,51 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     if (!((_a = newState.member) == null ? void 0 : _a.id)) {
       return;
     }
-    if (!this.knownUsers.has(newState.member.id)) {
-      this.log.debug(`Can't update user voice state for unknown user ${newState.member.id}`);
-      return;
-    }
     const proms = [];
-    const json = {
-      ...this.jsonStateCache.get(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`)
-    };
-    let update = false;
     if (oldState.channelId !== newState.channelId) {
-      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, ((_b = newState.channel) == null ? void 0 : _b.name) || "", true));
-      json.voiceChannel = ((_c = newState.channel) == null ? void 0 : _c.name) || "";
-      update = true;
+      if (oldState.channel) {
+        proms.push(this.updateChannelInfoStates(oldState.channel));
+      }
+      if (newState.channel) {
+        proms.push(this.updateChannelInfoStates(newState.channel));
+      }
     }
-    if (oldState.serverDeaf !== newState.serverDeaf) {
-      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerDeaf`, !!newState.serverDeaf, true));
-      json.voiceSelfDeaf = !!newState.selfDeaf;
-      update = true;
-    }
-    if (oldState.selfDeaf !== newState.selfDeaf) {
-      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfDeaf`, !!newState.selfDeaf, true));
-      json.voiceServerDeaf = !!newState.serverDeaf;
-      update = true;
-    }
-    if (oldState.serverMute !== newState.serverMute) {
-      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerMute`, !!newState.serverMute, true));
-      json.voiceSelfMute = !!newState.selfMute;
-      update = true;
-    }
-    if (oldState.selfMute !== newState.selfMute) {
-      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfMute`, !!newState.selfMute, true));
-      json.voiceServerMute = !!newState.serverMute;
-      update = true;
-    }
-    if (update) {
-      proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.json`, JSON.stringify(json), true));
-      this.jsonStateCache.set(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`, json);
+    if (this.knownUsers.has(newState.member.id)) {
+      const json = {
+        ...this.jsonStateCache.get(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`)
+      };
+      let update = false;
+      if (oldState.channelId !== newState.channelId) {
+        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, ((_b = newState.channel) == null ? void 0 : _b.name) || "", true));
+        json.voiceChannel = ((_c = newState.channel) == null ? void 0 : _c.name) || "";
+        update = true;
+      }
+      if (oldState.serverDeaf !== newState.serverDeaf) {
+        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerDeaf`, !!newState.serverDeaf, true));
+        json.voiceSelfDeaf = !!newState.selfDeaf;
+        update = true;
+      }
+      if (oldState.selfDeaf !== newState.selfDeaf) {
+        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfDeaf`, !!newState.selfDeaf, true));
+        json.voiceServerDeaf = !!newState.serverDeaf;
+        update = true;
+      }
+      if (oldState.serverMute !== newState.serverMute) {
+        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerMute`, !!newState.serverMute, true));
+        json.voiceSelfMute = !!newState.selfMute;
+        update = true;
+      }
+      if (oldState.selfMute !== newState.selfMute) {
+        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfMute`, !!newState.selfMute, true));
+        json.voiceServerMute = !!newState.serverMute;
+        update = true;
+      }
+      if (update) {
+        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.json`, JSON.stringify(json), true));
+        this.jsonStateCache.set(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`, json);
+      }
+    } else {
+      this.log.debug(`Can't update user voice state for unknown user ${newState.member.id}`);
     }
     await Promise.all(proms);
   }
