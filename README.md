@@ -6,6 +6,7 @@
 [![Downloads](https://img.shields.io/npm/dm/iobroker.discord.svg)](https://www.npmjs.com/package/iobroker.discord)
 ![Number of Installations](https://iobroker.live/badges/discord-installed.svg)
 ![Current version in stable repository](https://iobroker.live/badges/discord-stable.svg)
+[![Translation status](https://weblate.iobroker.net/widgets/adapters/-/discord/svg-badge.svg)](https://weblate.iobroker.net/engage/adapters/?utm_source=widget)
 
 [![NPM](https://nodei.co/npm/iobroker.discord.png?downloads=true)](https://nodei.co/npm/iobroker.discord/)
 
