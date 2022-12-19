@@ -13,6 +13,7 @@
         "it": "Conto/elenco dei membri del canale vocale fisso",
         "es": "Cuenta/lista miembro del canal de voz fijo",
         "pl": "Członek grupy głosowej liczy/list",
+        "uk": "Виправлена ​​кількість/список учасників голосового каналу",
         "zh-cn": "固定声音传送成员计票/名单"
       },
       "1.1.5": {
@@ -25,6 +26,7 @@
         "it": "Convalida dei token meno rigorosa",
         "es": "Validación de fichas menos estricta",
         "pl": "Czytelnia ta jest mniej ścisła",
+        "uk": "Перевірка токенів стала менш суворою",
         "zh-cn": "D. 证据不足"
       },
       "1.1.4": {
@@ -37,6 +39,7 @@
         "it": "Crash fisso se il nome delle scelte di comando personalizzate era vuoto",
         "es": "Accidente fijo si las opciones de comando personalizado nombre estaba vacío",
         "pl": "Szczegółowa katastrofa, jeśli nazwa dowodzenia była pusta",
+        "uk": "Виправлено збій, якщо ім’я вибору команди було порожнім",
         "zh-cn": "如果定制指挥选择名称是空洞,则固定的坠落。"
       },
       "1.1.3": {
@@ -49,6 +52,7 @@
         "it": "Aggiornamenti di dipendenza",
         "es": "Actualizaciones de dependencia",
         "pl": "Aktualizacja",
+        "uk": "Оновлення залежностей",
         "zh-cn": "B. 附属更新"
       },
       "1.1.2": {
@@ -61,6 +65,7 @@
         "it": "Risolto la terminazione dell'adattatore sugli errori di discord per far riavviare l'adattatore",
         "es": "Terminación del adaptador fijo en errores de discordia para permitir que el js-controller reinicie el adaptador",
         "pl": "Fixed adapter termination on discord error to let js-controller restartuje adapter",
+        "uk": "Виправлено завершення адаптера через помилки Discord, щоб дозволити js-контролеру перезапустити адаптер",
         "zh-cn": "对失误的混合适应人员终止,以便控制的行贿者重新启动适应者。"
       },
       "1.1.1": {
@@ -73,6 +78,7 @@
         "it": "Aggiunto supporto per i messaggi di testo in canali vocali\nAggiunto supporto per comandi slash personalizzati\nAggiunto Blockly supporto frusta speciale blocchi personalizzati\nInviare le risposte di errore sui comandi slash come efemeral\nAggiunta opzione di configurazione per inviare tutte le risposte di comando slash come ephemeral\nRegistrare i comandi get/set solo se gli stati sono configurati per questo\nLe scelte per i comandi sono ora gestite come completamento automatico che consente più scelte, è più dinamico e mostra le scelte solo agli utenti autorizzati\nAggiunte opzioni di comando a raw.interaction Contenuto di Json json\nControlli dei nomi dei comandi fissi\nCorretto alcuni crash / condizioni bloccate quando la rete non è disponibile\nRisolto diversi piccoli bug",
         "es": "Añadido soporte para mensajes de texto en canales de voz\nSoporte añadido para comandos de barras personalizadas\nBloques de apoyo bloqueado bloques personalizados especiales\nEnviar respuestas de error en comandos slash como efímero\nAñadido configuración opción para enviar todas las respuestas de comando slash como efímero\nRegistrar comandos get/set sólo si los estados están configurados para esto\nLas opciones para comandos se manejan ahora como autocompleto que permite más opciones, es más dinámica y muestra las opciones sólo para usuarios autorizados\nAñadido opciones de comando a crudo.interacción Json json content\nControles de nombre de comando fijo\nArreglado algunos fallos / condiciones atascadas cuando la red no está disponible\nArreglado varios pequeños errores",
         "pl": "Wsparcie dla wiadomości tekstowych w kanałach głosowych\nWsparcie dla obyczajowych poleceń\nStrona dopasowa\nObserwuje się błędy jako efemeryczne\nWykorzystywana opcja polega na wysyłaniu wszystkich poleceń w postaci efemerycznych\nRejestr dokonywany jest tylko wtedy, gdy stany są konfigurowane\nWybór komend jest obecnie obsługiwany jako autokompletny, który pozwala na bardziej dynamiczne wybory, jest bardziej dynamiczne i pokazuje wybór tylko autoryzowanych użytkowników\nZadaniowe opcje dowodzenia na surowo.interaction. Json treści\nFixed command name check\nNiektóre rozbicia / ułożone warunki, gdy sieć nie jest dostępna\nFixed kilka drobnych błędów",
+        "uk": "Додано підтримку текстових повідомлень у голосових каналах\nДодано підтримку власних команд із скісною рискою\nДодано підтримку Blockly зі спеціальними спеціальними блоками\nНадсилати відповіді про помилки на команди косої риски як тимчасові\nДодано параметр конфігурації, щоб надсилати всі відповіді на команди зі скісною рискою як ефемерні\nЗареєструйте команди get/set, лише якщо для цього налаштовано стани\nВибір для команд тепер обробляється як автозаповнення, яке надає більше варіантів, є більш динамічним і показує вибір лише авторизованим користувачам\nДодано параметри команди до json-контенту `raw.interactionJson`\nВиправлено перевірку імені команди\nВиправлено деякі збої/зависання, коли мережа недоступна\nВиправлено кілька дрібних помилок",
         "zh-cn": "增加在声音渠道对案文的支持\n增加对习惯冲突指挥的支持\n添加锁定支助,而特殊习俗则\n对手法的错误答复\n增加将所有冲突指挥答复作为电子武断手段\n登记只有当各州为此配置时才获得/指挥。\n指挥方面的选择现在被处理为能够作出更多选择的汽车包件,是更有活力的,并且只表明授权用户选择。\n增加指挥方案以采掘业务。 Json json的内容\n固定指挥名称检查\n当网络无法提供时,确定一些坠落条件\n固定数个小型配件"
       },
       "1.1.0": {
@@ -85,6 +91,7 @@
         "it": "Comandi personalizzati Discord slash, alcune correzioni di bug",
         "es": "Comandos de barra de Discord personalizados, algunas correcciones de errores",
         "pl": "Niestandardowe polecenia ukośnika Discorda, niektóre poprawki błędów",
+        "uk": "Спеціальні команди Discord зі слешами, деякі виправлення помилок",
         "zh-cn": "自定义 Discord 斜线命令，一些错误修复"
       }
     },
@@ -99,6 +106,7 @@
       "it": "Discord",
       "es": "Discord",
       "pl": "Discord",
+      "uk": "Розбрат",
       "zh-cn": "Discord"
     },
     "desc": {
@@ -111,6 +119,7 @@
       "it": "Integrazione del bot Discord",
       "es": "Integración de bots de discordia",
       "pl": "Integracja z botem Discord",
+      "uk": "Інтеграція бота Discord",
       "zh-cn": "Discord 机器人集成"
     },
     "authors": [
@@ -209,6 +218,7 @@
           "it": "Informazione",
           "es": "Información",
           "pl": "Informacja",
+          "uk": "Інформація",
           "zh-cn": "信息"
         }
       },
@@ -229,6 +239,7 @@
           "it": "Collegato alla discordia",
           "es": "Conectado a la discordia",
           "pl": "Połączony z niezgodą",
+          "uk": "З'єднатися до дискорду",
           "zh-cn": "连接到不和谐"
         },
         "type": "boolean",
@@ -252,6 +263,7 @@
           "it": "Bot",
           "es": "Bot",
           "pl": "Nerw",
+          "uk": "Бодибилдерши",
           "zh-cn": "机器人"
         }
       },
@@ -271,6 +283,7 @@
           "it": "Stato di presenza",
           "es": "Estado de presencia",
           "pl": "Status obecności",
+          "uk": "Статус на сервери",
           "zh-cn": "存在状态"
         },
         "type": "string",
@@ -301,6 +314,7 @@
           "it": "Tipo di attività",
           "es": "Tipo de actividad",
           "pl": "Rodzaj aktywności",
+          "uk": "Тип діяльності",
           "zh-cn": "活动类型"
         },
         "type": "string",
@@ -333,6 +347,7 @@
           "it": "Nome dell'attività",
           "es": "Nombre de la actividad",
           "pl": "Nazwa działania",
+          "uk": "Назва діяльності",
           "zh-cn": "活动名称"
         },
         "type": "string",
@@ -357,6 +372,7 @@
           "it": "Server",
           "es": "Servidores",
           "pl": "Serwery",
+          "uk": "Статус на сервери",
           "zh-cn": "服务器"
         }
       },
@@ -376,6 +392,7 @@
           "it": "Utenti",
           "es": "Usuarios",
           "pl": "Użytkownicy",
+          "uk": "Користувачі",
           "zh-cn": "用户"
         }
       },
