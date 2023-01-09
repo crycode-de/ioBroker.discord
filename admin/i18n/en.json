@@ -171,7 +171,7 @@
     "When enabled, the received message is send to the configured text2command instance.": "When enabled, the received message is send to the configured text2command instance.",
     "Enable discord commands for this state": "Enable discord commands for this state",
     "Make this state available for discord commands.": "Make this state available for discord commands.",
-    "Name": "name",
+    "Name": "Name",
     "A name for this object. Leave empty to use the object name. Must not exceed 100 chars.": "A name for this object. Leave empty to use the object name. Must not exceed 100 chars.",
     "Alias": "Alias",
     "An ID alias for this object. Leave empty to use the object ID. Must not exceed 100 chars.": "An ID alias for this object. Leave empty to use the object ID. Must not exceed 100 chars.",
