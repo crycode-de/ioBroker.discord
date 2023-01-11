@@ -38,7 +38,6 @@
     "Option %s": "Option %s",
     "Option %s value": "Option %s value",
     "Option %s choices": "Option %s choices",
-
     "Get an ioBroker state value": "Get an ioBroker state value",
     "Set an ioBroker state value": "Set an ioBroker state value",
     "The ioBroker state to get": "The ioBroker state to get",
@@ -63,7 +62,6 @@
     "yes": "yes",
     "no": "no",
     "Error while setting the state value!": "Error while setting the state value!",
-
     "Token": "Token",
     "Your bot token from the discord developers portal": "Your bot token from the discord developers portal",
     "🔗 Discord Developers Portal": "🔗 Discord Developers Portal",
@@ -169,7 +167,6 @@
     "Leave the server!": "Leave the server!",
     "Do you really want to let the bot leave the selected server?": "Do you really want to let the bot leave the selected server?",
     "Yes, leave the server!": "Yes, leave the server!",
-
     "Enable text2command for this state": "Enable text2command for this state",
     "When enabled, the received message is send to the configured text2command instance.": "When enabled, the received message is send to the configured text2command instance.",
     "Enable discord commands for this state": "Enable discord commands for this state",
