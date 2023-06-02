@@ -100,12 +100,12 @@ class DiscordAdapterSlashCommands {
     const numGet = this.commandObjectConfig.filter((c) => c.get === true).size;
     const numSet = this.commandObjectConfig.filter((c) => c.set === true).size;
     if (numGet > 0) {
-      const cmdGet = new import_builders.SlashCommandBuilder().setName(this.cmdGetStateName).setDescription(import_i18n.i18n.getString("Get an ioBroker state value")).setDefaultPermission(true);
+      const cmdGet = new import_builders.SlashCommandBuilder().setName(this.cmdGetStateName).setDescription(import_i18n.i18n.getString("Get an ioBroker state value"));
       cmdGet.addStringOption((opt) => opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to get")).setRequired(true).setAutocomplete(true));
       commands.push(cmdGet);
     }
     if (numSet > 0) {
-      const cmdSet = new import_builders.SlashCommandBuilder().setName(this.cmdSetStateName).setDescription(import_i18n.i18n.getString("Set an ioBroker state value")).setDefaultPermission(true);
+      const cmdSet = new import_builders.SlashCommandBuilder().setName(this.cmdSetStateName).setDescription(import_i18n.i18n.getString("Set an ioBroker state value"));
       cmdSet.addStringOption((opt) => opt.setName("state").setDescription(import_i18n.i18n.getString("The ioBroker state to set")).setRequired(true).setAutocomplete(true));
       cmdSet.addStringOption((opt) => {
         return opt.setName("value").setDescription(import_i18n.i18n.getString("The value to set")).setRequired(true);
@@ -157,7 +157,7 @@ class DiscordAdapterSlashCommands {
             this.adapter.log.warn(`Custom command "${customCommandCfg.name}" is configured multiple times! The command will be ignored.`);
             continue;
           }
-          const cmdCustom = new import_builders.SlashCommandBuilder().setName(customCommandCfg.name).setDescription(customCommandCfg.description).setDefaultPermission(true);
+          const cmdCustom = new import_builders.SlashCommandBuilder().setName(customCommandCfg.name).setDescription(customCommandCfg.description);
           const optionsChoices = new import_discord.Collection();
           const cmdOpts = /* @__PURE__ */ new Set();
           if (Array.isArray(customCommandCfg.options)) {
@@ -183,7 +183,7 @@ class DiscordAdapterSlashCommands {
               case "string":
                 let choices = [];
                 try {
-                  const val = ((_b = await this.adapter.getStateAsync(`slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices`)) == null ? void 0 : _b.val) || "[]";
+                  const val = ((_b = await this.adapter.getStateAsync(`slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices`)) == null ? void 0 : _b.val) ?? "[]";
                   if (typeof val !== "string") {
                     this.adapter.log.warn(`Value of ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices is not a string!`);
                   } else {
@@ -641,7 +641,7 @@ class DiscordAdapterSlashCommands {
       if (!this.adapter.checkUserAuthorization(authCheckTarget, { useCustomCommands: true })) {
         return interaction.respond([]);
       }
-      choices = ((_a = this.customCommands.get(commandName)) == null ? void 0 : _a.get(focused.name)) || [];
+      choices = ((_a = this.customCommands.get(commandName)) == null ? void 0 : _a.get(focused.name)) ?? [];
     } else {
       return interaction.respond([]);
     }
@@ -656,11 +656,11 @@ class DiscordAdapterSlashCommands {
     if (!cfg) {
       if (interaction.replied) {
         await interaction.editReply({
-          content: import_i18n.i18n.getString("Object `%s` not found!", objAlias || "")
+          content: import_i18n.i18n.getString("Object `%s` not found!", objAlias ?? "")
         });
       } else {
         await interaction.reply({
-          content: import_i18n.i18n.getString("Object `%s` not found!", objAlias || ""),
+          content: import_i18n.i18n.getString("Object `%s` not found!", objAlias ?? ""),
           ephemeral: true
         });
       }
@@ -697,7 +697,7 @@ class DiscordAdapterSlashCommands {
   }
   async handleCmdGetState(interaction) {
     var _a;
-    const objAlias = interaction.options.getString("state");
+    const objAlias = interaction.options.get("state", true).value;
     const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
     if (!obj || !cfg) {
       return;
@@ -756,13 +756,13 @@ class DiscordAdapterSlashCommands {
       switch (obj.common.type) {
         case "boolean":
           if (state.val) {
-            val = objCustom.commandsBooleanValueTrue || import_i18n.i18n.getString("true");
+            val = objCustom.commandsBooleanValueTrue ?? import_i18n.i18n.getString("true");
           } else {
-            val = objCustom.commandsBooleanValueFalse || import_i18n.i18n.getString("false");
+            val = objCustom.commandsBooleanValueFalse ?? import_i18n.i18n.getString("false");
           }
           break;
         case "number":
-          const decimals = objCustom.commandsNumberDecimals || 0;
+          const decimals = objCustom.commandsNumberDecimals ?? 0;
           if (typeof state.val === "number") {
             val = state.val.toFixed(decimals);
           } else if (state.val === null) {
@@ -796,8 +796,8 @@ class DiscordAdapterSlashCommands {
     }
   }
   async handleCmdSetState(interaction) {
-    var _a, _b;
-    const objAlias = interaction.options.getString("state");
+    var _a, _b, _c;
+    const objAlias = interaction.options.get("state", true).value;
     const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
     if (!obj || !cfg) {
       return;
@@ -810,7 +810,7 @@ class DiscordAdapterSlashCommands {
       });
       return;
     }
-    let valueStr = interaction.options.getString("value");
+    let valueStr = (_b = interaction.options.get("value")) == null ? void 0 : _b.value;
     if (typeof valueStr !== "string") {
       await interaction.reply({
         content: import_i18n.i18n.getString("No value provided!"),
@@ -828,12 +828,12 @@ class DiscordAdapterSlashCommands {
     switch (obj.common.type) {
       case "boolean":
         valueStr = valueStr.toLowerCase();
-        if (valueStr === ((_b = objCustom.commandsBooleanValueTrue) == null ? void 0 : _b.toLowerCase()) || this.wellKnownbooleanTrueValues.has(valueStr)) {
+        if (valueStr === ((_c = objCustom.commandsBooleanValueTrue) == null ? void 0 : _c.toLowerCase()) || this.wellKnownbooleanTrueValues.has(valueStr)) {
           value = true;
-          valueReply = objCustom.commandsBooleanValueTrue || import_i18n.i18n.getString("true");
+          valueReply = objCustom.commandsBooleanValueTrue ?? import_i18n.i18n.getString("true");
         } else {
           value = false;
-          valueReply = objCustom.commandsBooleanValueFalse || import_i18n.i18n.getString("false");
+          valueReply = objCustom.commandsBooleanValueFalse ?? import_i18n.i18n.getString("false");
         }
         break;
       case "number":
@@ -900,7 +900,7 @@ class DiscordAdapterSlashCommands {
       interactionId: interaction.id,
       commandName,
       channelId,
-      serverId: guildId || null,
+      serverId: guildId ?? null,
       user: {
         id: user.id,
         tag: user.tag,
@@ -913,7 +913,7 @@ class DiscordAdapterSlashCommands {
       const opt = options.data.find((o) => o.name === optCfg.name);
       if (opt) {
         json.options[optCfg.name] = {
-          value: opt.value !== void 0 ? opt.value : null,
+          value: opt.value ?? null,
           type: opt.type
         };
         if (opt.user instanceof import_discord.User) {
@@ -940,8 +940,8 @@ class DiscordAdapterSlashCommands {
           json.options[optCfg.name].channel = {
             id: opt.channel.id,
             name: opt.channel.name,
-            type: opt.channel.type,
-            lastMessageId: opt.channel.isText() ? opt.channel.lastMessageId : null
+            type: import_discord.ChannelType[opt.channel.type],
+            lastMessageId: opt.channel.type === import_discord.ChannelType.GuildText || opt.channel.type == import_discord.ChannelType.GuildVoice ? opt.channel.lastMessageId : null
           };
         }
       } else {
@@ -955,7 +955,7 @@ class DiscordAdapterSlashCommands {
     await Promise.all([
       this.adapter.setStateAsync(`slashCommands.${commandName}.interactionId`, interaction.id, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.channelId`, channelId, true),
-      this.adapter.setStateAsync(`slashCommands.${commandName}.serverId`, guildId || null, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.serverId`, guildId ?? null, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.userId`, user.id, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.userTag`, user.tag, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.timestamp`, interaction.createdTimestamp, true),

@@ -5,6 +5,7 @@ import { boundMethod } from 'autobind-decorator';
 import {
   AutocompleteInteraction,
   CacheType,
+  ChannelType,
   Collection,
   CommandInteraction,
   DiscordAPIError,
@@ -12,7 +13,7 @@ import {
   GuildChannel,
   GuildMember,
   Interaction,
-  MessageOptions,
+  MessageCreateOptions,
   Role,
   Snowflake,
   User,
@@ -27,7 +28,7 @@ import {
   getBasenameFromFilePathOrUrl,
   getBufferAndNameFromBase64String,
 } from './lib/utils';
-import { JsonSlashCommandObj } from './lib/definitions';
+import { ChannelTypeNames, JsonSlashCommandObj } from './lib/definitions';
 
 export interface CommandObjectConfig {
   id: string;
@@ -198,8 +199,7 @@ export class DiscordAdapterSlashCommands {
     if (numGet > 0) {
       const cmdGet = new SlashCommandBuilder()
         .setName(this.cmdGetStateName)
-        .setDescription(i18n.getString('Get an ioBroker state value'))
-        .setDefaultPermission(true);
+        .setDescription(i18n.getString('Get an ioBroker state value'));
 
       // add options
       cmdGet.addStringOption((opt) => (
@@ -216,8 +216,7 @@ export class DiscordAdapterSlashCommands {
     if (numSet > 0) {
       const cmdSet = new SlashCommandBuilder()
         .setName(this.cmdSetStateName)
-        .setDescription(i18n.getString('Set an ioBroker state value'))
-        .setDefaultPermission(true);
+        .setDescription(i18n.getString('Set an ioBroker state value'));
 
       cmdSet.addStringOption((opt) => (
         opt.setName('state')
@@ -288,8 +287,7 @@ export class DiscordAdapterSlashCommands {
         // create the command
         const cmdCustom = new SlashCommandBuilder()
           .setName(customCommandCfg.name)
-          .setDescription(customCommandCfg.description)
-          .setDefaultPermission(true);
+          .setDescription(customCommandCfg.description);
 
         const optionsChoices = new Collection<string, CommandOptionChoiceData[]>();
 
@@ -325,7 +323,7 @@ export class DiscordAdapterSlashCommands {
               // string options may have choices from the ioBroker object
               let choices: (string | CommandOptionChoiceData)[] = [];
               try {
-                const val = (await this.adapter.getStateAsync(`slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices`))?.val || '[]';
+                const val = (await this.adapter.getStateAsync(`slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices`))?.val ?? '[]';
                 if (typeof val !== 'string') {
                   this.adapter.log.warn(`Value of ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices is not a string!`);
                 } else {
@@ -923,7 +921,7 @@ export class DiscordAdapterSlashCommands {
         return interaction.respond([]);
       }
 
-      choices = this.customCommands.get(commandName)?.get(focused.name) || [];
+      choices = this.customCommands.get(commandName)?.get(focused.name) ?? [];
 
     } else {
       // unknown command
@@ -957,11 +955,11 @@ export class DiscordAdapterSlashCommands {
     if (!cfg) {
       if (interaction.replied) {
         await interaction.editReply({
-          content: i18n.getString('Object `%s` not found!', objAlias || ''),
+          content: i18n.getString('Object `%s` not found!', objAlias ?? ''),
         });
       } else {
         await interaction.reply({
-          content: i18n.getString('Object `%s` not found!', objAlias || ''),
+          content: i18n.getString('Object `%s` not found!', objAlias ?? ''),
           ephemeral: true,
         });
       }
@@ -1005,7 +1003,7 @@ export class DiscordAdapterSlashCommands {
    * @param interaction The interaction which triggered this.
    */
   private async handleCmdGetState (interaction: CommandInteraction<CacheType>): Promise<void> {
-    const objAlias = interaction.options.getString('state');
+    const objAlias = interaction.options.get('state', true).value as string;
 
     const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
     if (!obj || !cfg) {
@@ -1042,7 +1040,7 @@ export class DiscordAdapterSlashCommands {
     let val: string = '';
 
     // an optional MessageOptions object for special cases (like sending files)
-    let msgOpts: MessageOptions | undefined = undefined;
+    let msgOpts: MessageCreateOptions | undefined = undefined;
 
     // add unit if defined in the object
     const unit = obj.common.unit ? ` ${obj.common.unit}` : '';
@@ -1093,15 +1091,15 @@ export class DiscordAdapterSlashCommands {
       switch (obj.common.type) {
         case 'boolean':
           if (state.val) {
-            val = objCustom.commandsBooleanValueTrue || i18n.getString('true');
+            val = objCustom.commandsBooleanValueTrue ?? i18n.getString('true');
           } else {
-            val = objCustom.commandsBooleanValueFalse || i18n.getString('false');
+            val = objCustom.commandsBooleanValueFalse ?? i18n.getString('false');
           }
           break;
 
         case 'number':
           // number values
-          const decimals = objCustom.commandsNumberDecimals || 0;
+          const decimals = objCustom.commandsNumberDecimals ?? 0;
           if (typeof state.val === 'number') {
             val = state.val.toFixed(decimals);
           } else if (state.val === null) {
@@ -1146,7 +1144,7 @@ export class DiscordAdapterSlashCommands {
    * @param interaction The interaction which triggered this.
    */
   private async handleCmdSetState (interaction: CommandInteraction<CacheType>): Promise<void> {
-    const objAlias = interaction.options.getString('state');
+    const objAlias = interaction.options.get('state', true).value as string;
 
     const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
     if (!obj || !cfg) {
@@ -1164,7 +1162,7 @@ export class DiscordAdapterSlashCommands {
       return;
     }
 
-    let valueStr = interaction.options.getString('value');
+    let valueStr = interaction.options.get('value')?.value;
     if (typeof valueStr !== 'string') {
       await interaction.reply({
         content: i18n.getString('No value provided!'),
@@ -1193,11 +1191,11 @@ export class DiscordAdapterSlashCommands {
         if (valueStr === objCustom.commandsBooleanValueTrue?.toLowerCase() || this.wellKnownbooleanTrueValues.has(valueStr)) {
           // true value form configures custom value or from well known boolean true values
           value = true;
-          valueReply = objCustom.commandsBooleanValueTrue || i18n.getString('true');
+          valueReply = objCustom.commandsBooleanValueTrue ?? i18n.getString('true');
         } else {
           // false value
           value = false;
-          valueReply = objCustom.commandsBooleanValueFalse || i18n.getString('false');
+          valueReply = objCustom.commandsBooleanValueFalse ?? i18n.getString('false');
         }
         break;
 
@@ -1292,7 +1290,7 @@ export class DiscordAdapterSlashCommands {
       interactionId: interaction.id,
       commandName,
       channelId,
-      serverId: guildId || null,
+      serverId: guildId ?? null,
       user: {
         id: user.id,
         tag: user.tag,
@@ -1307,7 +1305,7 @@ export class DiscordAdapterSlashCommands {
       const opt = options.data.find((o) => o.name === optCfg.name);
       if (opt) {
         json.options[optCfg.name] = {
-          value: opt.value !== undefined ? opt.value : null,
+          value: opt.value ?? null,
           type: opt.type,
         };
 
@@ -1335,8 +1333,8 @@ export class DiscordAdapterSlashCommands {
           json.options[optCfg.name].channel = {
             id: opt.channel.id,
             name: opt.channel.name,
-            type: opt.channel.type,
-            lastMessageId: opt.channel.isText() ? opt.channel.lastMessageId : null,
+            type: ChannelType[opt.channel.type] as ChannelTypeNames,
+            lastMessageId: (opt.channel.type === ChannelType.GuildText || opt.channel.type == ChannelType.GuildVoice) ? opt.channel.lastMessageId : null,
           };
         }
       } else {
@@ -1352,7 +1350,7 @@ export class DiscordAdapterSlashCommands {
     await Promise.all([
       this.adapter.setStateAsync(`slashCommands.${commandName}.interactionId`, interaction.id, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.channelId`, channelId, true),
-      this.adapter.setStateAsync(`slashCommands.${commandName}.serverId`, guildId || null, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.serverId`, guildId ?? null, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.userId`, user.id, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.userTag`, user.tag, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.timestamp`, interaction.createdTimestamp, true),
@@ -1380,7 +1378,7 @@ export class DiscordAdapterSlashCommands {
    * @returns Promise which resolves withe the ID of the reply message if the reply is sent.
    * @throws Error if the reply could not be sent for some reason (i.e. some check failed).
    */
-  public async sendCmdCustomReply (interactionId: Snowflake, msg: string | MessageOptions): Promise<Snowflake> {
+  public async sendCmdCustomReply (interactionId: Snowflake, msg: string | MessageCreateOptions): Promise<Snowflake> {
     // get the interaction
     const interaction = this.lastInteractions.get(interactionId);
 

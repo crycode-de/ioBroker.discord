@@ -1,7 +1,7 @@
 {
   "common": {
     "name": "discord",
-    "version": "1.1.6",
+    "version": "2.0.0-alpha.0",
     "news": {
       "1.1.6": {
         "en": "Fixed voice channel member count/list",
@@ -321,14 +321,14 @@
         "role": "text",
         "read": true,
         "write": true,
-        "def": "COMPETING",
+        "def": "Competing",
         "states": {
           "": "---",
-          "PLAYING": "playing",
-          "STREAMING": "streaming",
-          "LISTENING": "listening",
-          "WATCHING": "watching",
-          "COMPETING": "competing"
+          "Playing": "playing",
+          "Streaming": "streaming",
+          "Listening": "listening",
+          "Watching": "watching",
+          "Competing": "competing"
         }
       },
       "native": {}

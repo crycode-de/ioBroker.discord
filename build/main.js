@@ -144,19 +144,19 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     this.client = new import_discord.Client({
       intents: [
-        import_discord.Intents.FLAGS.GUILDS,
-        import_discord.Intents.FLAGS.GUILD_MEMBERS,
-        import_discord.Intents.FLAGS.GUILD_MESSAGES,
-        import_discord.Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
-        import_discord.Intents.FLAGS.GUILD_MESSAGE_TYPING,
-        import_discord.Intents.FLAGS.GUILD_PRESENCES,
-        import_discord.Intents.FLAGS.DIRECT_MESSAGES,
-        import_discord.Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
-        import_discord.Intents.FLAGS.DIRECT_MESSAGE_TYPING,
-        import_discord.Intents.FLAGS.GUILD_VOICE_STATES
+        import_discord.GatewayIntentBits.Guilds,
+        import_discord.GatewayIntentBits.GuildMembers,
+        import_discord.GatewayIntentBits.GuildMessages,
+        import_discord.GatewayIntentBits.GuildMessageReactions,
+        import_discord.GatewayIntentBits.GuildMessageTyping,
+        import_discord.GatewayIntentBits.GuildPresences,
+        import_discord.GatewayIntentBits.GuildVoiceStates,
+        import_discord.GatewayIntentBits.DirectMessages,
+        import_discord.GatewayIntentBits.DirectMessageReactions,
+        import_discord.GatewayIntentBits.DirectMessageTyping
       ],
       partials: [
-        "CHANNEL"
+        import_discord.Partials.Channel
       ]
     });
     this.client.on("ready", this.onClientReady);
@@ -181,7 +181,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       this.setBotPresence();
     });
     this.client.on("shardResume", (shardId, replayedEvents) => this.log.debug(`Discord client websocket resume (shardId:${shardId} replayedEvents:${replayedEvents})`));
-    this.client.on("shardDisconnect", (event, shardId) => this.log.debug(`Discord client websocket disconnect (shardId:${shardId} ${event.reason})`));
+    this.client.on("shardDisconnect", (event, shardId) => this.log.debug(`Discord client websocket disconnect (shardId:${shardId} code:${event.code})`));
     this.client.on("shardReconnecting", (shardId) => this.log.debug(`Discord client websocket reconnecting (shardId:${shardId})`));
     this.client.on("shardError", (err, shardId) => {
       this.log.error(`Discord client websocket error (shardId:${shardId}) ${err}`);
@@ -510,7 +510,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.displayName`, member.displayName, true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.roles`, memberRoles.join(", "), true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.joinedAt`, member.joinedTimestamp, true),
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceChannel`, ((_b = member.voice.channel) == null ? void 0 : _b.name) || "", true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceChannel`, ((_b = member.voice.channel) == null ? void 0 : _b.name) ?? "", true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, !!member.voice.selfDeaf, true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, !!member.voice.serverDeaf, true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, !!member.voice.selfMute, true),
@@ -522,8 +522,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           displayName: member.displayName,
           roles: memberRoles,
           joined: member.joinedTimestamp,
-          voiceChannel: ((_c = member.voice.channel) == null ? void 0 : _c.name) || "",
-          voiceChannelId: ((_d = member.voice.channel) == null ? void 0 : _d.id) || "",
+          voiceChannel: ((_c = member.voice.channel) == null ? void 0 : _c.name) ?? "",
+          voiceChannelId: ((_d = member.voice.channel) == null ? void 0 : _d.id) ?? "",
           voiceSelfDeaf: !!member.voice.selfDeaf,
           voiceServerDeaf: !!member.voice.serverDeaf,
           voiceSelfMute: !!member.voice.selfMute,
@@ -541,16 +541,16 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         return;
       for (const parents of [true, false]) {
         for (const [, channel] of channels) {
-          if (parents && channel.parentId || !parents && !channel.parentId) {
+          if (!channel || parents && channel.parentId || !parents && !channel.parentId) {
             continue;
           }
           const channelIdPrefix = parents ? `servers.${guild.id}.channels.${channel.id}` : `servers.${guild.id}.channels.${channel.parentId}.channels.${channel.id}`;
           knownServersAndChannelsIds.add(`${this.namespace}.${channelIdPrefix}`);
           let icon = void 0;
-          if (channel.isText()) {
+          if (channel.type === import_discord.ChannelType.GuildText) {
             icon = "channel-text.svg";
           }
-          if (channel.isVoice()) {
+          if (channel.type === import_discord.ChannelType.GuildVoice) {
             icon = "channel-voice.svg";
           }
           await this.extendObjectAsyncCached(channelIdPrefix, {
@@ -563,7 +563,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
               channelId: channel.id
             }
           });
-          if (channel.type === "GUILD_CATEGORY") {
+          if (channel.type === import_discord.ChannelType.GuildCategory) {
             await this.extendObjectAsyncCached(`${channelIdPrefix}.channels`, {
               type: "channel",
               common: {
@@ -610,7 +610,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
               native: {}
             })
           ]);
-          if (channel.isText()) {
+          if (channel.type === import_discord.ChannelType.GuildText || channel.type === import_discord.ChannelType.GuildVoice) {
             await Promise.all([
               this.extendObjectAsyncCached(`${channelIdPrefix}.message`, {
                 type: "state",
@@ -971,7 +971,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       if (m) {
         const idPath = m[1];
         if (!knownServersAndChannelsIds.has(item.id)) {
-          this.log.debug(`Server/Channel ${idPath} "${item.value.common.name}" is no longer available - deleting objects`);
+          this.log.debug(`Server/Channel ${idPath} "${(0, import_utils.getObjName)(item.value.common)}" is no longer available - deleting objects`);
           this.messageReceiveStates.delete(`${this.namespace}.servers.${idPath}.message`);
           this.jsonStateCache.delete(`${this.namespace}.servers.${idPath}.json`);
           await this.delObjectAsyncCached(`servers.${idPath}`, { recursive: true });
@@ -988,7 +988,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       if (m) {
         const userId = m[1];
         if (!allServersUsers.has(userId)) {
-          this.log.debug(`User ${userId} "${item.value.common.name}" is no longer available - deleting objects`);
+          this.log.debug(`User ${userId} "${(0, import_utils.getObjName)(item.value.common)}" is no longer available - deleting objects`);
           this.knownUsers.delete(userId);
           this.messageReceiveStates.delete(`${this.namespace}.users.${userId}.message`);
           this.jsonStateCache.delete(`${this.namespace}.users.${userId}.json`);
@@ -1033,9 +1033,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     try {
       const p = {
-        status: (presence == null ? void 0 : presence.status) || "",
-        activityName: (((_a = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _a.type) === "CUSTOM" ? (_b = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _b.state : (_c = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _c.name) || "",
-        activityType: ((_d = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _d.type) || ""
+        status: (presence == null ? void 0 : presence.status) ?? "",
+        activityName: (((_a = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _a.type) === import_discord.ActivityType.Custom ? (_b = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _b.state : (_c = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _c.name) ?? "",
+        activityType: ((_d = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _d.type) !== void 0 ? import_discord.ActivityType[presence.activities[0].type] : ""
       };
       const proms = [];
       if (!skipJsonStateUpdate) {
@@ -1068,7 +1068,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       opts = {};
     }
     if (!opts.status) {
-      opts.status = ((_b = await this.getStateAsync("bot.status")) == null ? void 0 : _b.val) || "online";
+      opts.status = ((_b = await this.getStateAsync("bot.status")) == null ? void 0 : _b.val) ?? "online";
     }
     if (!import_definitions.VALID_PRESENCE_STATUS_DATA.includes(opts.status)) {
       opts.status = "online";
@@ -1078,17 +1078,17 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       activities: []
     };
     if (opts.activityType === void 0) {
-      opts.activityType = ((_c = await this.getStateAsync("bot.activityType")) == null ? void 0 : _c.val) || "";
+      opts.activityType = ((_c = await this.getStateAsync("bot.activityType")) == null ? void 0 : _c.val) ?? "";
     }
     if (!import_definitions.VALID_ACTIVITY_TYPES.includes(opts.activityType)) {
       opts.activityType = "";
     }
     if (opts.activityName === void 0) {
-      opts.activityName = ((_d = await this.getStateAsync("bot.activityName")) == null ? void 0 : _d.val) || "";
+      opts.activityName = ((_d = await this.getStateAsync("bot.activityName")) == null ? void 0 : _d.val) ?? "";
     }
     if (opts.activityType && opts.activityName) {
       presenceData.activities = [{
-        type: opts.activityType,
+        type: import_discord.ActivityType[opts.activityType],
         name: opts.activityName
       }];
     }
@@ -1110,7 +1110,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     if (author.id === this.client.user.id) {
       return;
     }
-    const authCheckTarget = message.member || author;
+    const authCheckTarget = message.member ?? author;
     const isAuthorAuthorized = this.checkUserAuthorization(authCheckTarget);
     if (!this.config.processMessagesFromUnauthorizedUsers && !isAuthorAuthorized) {
       this.log.debug(`Ignore message from unauthorized user ${author.tag} (id:${author.id})`);
@@ -1124,14 +1124,14 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.log.warn(`Error while adding reaction to message ${message.id}! ${err}`);
       }
     }
-    if (!mentioned && (channel.type === "GUILD_TEXT" || channel.type === "GUILD_VOICE") && !this.config.processAllMessagesInServerChannel) {
+    if (!mentioned && (channel.type === import_discord.ChannelType.GuildText || channel.type === import_discord.ChannelType.GuildVoice) && !this.config.processAllMessagesInServerChannel) {
       this.log.debug("Server channel message without mention ignored");
       return;
     }
     let msgStateIdPrefix;
-    if (channel.type === "GUILD_TEXT" || channel.type === "GUILD_VOICE") {
+    if (channel.type === import_discord.ChannelType.GuildText || channel.type === import_discord.ChannelType.GuildVoice) {
       msgStateIdPrefix = channel.parentId ? `${this.namespace}.servers.${message.guildId}.channels.${channel.parentId}.channels.${channel.id}` : `${this.namespace}.servers.${message.guildId}.channels.${channel.id}`;
-    } else if (channel.type === "DM") {
+    } else if (channel.type === import_discord.ChannelType.DM) {
       msgStateIdPrefix = `${this.namespace}.users.${author.id}`;
     } else if (channel.isThread()) {
       this.log.debug("Thread message ignored");
@@ -1146,9 +1146,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     const json = {
       content,
-      attachments: message.attachments.map((att) => ({ attachment: att.attachment.toString(), name: att.name, size: att.size, id: att.id })),
+      attachments: message.attachments.map((att) => ({ attachment: att.url, name: att.name, description: att.description ?? "", size: att.size, contentType: att.contentType ?? "", id: att.id })),
       id: message.id,
-      mentions: ((_c = message.mentions.members) == null ? void 0 : _c.map((m) => ({ id: m.id, tag: m.user.tag, displayName: m.displayName }))) || [],
+      mentions: ((_c = message.mentions.members) == null ? void 0 : _c.map((m) => ({ id: m.id, tag: m.user.tag, displayName: m.displayName }))) ?? [],
       mentioned,
       timestamp: message.createdTimestamp,
       authorized: isAuthorAuthorized
@@ -1158,7 +1158,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       json.author = {
         id: author.id,
         tag: author.tag,
-        displayName: ((_e = (_d = this.client.guilds.cache.get(message.guildId)) == null ? void 0 : _d.members.cache.get(author.id)) == null ? void 0 : _e.displayName) || author.username
+        displayName: ((_e = (_d = this.client.guilds.cache.get(message.guildId)) == null ? void 0 : _d.members.cache.get(author.id)) == null ? void 0 : _e.displayName) ?? author.username
       };
       proms.push(this.setStateAsync(`${msgStateIdPrefix}.messageAuthor`, author.tag, true));
     }
@@ -1224,8 +1224,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       };
       let update = false;
       if (oldState.channelId !== newState.channelId) {
-        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, ((_b = newState.channel) == null ? void 0 : _b.name) || "", true));
-        json.voiceChannel = ((_c = newState.channel) == null ? void 0 : _c.name) || "";
+        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, ((_b = newState.channel) == null ? void 0 : _b.name) ?? "", true));
+        json.voiceChannel = ((_c = newState.channel) == null ? void 0 : _c.name) ?? "";
         update = true;
       }
       if (oldState.serverDeaf !== newState.serverDeaf) {
@@ -1279,15 +1279,15 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       let name = customCfg.commandsName;
       if (!name && objCommon) {
         if (typeof objCommon.name === "object") {
-          name = objCommon.name[import_i18n.i18n.language] || objCommon.name.en;
+          name = objCommon.name[import_i18n.i18n.language] ?? objCommon.name.en;
         } else {
           name = objCommon.name;
         }
       }
       const cfg = {
         id: objId,
-        alias: customCfg.commandsAlias || objId,
-        name: name || objId,
+        alias: customCfg.commandsAlias ?? objId,
+        name: name ?? objId,
         get: !!customCfg.commandsAllowGet,
         set: !!customCfg.commandsAllowSet
       };
@@ -1381,7 +1381,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       targetStateIdBase = m[1];
       action = m[6];
       const channel = (_b = this.client.guilds.cache.get(guildId)) == null ? void 0 : _b.channels.cache.get(channelId);
-      if (!(channel == null ? void 0 : channel.isText()) || channel.isThread()) {
+      if (!channel || channel.type !== import_discord.ChannelType.GuildText && channel.type !== import_discord.ChannelType.GuildVoice || channel.isThread()) {
         this.log.warn(`State ${stateId} changed but target is not a valid text channel!`);
         return false;
       }
@@ -1472,12 +1472,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.log.warn(`No message reference or no/invalid content for reaction for ${stateId}!`);
           return false;
         }
-        const channel = target instanceof import_discord.User ? target.dmChannel || await target.createDM() : target;
-        if (!channel || !channel.isText()) {
+        const channel = target instanceof import_discord.User ? target.dmChannel ?? await target.createDM() : target;
+        if (channel.type !== import_discord.ChannelType.GuildText && channel.type !== import_discord.ChannelType.GuildVoice) {
           this.log.warn(`Could not determine target channel for reaction ${stateId}!`);
           return false;
         }
-        const message = channel.messages.cache.get(messageReference) || await channel.messages.fetch(messageReference);
+        const message = channel.messages.cache.get(messageReference) ?? await channel.messages.fetch(messageReference);
         if (!message) {
           this.log.warn(`Could not determine target message for reaction ${stateId}!`);
           return false;
@@ -1619,7 +1619,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
-        const users = ((_a = this.client) == null ? void 0 : _a.users.cache.map((u) => ({ label: u.tag, value: u.id }))) || [];
+        const users = ((_a = this.client) == null ? void 0 : _a.users.cache.map((u) => ({ label: u.tag, value: u.id }))) ?? [];
         this.log.debug(`Users: ${users.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, users, obj.callback);
         break;
@@ -1628,7 +1628,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
-        const servers = ((_b = this.client) == null ? void 0 : _b.guilds.cache.map((g) => ({ label: g.name, value: g.id }))) || [];
+        const servers = ((_b = this.client) == null ? void 0 : _b.guilds.cache.map((g) => ({ label: g.name, value: g.id }))) ?? [];
         this.log.debug(`Servers: ${servers.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, servers, obj.callback);
         break;
@@ -1659,19 +1659,19 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         if ((_d = (_c = this.client) == null ? void 0 : _c.user) == null ? void 0 : _d.id) {
-          const perms = new import_discord.Permissions([
-            import_discord.Permissions.FLAGS.CHANGE_NICKNAME,
-            import_discord.Permissions.FLAGS.VIEW_CHANNEL,
-            import_discord.Permissions.FLAGS.MODERATE_MEMBERS,
-            import_discord.Permissions.FLAGS.SEND_MESSAGES,
-            import_discord.Permissions.FLAGS.EMBED_LINKS,
-            import_discord.Permissions.FLAGS.ATTACH_FILES,
-            import_discord.Permissions.FLAGS.READ_MESSAGE_HISTORY,
-            import_discord.Permissions.FLAGS.MENTION_EVERYONE,
-            import_discord.Permissions.FLAGS.ADD_REACTIONS,
-            import_discord.Permissions.FLAGS.MUTE_MEMBERS,
-            import_discord.Permissions.FLAGS.DEAFEN_MEMBERS,
-            import_discord.Permissions.FLAGS.MOVE_MEMBERS
+          const perms = new import_discord.PermissionsBitField([
+            import_discord.PermissionsBitField.Flags.ChangeNickname,
+            import_discord.PermissionsBitField.Flags.ViewChannel,
+            import_discord.PermissionsBitField.Flags.ModerateMembers,
+            import_discord.PermissionsBitField.Flags.SendMessages,
+            import_discord.PermissionsBitField.Flags.EmbedLinks,
+            import_discord.PermissionsBitField.Flags.AttachFiles,
+            import_discord.PermissionsBitField.Flags.ReadMessageHistory,
+            import_discord.PermissionsBitField.Flags.MentionEveryone,
+            import_discord.PermissionsBitField.Flags.AddReactions,
+            import_discord.PermissionsBitField.Flags.MuteMembers,
+            import_discord.PermissionsBitField.Flags.DeafenMembers,
+            import_discord.PermissionsBitField.Flags.MoveMembers
           ]);
           this.sendTo(obj.from, obj.command, `https://discord.com/api/oauth2/authorize?client_id=${this.client.user.id}&permissions=${perms.bitfield}&scope=bot%20applications.commands`, obj.callback);
         } else {
@@ -1715,7 +1715,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           }
         } else if (sendPayload.serverId && sendPayload.channelId) {
           channel = (_h = (_g = this.client) == null ? void 0 : _g.guilds.cache.get(sendPayload.serverId)) == null ? void 0 : _h.channels.cache.get(sendPayload.channelId);
-          if (!(channel == null ? void 0 : channel.isText())) {
+          if ((channel == null ? void 0 : channel.type) !== import_discord.ChannelType.GuildText && (channel == null ? void 0 : channel.type) !== import_discord.ChannelType.GuildVoice) {
             this.sendToIfCb(obj.from, obj.command, { error: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found`, ...sendPayload }, obj.callback);
             return;
           }
@@ -2140,7 +2140,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         if (!user.dmChannel) {
           await user.createDM();
         }
-        const msg = ((_c = user.dmChannel) == null ? void 0 : _c.messages.cache.get(identifier.messageId)) || await ((_d = user.dmChannel) == null ? void 0 : _d.messages.fetch(identifier.messageId));
+        const msg = ((_c = user.dmChannel) == null ? void 0 : _c.messages.cache.get(identifier.messageId)) ?? await ((_d = user.dmChannel) == null ? void 0 : _d.messages.fetch(identifier.messageId));
         if (!msg) {
           throw new Error(`No message with messageId ${identifier.messageId} for user ${user.tag} found`);
         }
@@ -2150,11 +2150,11 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       }
     } else if (identifier.serverId && identifier.channelId) {
       const channel = (_f = (_e = this.client) == null ? void 0 : _e.guilds.cache.get(identifier.serverId)) == null ? void 0 : _f.channels.cache.get(identifier.channelId);
-      if (!(channel == null ? void 0 : channel.isText())) {
+      if ((channel == null ? void 0 : channel.type) !== import_discord.ChannelType.GuildText && (channel == null ? void 0 : channel.type) !== import_discord.ChannelType.GuildVoice) {
         throw new Error(`No text channel with channelId ${identifier.channelId} on server ${identifier.serverId} found`);
       }
       try {
-        const msg = channel.messages.cache.get(identifier.messageId) || await channel.messages.fetch(identifier.messageId);
+        const msg = channel.messages.cache.get(identifier.messageId) ?? await channel.messages.fetch(identifier.messageId);
         if (!msg) {
           throw new Error(`No message with messageId ${identifier.messageId} for channel ${channel.name} found`);
         }

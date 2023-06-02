@@ -50,3 +50,18 @@ export function getBasenameFromFilePathOrUrl (file: string): string {
     return basename(file);
   }
 }
+
+/**
+ * Get the name of an ioBroker object.
+ * The name in the common object may be a single string or an object containing
+ * the translations. If it's an object, the 'en' translation will be used.
+ * @param common The common object of an ioBroker object.
+ * @returns The object name.
+ */
+export function getObjName (common: ioBroker.ObjectCommon): string {
+  if (typeof common.name === 'string') {
+    return common.name;
+  }
+
+  return common.name['en'];
+}

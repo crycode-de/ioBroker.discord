@@ -45,16 +45,16 @@ class I18n {
   getStringOrTranslated(key, ...args) {
     if (import_en.default[key]) {
       return {
-        de: this.replacePlaceholders(import_de.default[key] || key, ...args),
-        en: this.replacePlaceholders(import_en.default[key] || key, ...args),
-        es: this.replacePlaceholders(import_es.default[key] || key, ...args),
-        fr: this.replacePlaceholders(import_fr.default[key] || key, ...args),
-        it: this.replacePlaceholders(import_it.default[key] || key, ...args),
-        nl: this.replacePlaceholders(import_nl.default[key] || key, ...args),
-        pl: this.replacePlaceholders(import_pl.default[key] || key, ...args),
-        pt: this.replacePlaceholders(import_pt.default[key] || key, ...args),
-        ru: this.replacePlaceholders(import_ru.default[key] || key, ...args),
-        "zh-cn": this.replacePlaceholders(import_zh_cn.default[key] || key, ...args)
+        de: this.replacePlaceholders(import_de.default[key] ?? key, ...args),
+        en: this.replacePlaceholders(import_en.default[key] ?? key, ...args),
+        es: this.replacePlaceholders(import_es.default[key] ?? key, ...args),
+        fr: this.replacePlaceholders(import_fr.default[key] ?? key, ...args),
+        it: this.replacePlaceholders(import_it.default[key] ?? key, ...args),
+        nl: this.replacePlaceholders(import_nl.default[key] ?? key, ...args),
+        pl: this.replacePlaceholders(import_pl.default[key] ?? key, ...args),
+        pt: this.replacePlaceholders(import_pt.default[key] ?? key, ...args),
+        ru: this.replacePlaceholders(import_ru.default[key] ?? key, ...args),
+        "zh-cn": this.replacePlaceholders(import_zh_cn.default[key] ?? key, ...args)
       };
     } else {
       return key;
@@ -64,34 +64,34 @@ class I18n {
     let str;
     switch (this.language) {
       case "de":
-        str = import_de.default[key] || key;
+        str = import_de.default[key] ?? key;
         break;
       case "en":
-        str = import_en.default[key] || key;
+        str = import_en.default[key] ?? key;
         break;
       case "es":
-        str = import_es.default[key] || key;
+        str = import_es.default[key] ?? key;
         break;
       case "fr":
-        str = import_fr.default[key] || key;
+        str = import_fr.default[key] ?? key;
         break;
       case "it":
-        str = import_it.default[key] || key;
+        str = import_it.default[key] ?? key;
         break;
       case "nl":
-        str = import_nl.default[key] || key;
+        str = import_nl.default[key] ?? key;
         break;
       case "pl":
-        str = import_pl.default[key] || key;
+        str = import_pl.default[key] ?? key;
         break;
       case "pt":
-        str = import_pt.default[key] || key;
+        str = import_pt.default[key] ?? key;
         break;
       case "ru":
-        str = import_ru.default[key] || key;
+        str = import_ru.default[key] ?? key;
         break;
       case "zh-cn":
-        str = import_zh_cn.default[key] || key;
+        str = import_zh_cn.default[key] ?? key;
         break;
       default:
         str = key;

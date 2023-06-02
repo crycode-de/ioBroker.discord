@@ -1,12 +1,22 @@
 export const VALID_PRESENCE_STATUS_DATA = <const>['online', 'idle', 'dnd', 'invisible'];
 
-export const VALID_ACTIVITY_TYPES = <const>['', 'PLAYING', 'STREAMING', 'LISTENING', 'WATCHING', 'COMPETING'];
-export type ValidActivityType = typeof VALID_ACTIVITY_TYPES[number];
+export const ACTIVITY_TYPES = <const>['', 'Playing', 'Streaming', 'Listening', 'Watching', 'Custom', 'Competing'];
+export type ActivityTypeNames = typeof ACTIVITY_TYPES[number];
+
+export const VALID_ACTIVITY_TYPES = <const>['', 'Playing', 'Streaming', 'Listening', 'Watching', 'Competing'];
+export type ValidActivityTypeNames = typeof VALID_ACTIVITY_TYPES[number];
+
+/**
+ * Valid channel types.
+ * @see discord-api-types/payloads/v10/channel.d.ts#304
+ */
+export type ChannelTypeNames = 'GuildText' | 'DM' | 'GuildVoice' | 'GroupDM' | 'GuildCategory' | 'GuildAnnouncement' | 'AnnouncementThread' | 'PublicThread' | 'PrivateThread' | 'GuildStageVoice' | 'GuildDirectory' | 'GuildForum' | 'GuildNews' | 'GuildNewsThread' | 'GuildPublicThread' | 'GuildPrivateThread';
 
 import {
   ApplicationCommandOptionType,
+  ChannelType,
   MessageEditOptions,
-  MessageOptions,
+  MessageCreateOptions,
   PresenceStatus,
   PresenceStatusData,
   Snowflake,
@@ -19,7 +29,7 @@ export interface Text2commandMessagePayload {
 
 export interface SetBotPresenceOptions {
   status?: PresenceStatusData;
-  activityType?: ValidActivityType;
+  activityType?: ValidActivityTypeNames;
   activityName?: string;
 }
 
@@ -46,14 +56,14 @@ export interface JsonServersChannelsObj {
     tag: string;
     displayName: string;
   }[];
-  type: string;
+  type: ChannelType;
 }
 
 export interface JsonUsersObj {
   id: Snowflake;
   tag: string;
   activityName: string;
-  activityType: ValidActivityType | 'CUSTOM' | '';
+  activityType: ActivityTypeNames;
   avatarUrl: string;
   bot: boolean;
   status: PresenceStatus | '';
@@ -118,14 +128,14 @@ export interface JsonSlashCommandObjOption {
   channel?: {
     id: Snowflake;
     name: string;
-    type: 'GUILD_CATEGORY' | 'GUILD_NEWS' | 'GUILD_STAGE_VOICE' | 'GUILD_STORE' | 'GUILD_TEXT' | 'GUILD_VOICE';
+    type: ChannelTypeNames;
     lastMessageId: Snowflake | null;
   };
 }
 
 export interface UpdateUserPresenceResult {
   status: PresenceStatus | '';
-  activityType: ValidActivityType | 'CUSTOM' | '';
+  activityType: ActivityTypeNames;
   activityName: string;
 }
 
@@ -157,7 +167,7 @@ export interface MessageIdentifier extends MessageTargetIdentifier {
  * Payload for a `sentTo(...)` `sendMessage` action.
  */
 export interface SendToActionSendPayload extends MessageTargetIdentifier {
-  content: string | MessageOptions;
+  content: string | MessageCreateOptions;
 }
 
 /**
@@ -216,5 +226,5 @@ export interface SendToActionServerMemberIdentifier extends SendToActionServerId
  */
 export interface SendToActionSendCustomCommandReplyPayload {
   interactionId: Snowflake;
-  content: string | MessageOptions;
+  content: string | MessageCreateOptions;
 }

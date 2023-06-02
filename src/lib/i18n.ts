@@ -36,16 +36,16 @@ class I18n {
   public getStringOrTranslated (key: I18nKey, ...args: string[]): ioBroker.StringOrTranslated {
     if (en[key]) {
       return {
-        de: this.replacePlaceholders((de as I18nObj)[key] || key, ...args),
-        en: this.replacePlaceholders((en as I18nObj)[key] || key, ...args),
-        es: this.replacePlaceholders((es as I18nObj)[key] || key, ...args),
-        fr: this.replacePlaceholders((fr as I18nObj)[key] || key, ...args),
-        it: this.replacePlaceholders((it as I18nObj)[key] || key, ...args),
-        nl: this.replacePlaceholders((nl as I18nObj)[key] || key, ...args),
-        pl: this.replacePlaceholders((pl as I18nObj)[key] || key, ...args),
-        pt: this.replacePlaceholders((pt as I18nObj)[key] || key, ...args),
-        ru: this.replacePlaceholders((ru as I18nObj)[key] || key, ...args),
-        'zh-cn': this.replacePlaceholders((zhCn as I18nObj)[key] || key, ...args),
+        de: this.replacePlaceholders((de as I18nObj)[key] ?? key, ...args),
+        en: this.replacePlaceholders((en as I18nObj)[key] ?? key, ...args),
+        es: this.replacePlaceholders((es as I18nObj)[key] ?? key, ...args),
+        fr: this.replacePlaceholders((fr as I18nObj)[key] ?? key, ...args),
+        it: this.replacePlaceholders((it as I18nObj)[key] ?? key, ...args),
+        nl: this.replacePlaceholders((nl as I18nObj)[key] ?? key, ...args),
+        pl: this.replacePlaceholders((pl as I18nObj)[key] ?? key, ...args),
+        pt: this.replacePlaceholders((pt as I18nObj)[key] ?? key, ...args),
+        ru: this.replacePlaceholders((ru as I18nObj)[key] ?? key, ...args),
+        'zh-cn': this.replacePlaceholders((zhCn as I18nObj)[key] ?? key, ...args),
       };
     } else {
       return key;
@@ -61,16 +61,16 @@ class I18n {
   public getString (key: I18nKey, ...args: string[]): string {
     let str: string;
     switch (this.language) {
-      case 'de': str = (de as I18nObj)[key] || key; break;
-      case 'en': str = (en as I18nObj)[key] || key; break;
-      case 'es': str = (es as I18nObj)[key] || key; break;
-      case 'fr': str = (fr as I18nObj)[key] || key; break;
-      case 'it': str = (it as I18nObj)[key] || key; break;
-      case 'nl': str = (nl as I18nObj)[key] || key; break;
-      case 'pl': str = (pl as I18nObj)[key] || key; break;
-      case 'pt': str = (pt as I18nObj)[key] || key; break;
-      case 'ru': str = (ru as I18nObj)[key] || key; break;
-      case 'zh-cn': str = (zhCn as I18nObj)[key] || key; break;
+      case 'de': str = (de as I18nObj)[key] ?? key; break;
+      case 'en': str = (en as I18nObj)[key] ?? key; break;
+      case 'es': str = (es as I18nObj)[key] ?? key; break;
+      case 'fr': str = (fr as I18nObj)[key] ?? key; break;
+      case 'it': str = (it as I18nObj)[key] ?? key; break;
+      case 'nl': str = (nl as I18nObj)[key] ?? key; break;
+      case 'pl': str = (pl as I18nObj)[key] ?? key; break;
+      case 'pt': str = (pt as I18nObj)[key] ?? key; break;
+      case 'ru': str = (ru as I18nObj)[key] ?? key; break;
+      case 'zh-cn': str = (zhCn as I18nObj)[key] ?? key; break;
       default: str = key;
     }
 

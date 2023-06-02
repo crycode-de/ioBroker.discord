@@ -19,7 +19,8 @@ var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: tru
 var utils_exports = {};
 __export(utils_exports, {
   getBasenameFromFilePathOrUrl: () => getBasenameFromFilePathOrUrl,
-  getBufferAndNameFromBase64String: () => getBufferAndNameFromBase64String
+  getBufferAndNameFromBase64String: () => getBufferAndNameFromBase64String,
+  getObjName: () => getObjName
 });
 module.exports = __toCommonJS(utils_exports);
 var import_node_path = require("node:path");
@@ -50,9 +51,16 @@ function getBasenameFromFilePathOrUrl(file) {
     return (0, import_node_path.basename)(file);
   }
 }
+function getObjName(common) {
+  if (typeof common.name === "string") {
+    return common.name;
+  }
+  return common.name["en"];
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   getBasenameFromFilePathOrUrl,
-  getBufferAndNameFromBase64String
+  getBufferAndNameFromBase64String,
+  getObjName
 });
 //# sourceMappingURL=utils.js.map

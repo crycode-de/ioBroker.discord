@@ -18,14 +18,17 @@ var __copyProps = (to, from, except, desc) => {
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var definitions_exports = {};
 __export(definitions_exports, {
+  ACTIVITY_TYPES: () => ACTIVITY_TYPES,
   VALID_ACTIVITY_TYPES: () => VALID_ACTIVITY_TYPES,
   VALID_PRESENCE_STATUS_DATA: () => VALID_PRESENCE_STATUS_DATA
 });
 module.exports = __toCommonJS(definitions_exports);
 const VALID_PRESENCE_STATUS_DATA = ["online", "idle", "dnd", "invisible"];
-const VALID_ACTIVITY_TYPES = ["", "PLAYING", "STREAMING", "LISTENING", "WATCHING", "COMPETING"];
+const ACTIVITY_TYPES = ["", "Playing", "Streaming", "Listening", "Watching", "Custom", "Competing"];
+const VALID_ACTIVITY_TYPES = ["", "Playing", "Streaming", "Listening", "Watching", "Competing"];
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  ACTIVITY_TYPES,
   VALID_ACTIVITY_TYPES,
   VALID_PRESENCE_STATUS_DATA
 });
