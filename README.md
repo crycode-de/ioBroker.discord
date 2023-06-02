@@ -120,7 +120,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 
 MIT License
 
-Copyright (c) 2022 Peter Müller <peter@crycode.de>
+Copyright (c) 2022-2023 Peter Müller <peter@crycode.de>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
