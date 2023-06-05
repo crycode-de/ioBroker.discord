@@ -914,7 +914,7 @@ class DiscordAdapterSlashCommands {
       if (opt) {
         json.options[optCfg.name] = {
           value: opt.value ?? null,
-          type: opt.type
+          type: import_discord.ApplicationCommandOptionType[opt.type]
         };
         if (opt.user instanceof import_discord.User) {
           json.options[optCfg.name].user = {

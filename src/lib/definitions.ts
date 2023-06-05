@@ -13,7 +13,6 @@ export type ValidActivityTypeNames = typeof VALID_ACTIVITY_TYPES[number];
 export type ChannelTypeNames = 'GuildText' | 'DM' | 'GuildVoice' | 'GroupDM' | 'GuildCategory' | 'GuildAnnouncement' | 'AnnouncementThread' | 'PublicThread' | 'PrivateThread' | 'GuildStageVoice' | 'GuildDirectory' | 'GuildForum' | 'GuildNews' | 'GuildNewsThread' | 'GuildPublicThread' | 'GuildPrivateThread';
 
 import {
-  ApplicationCommandOptionType,
   MessageEditOptions,
   MessageCreateOptions,
   PresenceStatus,
@@ -109,7 +108,7 @@ export interface JsonSlashCommandObj {
 
 export interface JsonSlashCommandObjOption {
   value: string | number | boolean | null;
-  type: ApplicationCommandOptionType | null;
+  type: string | null;
   user?: {
     id: Snowflake;
     tag: string;

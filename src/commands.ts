@@ -3,6 +3,7 @@ import { isDeepStrictEqual } from 'node:util';
 import { boundMethod } from 'autobind-decorator';
 
 import {
+  ApplicationCommandOptionType,
   AutocompleteInteraction,
   CacheType,
   ChannelType,
@@ -1306,7 +1307,7 @@ export class DiscordAdapterSlashCommands {
       if (opt) {
         json.options[optCfg.name] = {
           value: opt.value ?? null,
-          type: opt.type,
+          type: ApplicationCommandOptionType[opt.type],
         };
 
         if (opt.user instanceof User) {
