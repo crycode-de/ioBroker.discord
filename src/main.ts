@@ -61,6 +61,7 @@ import {
   SendToActionUserIdentifier,
   ActivityTypeNames,
   ValidActivityTypeNames,
+  ChannelTypeNames,
 } from './lib/definitions';
 import { i18n } from './lib/i18n';
 import {
@@ -1233,7 +1234,7 @@ class DiscordAdapter extends Adapter {
     const json: JsonServersChannelsObj = {
       id: channel.id,
       name: channel.name,
-      type: channel.type,
+      type: ChannelType[channel.type] as ChannelTypeNames,
       memberCount: members.length,
       members: members.map((m) => ({
         id: m.user.id,
@@ -1861,7 +1862,7 @@ class DiscordAdapter extends Adapter {
         }
 
         const channel = target instanceof User ? target.dmChannel ?? await target.createDM() : target;
-        if (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice) {
+        if (channel.type !== ChannelType.GuildText && channel.type !== ChannelType.GuildVoice && channel.type !== ChannelType.DM) {
           this.log.warn(`Could not determine target channel for reaction ${stateId}!`);
           return false;
         }

@@ -1003,7 +1003,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     const json = {
       id: channel.id,
       name: channel.name,
-      type: channel.type,
+      type: import_discord.ChannelType[channel.type],
       memberCount: members.length,
       members: members.map((m) => ({
         id: m.user.id,
@@ -1473,7 +1473,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return false;
         }
         const channel = target instanceof import_discord.User ? target.dmChannel ?? await target.createDM() : target;
-        if (channel.type !== import_discord.ChannelType.GuildText && channel.type !== import_discord.ChannelType.GuildVoice) {
+        if (channel.type !== import_discord.ChannelType.GuildText && channel.type !== import_discord.ChannelType.GuildVoice && channel.type !== import_discord.ChannelType.DM) {
           this.log.warn(`Could not determine target channel for reaction ${stateId}!`);
           return false;
         }

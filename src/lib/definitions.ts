@@ -14,7 +14,6 @@ export type ChannelTypeNames = 'GuildText' | 'DM' | 'GuildVoice' | 'GroupDM' | '
 
 import {
   ApplicationCommandOptionType,
-  ChannelType,
   MessageEditOptions,
   MessageCreateOptions,
   PresenceStatus,
@@ -56,7 +55,7 @@ export interface JsonServersChannelsObj {
     tag: string;
     displayName: string;
   }[];
-  type: ChannelType;
+  type: ChannelTypeNames;
 }
 
 export interface JsonUsersObj {
