@@ -1205,7 +1205,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onClientVoiceStateUpdate(oldState, newState) {
-    var _a, _b, _c;
+    var _a, _b, _c, _d;
     if (!((_a = newState.member) == null ? void 0 : _a.id)) {
       return;
     }
@@ -1226,6 +1226,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       if (oldState.channelId !== newState.channelId) {
         proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, ((_b = newState.channel) == null ? void 0 : _b.name) ?? "", true));
         json.voiceChannel = ((_c = newState.channel) == null ? void 0 : _c.name) ?? "";
+        json.voiceChannelId = ((_d = newState.channel) == null ? void 0 : _d.id) ?? "";
         update = true;
       }
       if (oldState.serverDeaf !== newState.serverDeaf) {

@@ -1517,6 +1517,7 @@ class DiscordAdapter extends Adapter {
       if (oldState.channelId !== newState.channelId) {
         proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, newState.channel?.name ?? '', true));
         json.voiceChannel = newState.channel?.name ?? '';
+        json.voiceChannelId = newState.channel?.id ?? '';
         update = true;
       }
       if (oldState.serverDeaf !== newState.serverDeaf) {
