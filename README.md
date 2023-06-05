@@ -65,6 +65,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 
 * (crycode-de) Updated discord.js to v14
 * (crycode-de) 💥 **Breaking:** Activity types and channel types are now in title case. Example: `PLAYING` is now `Playing`, `GUILD_TEXT` is now `GuildText`.
+* (crycode-de) 💥 **Breaking:** In raw states all `type` field values are now numbers representing the internal enum values of the types.
 * (crycode-de) Updated dependencies
 * (crycode-de) Added Ukrainian translations
 * Updated translations
