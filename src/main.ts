@@ -198,6 +198,18 @@ class DiscordAdapter extends Adapter {
     }
     this.config.reactOnMentionsEmoji = this.config.reactOnMentionsEmoji?.trim() || '👍';
 
+    // setup/fix native objects from older adapter versions
+    const botActivityTypeObj = await this.getObjectAsync('bot.activityType');
+    if (botActivityTypeObj?.common?.states?.hasOwnProperty('PLAYING')) {
+      // TODO: use extendObjectAsync with null values when issue https://github.com/ioBroker/ioBroker.js-controller/issues/1735 is resolved
+      delete botActivityTypeObj.common.states.PLAYING;
+      delete botActivityTypeObj.common.states.STREAMING;
+      delete botActivityTypeObj.common.states.LISTENING;
+      delete botActivityTypeObj.common.states.WATCHING;
+      delete botActivityTypeObj.common.states.COMPETING;
+      await this.setObjectAsync('bot.activityType', botActivityTypeObj);
+    }
+
     // setup generic dynamic objects (most objects will be set up in `updateGuilds` method)
     if (this.config.enableRawStates) {
       await this.extendObjectAsync('raw', {

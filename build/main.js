@@ -68,7 +68,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.on("unload", this.onUnload);
   }
   async onReady() {
-    var _a, _b;
+    var _a, _b, _c, _d;
     await this.setInfoConnectionState(false, true);
     this.log.debug(`Version of discord.js: ${import_discord.version}`);
     const systemConfig = await this.getForeignObjectAsync("system.config");
@@ -94,6 +94,15 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       this.config.customCommands = [];
     }
     this.config.reactOnMentionsEmoji = ((_a = this.config.reactOnMentionsEmoji) == null ? void 0 : _a.trim()) || "\u{1F44D}";
+    const botActivityTypeObj = await this.getObjectAsync("bot.activityType");
+    if ((_c = (_b = botActivityTypeObj == null ? void 0 : botActivityTypeObj.common) == null ? void 0 : _b.states) == null ? void 0 : _c.hasOwnProperty("PLAYING")) {
+      delete botActivityTypeObj.common.states.PLAYING;
+      delete botActivityTypeObj.common.states.STREAMING;
+      delete botActivityTypeObj.common.states.LISTENING;
+      delete botActivityTypeObj.common.states.WATCHING;
+      delete botActivityTypeObj.common.states.COMPETING;
+      await this.setObjectAsync("bot.activityType", botActivityTypeObj);
+    }
     if (this.config.enableRawStates) {
       await this.extendObjectAsync("raw", {
         type: "channel",
@@ -230,7 +239,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     const view = await this.getObjectViewAsync("system", "custom", {});
     if (view == null ? void 0 : view.rows) {
       for (const item of view.rows) {
-        await this.setupObjCustom(item.id, (_b = item.value) == null ? void 0 : _b[this.namespace]);
+        await this.setupObjCustom(item.id, (_d = item.value) == null ? void 0 : _d[this.namespace]);
       }
     }
     this.log.debug("Getting all objects with custom config done");
