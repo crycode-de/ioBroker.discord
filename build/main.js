@@ -1081,6 +1081,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       opts.activityType = ((_c = await this.getStateAsync("bot.activityType")) == null ? void 0 : _c.val) ?? "";
     }
     if (!import_definitions.VALID_ACTIVITY_TYPES.includes(opts.activityType)) {
+      this.log.warn(`Invalid activityType! ${opts.activityType}`);
       opts.activityType = "";
     }
     if (opts.activityName === void 0) {
@@ -1137,7 +1138,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       this.log.debug("Thread message ignored");
       return;
     } else {
-      this.log.warn(`Received message from unsupported channel type ${channel.type}!`);
+      this.log.warn(`Received message from unsupported channel type ${import_discord.ChannelType[channel.type]}!`);
       return;
     }
     if (!this.messageReceiveStates.has(`${msgStateIdPrefix}.message`)) {

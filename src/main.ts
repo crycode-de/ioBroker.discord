@@ -1326,6 +1326,7 @@ class DiscordAdapter extends Adapter {
       opts.activityType = ((await this.getStateAsync('bot.activityType'))?.val as ValidActivityTypeNames | undefined) ?? '';
     }
     if (!VALID_ACTIVITY_TYPES.includes(opts.activityType)) {
+      this.log.warn(`Invalid activityType! ${opts.activityType}`);
       opts.activityType = '';
     }
     if (opts.activityName === undefined) {
@@ -1403,7 +1404,7 @@ class DiscordAdapter extends Adapter {
       this.log.debug('Thread message ignored');
       return;
     } else {
-      this.log.warn(`Received message from unsupported channel type ${channel.type}!`);
+      this.log.warn(`Received message from unsupported channel type ${ChannelType[channel.type]}!`);
       return;
     }
 
