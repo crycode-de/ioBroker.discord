@@ -32,6 +32,7 @@ var import_commands = require("./commands");
 var import_definitions = require("./lib/definitions");
 var import_i18n = require("./lib/i18n");
 var import_utils = require("./lib/utils");
+var import_notification_manager = require("./lib/notification-manager");
 const LOGIN_WAIT_TIMES = [
   0,
   5e3,
@@ -1598,7 +1599,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x;
     if (typeof obj !== "object")
       return;
     this.log.debug(`Got message: ${JSON.stringify(obj)}`);
@@ -1625,12 +1626,35 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.log.debug(`Found text2command instances: ${text2commandInstances.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, [{ value: "", label: "---" }, ...text2commandInstances], obj.callback);
         break;
+      case "getNotificationTargets":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+        const targets = [{ value: "", label: "---" }];
+        (_a = this.client) == null ? void 0 : _a.users.cache.forEach((u) => {
+          targets.push({ label: u.tag, value: u.id });
+        });
+        (_b = this.client) == null ? void 0 : _b.guilds.cache.forEach((g) => {
+          g.channels.cache.forEach((c) => {
+            if (c.type === import_discord.ChannelType.GuildText) {
+              if (c.parent) {
+                targets.push({ label: `${g.name} \xBB ${c.parent.name} \xBB ${c.name}`, value: `${g.id}/${c.id}` });
+              } else {
+                targets.push({ label: `${g.name} \xBB ${c.name}`, value: `${g.id}/${c.id}` });
+              }
+            }
+          });
+        });
+        this.log.debug(`Notification targets: ${targets.map((i) => i.value)}`);
+        this.sendTo(obj.from, obj.command, targets, obj.callback);
+        break;
       case "getUsers":
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
-        const users = ((_a = this.client) == null ? void 0 : _a.users.cache.map((u) => ({ label: u.tag, value: u.id }))) ?? [];
+        const users = ((_c = this.client) == null ? void 0 : _c.users.cache.map((u) => ({ label: u.tag, value: u.id }))) ?? [];
         this.log.debug(`Users: ${users.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, users, obj.callback);
         break;
@@ -1639,7 +1663,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
-        const servers = ((_b = this.client) == null ? void 0 : _b.guilds.cache.map((g) => ({ label: g.name, value: g.id }))) ?? [];
+        const servers = ((_d = this.client) == null ? void 0 : _d.guilds.cache.map((g) => ({ label: g.name, value: g.id }))) ?? [];
         this.log.debug(`Servers: ${servers.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, servers, obj.callback);
         break;
@@ -1669,7 +1693,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
-        if ((_d = (_c = this.client) == null ? void 0 : _c.user) == null ? void 0 : _d.id) {
+        if ((_f = (_e = this.client) == null ? void 0 : _e.user) == null ? void 0 : _f.id) {
           const perms = new import_discord.PermissionsBitField([
             import_discord.PermissionsBitField.Flags.ChangeNickname,
             import_discord.PermissionsBitField.Flags.ViewChannel,
@@ -1706,13 +1730,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         if (sendPayload.userId || sendPayload.userTag) {
           if (sendPayload.userId) {
-            user = (_e = this.client) == null ? void 0 : _e.users.cache.get(sendPayload.userId);
+            user = (_g = this.client) == null ? void 0 : _g.users.cache.get(sendPayload.userId);
             if (!user) {
               this.sendToIfCb(obj.from, obj.command, { error: `No user with userId ${sendPayload.userId} found`, ...sendPayload }, obj.callback);
               return;
             }
           } else {
-            user = (_f = this.client) == null ? void 0 : _f.users.cache.find((u) => u.tag === sendPayload.userTag);
+            user = (_h = this.client) == null ? void 0 : _h.users.cache.find((u) => u.tag === sendPayload.userTag);
             if (!user) {
               this.sendToIfCb(obj.from, obj.command, { error: `No user with userTag ${sendPayload.userTag} found`, ...sendPayload }, obj.callback);
               return;
@@ -1725,7 +1749,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to user ${user.tag}: ${err}`, ...sendPayload }, obj.callback);
           }
         } else if (sendPayload.serverId && sendPayload.channelId) {
-          channel = (_h = (_g = this.client) == null ? void 0 : _g.guilds.cache.get(sendPayload.serverId)) == null ? void 0 : _h.channels.cache.get(sendPayload.channelId);
+          channel = (_j = (_i = this.client) == null ? void 0 : _i.guilds.cache.get(sendPayload.serverId)) == null ? void 0 : _j.channels.cache.get(sendPayload.channelId);
           if ((channel == null ? void 0 : channel.type) !== import_discord.ChannelType.GuildText && (channel == null ? void 0 : channel.type) !== import_discord.ChannelType.GuildVoice) {
             this.sendToIfCb(obj.from, obj.command, { error: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found`, ...sendPayload }, obj.callback);
             return;
@@ -1896,7 +1920,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendToIfCb(obj.from, obj.command, { error: "serverId needs to be set", ...leaveServerPayload }, obj.callback);
           return;
         }
-        const guildToLeave = (_i = this.client) == null ? void 0 : _i.guilds.cache.get(leaveServerPayload.serverId);
+        const guildToLeave = (_k = this.client) == null ? void 0 : _k.guilds.cache.get(leaveServerPayload.serverId);
         if (!guildToLeave) {
           this.sendToIfCb(obj.from, obj.command, { error: `No server with ID ${leaveServerPayload.serverId} found` }, obj.callback);
           return;
@@ -1923,7 +1947,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendTo(obj.from, obj.command, { error: "serverId needs to be set", ...getServerInfoPayload }, obj.callback);
           return;
         }
-        const server = (_j = this.client) == null ? void 0 : _j.guilds.cache.get(getServerInfoPayload.serverId);
+        const server = (_l = this.client) == null ? void 0 : _l.guilds.cache.get(getServerInfoPayload.serverId);
         if (!server) {
           this.sendTo(obj.from, obj.command, { error: `No server with ID ${getServerInfoPayload.serverId} found`, ...getServerInfoPayload }, obj.callback);
           return;
@@ -1964,7 +1988,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendTo(obj.from, obj.command, { error: "serverId and channelId need to be set", ...getChannelInfoPayload }, obj.callback);
           return;
         }
-        channel = (_l = (_k = this.client) == null ? void 0 : _k.guilds.cache.get(getChannelInfoPayload.serverId)) == null ? void 0 : _l.channels.cache.get(getChannelInfoPayload.channelId);
+        channel = (_n = (_m = this.client) == null ? void 0 : _m.guilds.cache.get(getChannelInfoPayload.serverId)) == null ? void 0 : _n.channels.cache.get(getChannelInfoPayload.channelId);
         if (!channel) {
           this.sendTo(obj.from, obj.command, { error: `No channel with ID ${getChannelInfoPayload.channelId} for server with ID ${getChannelInfoPayload.serverId} found`, ...getChannelInfoPayload }, obj.callback);
           return;
@@ -1997,13 +2021,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         let member;
         if (getServerMemberInfoPayload.userId) {
-          member = (_n = (_m = this.client) == null ? void 0 : _m.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _n.members.cache.get(getServerMemberInfoPayload.userId);
+          member = (_p = (_o = this.client) == null ? void 0 : _o.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _p.members.cache.get(getServerMemberInfoPayload.userId);
           if (!member) {
             this.sendTo(obj.from, obj.command, { error: `No member with ID ${getServerMemberInfoPayload.userId} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
             return;
           }
         } else {
-          member = (_p = (_o = this.client) == null ? void 0 : _o.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _p.members.cache.find((m) => m.user.tag === getServerMemberInfoPayload.userTag);
+          member = (_r = (_q = this.client) == null ? void 0 : _q.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _r.members.cache.find((m) => m.user.tag === getServerMemberInfoPayload.userTag);
           if (!member) {
             this.sendTo(obj.from, obj.command, { error: `No member with tag ${getServerMemberInfoPayload.userTag} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
             return;
@@ -2041,13 +2065,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         if (getUserInfoPayload.userId) {
-          user = (_q = this.client) == null ? void 0 : _q.users.cache.get(getUserInfoPayload.userId);
+          user = (_s = this.client) == null ? void 0 : _s.users.cache.get(getUserInfoPayload.userId);
           if (!user) {
             this.sendTo(obj.from, obj.command, { error: `No user with ID ${getUserInfoPayload.userId} found`, ...getUserInfoPayload }, obj.callback);
             return;
           }
         } else {
-          user = (_r = this.client) == null ? void 0 : _r.users.cache.find((u) => u.tag === getUserInfoPayload.userTag);
+          user = (_t = this.client) == null ? void 0 : _t.users.cache.find((u) => u.tag === getUserInfoPayload.userTag);
           if (!user) {
             this.sendTo(obj.from, obj.command, { error: `No user with tag ${getUserInfoPayload.userTag} found`, ...getUserInfoPayload }, obj.callback);
             return;
@@ -2095,6 +2119,53 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           editedTimestamp: msg.editedTimestamp,
           reference: msg.reference
         }, obj.callback);
+        break;
+      case "sendNotification":
+        if (!this.config.sendNotificationsTo) {
+          this.log.debug(`New notification received from ${obj.from}, but sending notifications is not enabled in adapter config`);
+          return;
+        }
+        this.log.info(`New notification received from ${obj.from}`);
+        let target = void 0;
+        if (this.config.sendNotificationsTo.indexOf("/") > 0) {
+          const [serverId, channelId] = this.config.sendNotificationsTo.split("/");
+          const channel2 = (_v = (_u = this.client) == null ? void 0 : _u.guilds.cache.get(serverId)) == null ? void 0 : _v.channels.cache.get(channelId);
+          if ((channel2 == null ? void 0 : channel2.type) === import_discord.ChannelType.GuildText) {
+            target = channel2;
+          }
+        } else {
+          target = (_w = this.client) == null ? void 0 : _w.users.cache.get(this.config.sendNotificationsTo);
+        }
+        if (!target) {
+          this.log.error(`Cannot send notification because the configured target is invalid!`);
+          return;
+        }
+        const message = obj.message;
+        if (!((_x = message == null ? void 0 : message.category) == null ? void 0 : _x.instances) || !message.category.name) {
+          this.log.warn(`Cannot send notification because the received message object is invalid`);
+          return;
+        }
+        const { instances, severity } = message.category;
+        let icon = "";
+        switch (severity) {
+          case "alert":
+            icon = ":warning: ";
+            break;
+          case "info":
+            icon = ":information_source: ";
+            break;
+          case "notify":
+            icon = ":bell: ";
+            break;
+        }
+        const readableInstances = Object.entries(instances).map(([instance, entry]) => `${instance.substring("system.adapter.".length)}: ${(0, import_notification_manager.getNewestDate)(entry.messages, import_i18n.i18n.language)}`);
+        const text = `${icon}**${message.category.name}**
+
+${message.category.description ?? ""}
+
+${message.host}:
+${readableInstances.join("\n")}`;
+        await target.send(text);
         break;
       default:
         this.log.warn(`Got message with unknown command: ${obj.command}`);

@@ -32,6 +32,7 @@ import {
   version as djsVersion,
   VoiceState,
   ActivityType,
+  TextChannel,
 } from 'discord.js';
 
 import {
@@ -69,6 +70,7 @@ import {
   getBufferAndNameFromBase64String,
   getObjName,
 } from './lib/utils';
+import { LocalizedNotification, getNewestDate } from './lib/notification-manager';
 
 const LOGIN_WAIT_TIMES = <const>[
   0, // none - first try!
@@ -2057,6 +2059,38 @@ class DiscordAdapter extends Adapter {
         this.sendTo(obj.from, obj.command, [{value: '', label: '---'}, ...text2commandInstances], obj.callback);
         break;
 
+      case 'getNotificationTargets':
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
+
+        const targets: { label: string, value: string }[] = [{ value: '', label: '---' }];
+
+        // users
+        this.client?.users.cache.forEach((u) => {
+          targets.push({ label: u.tag, value: u.id });
+        });
+
+        // server channels
+        this.client?.guilds.cache.forEach((g) => {
+          g.channels.cache.forEach((c) => {
+            if (c.type === ChannelType.GuildText) {
+              if (c.parent) {
+                // channel has a parent
+                targets.push({ label: `${g.name} » ${c.parent.name} » ${c.name}`, value: `${g.id}/${c.id}` });
+              } else {
+                // channel has no parent
+                targets.push({ label: `${g.name} » ${c.name}`, value: `${g.id}/${c.id}` });
+              }
+            }
+          });
+        });
+
+        this.log.debug(`Notification targets: ${targets.map((i) => i.value)}`);
+        this.sendTo(obj.from, obj.command, targets, obj.callback);
+        break;
+
       case 'getUsers':
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -2672,6 +2706,72 @@ class DiscordAdapter extends Adapter {
         }, obj.callback);
 
         break; // getMessageInfo
+
+      case 'sendNotification':
+        /*
+         * notification from ioBrokers notification system
+         * see https://github.com/foxriver76/ioBroker.notification-manager
+         */
+        if (!this.config.sendNotificationsTo) {
+          this.log.debug(`New notification received from ${obj.from}, but sending notifications is not enabled in adapter config`);
+          return;
+        }
+        this.log.info(`New notification received from ${obj.from}`);
+
+        let target: User | TextChannel | undefined = undefined;
+
+        if (this.config.sendNotificationsTo.indexOf('/') > 0) {
+          // server channel
+          const [serverId, channelId] = this.config.sendNotificationsTo.split('/');
+          const channel = this.client?.guilds.cache.get(serverId)?.channels.cache.get(channelId);
+          if (channel?.type === ChannelType.GuildText) {
+            target = channel;
+          }
+        } else {
+          // user
+          target = this.client?.users.cache.get(this.config.sendNotificationsTo);
+        }
+
+        if (!target) {
+          this.log.error(`Cannot send notification because the configured target is invalid!`);
+          return;
+        }
+
+        const message = obj.message as LocalizedNotification;
+
+        // check the message object
+        if (!message?.category?.instances || !message.category.name) {
+          this.log.warn(`Cannot send notification because the received message object is invalid`);
+          return;
+        }
+
+        const { instances, severity } = message.category;
+
+        let icon: string = '';
+        switch (severity) {
+          case 'alert':
+            icon = ':warning: ';
+            break;
+          case 'info':
+            icon = ':information_source: ';
+            break;
+          case 'notify':
+            icon = ':bell: ';
+            break;
+        }
+
+        const readableInstances = Object.entries(instances).map(([instance, entry]) => `${instance.substring('system.adapter.'.length)}: ${getNewestDate(entry.messages, i18n.language)}`);
+
+        const text = `${icon}**${message.category.name}**
+
+${message.category.description ?? ''}
+
+${message.host}:
+${readableInstances.join('\n')}`;
+
+        await target.send(text);
+
+        break;
 
       default:
         /*

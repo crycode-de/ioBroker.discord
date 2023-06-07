@@ -155,6 +155,10 @@
       "config": "json"
     },
     "messagebox": true,
+    "supportedMessages": {
+      "custom": true,
+      "notifications": true
+    },
     "supportCustoms": true,
     "plugins": {
       "sentry": {

@@ -13,6 +13,7 @@ declare global {
       reactOnMentionsEmoji: string | Snowflake;
       text2commandInstance: string;
       text2commandRespondWith: 'message' | 'reply' | 'none';
+      sendNotificationsTo: string;
       dynamicServerUpdates: boolean;
       observeUserPresence: boolean;
       observeUserVoiceState: boolean;

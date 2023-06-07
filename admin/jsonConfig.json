@@ -143,6 +143,28 @@
             { "label": "Message", "value": "message" },
             { "label": "None", "value": "none" }
           ]
+        },
+
+        "sendNotificationsTo": {
+          "type": "selectSendTo",
+          "label": "Send ioBroker notifications to",
+          "sm": 12,
+          "lg": 6,
+          "newLine": true,
+          "help": "Send notifications from the ioBroker notifications system to the selected user or channel. The notification-manager adapter needs to be installed and running for this.",
+          "command": "getNotificationTargets",
+          "defaultFunc": "data.sendNotificationsTo || ''"
+        },
+        "_sendNotificationsToHelp": {
+          "type": "staticText",
+          "sm": 12,
+          "lg": 6,
+          "hidden": "_alive",
+          "hideOnlyControl": true,
+          "text": "Adapter instance needs to be running to be able to select a notification target!",
+          "style": {
+            "color": "red"
+          }
         }
       }
     },
