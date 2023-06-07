@@ -10,51 +10,52 @@ Using this states, it's possible to receive and send messages and files on Disco
 
 Additionally, the adapter can register Discord slash commands to get and set ioBroker state values.
 
-* [Features](#features)
-* [Creating a Discord bot](#creating-a-discord-bot)
-* [Adding the bot to a server](#adding-the-bot-to-a-server)
-  * [Remove the bot from a server](#remove-the-bot-from-a-server)
-* [States](#states)
-  * [discord.0.bot.*](#discord0bot)
-  * [discord.0.servers.\<server-id\>.*](#discord0serversserver-id)
-  * [discord.0.servers.\<server-id\>.channels.\<channel-id\>.*](#discord0serversserver-idchannelschannel-id)
-  * [discord.0.servers.\<server-id\>.members.\<user-id\>.*](#discord0serversserver-idmembersuser-id)
-  * [discord.0.users.\<user-id\>.*](#discord0usersuser-id)
-  * [discord.0.slashCommands.\<command-name\>.*](#discord0slashcommandscommand-name)
-  * [discord.0.raw.*](#discord0raw)
-* [Authorization](#authorization)
-* [Messages](#messages)
-  * [Receiving messages](#receiving-messages)
-    * [Using text2command](#using-text2command)
-  * [Sending messages](#sending-messages)
-    * [Sending simple texts](#sending-simple-texts)
-    * [Sending files](#sending-files)
-    * [Sending reactions](#sending-reactions)
-    * [Sending replies](#sending-replies)
-    * [Sending special custom messages](#sending-special-custom-messages)
-* [Slash commands](#slash-commands)
-  * [Configure states for slash commands](#configure-states-for-slash-commands)
-  * [Get states](#get-states)
-  * [Set states](#set-states)
-  * [Get an overview about states configured for slash commands](#get-an-overview-about-states-configured-for-slash-commands)
-  * [Custom slash commands](#custom-slash-commands)
-    * [Structure of a custom slash command json state](#structure-of-a-custom-slash-command-json-state)
-* [Blocky](#blocky)
-  * [Blockly example: Send a message to a user and edit it after three seconds](#blockly-example-send-a-message-to-a-user-and-edit-it-after-three-seconds)
-  * [Blockly example: Send a composed message with an embed and two file attachments](#blockly-example-send-a-composed-message-with-an-embed-and-two-file-attachments)
-  * [Blockly example: Listen to custom slash command executes and send an image of the requested IP cam](#blockly-example-listen-to-custom-slash-command-executes-and-send-an-image-of-the-requested-ip-cam)
-* [Usage in scripts](#usage-in-scripts)
-  * [Send a message from a script](#send-a-message-from-a-script)
-  * [Edit a message from a script](#edit-a-message-from-a-script)
-  * [Delete a message from a script](#delete-a-message-from-a-script)
-  * [Add a reaction emoji to a message from a script](#add-a-reaction-emoji-to-a-message-from-a-script)
-  * [Await reactions to a message in a script](#await-reactions-to-a-message-in-a-script)
-  * [Reply to a custom slash command from a script](#reply-to-a-custom-slash-command-from-a-script)
-  * [Get information about a server in a script](#get-information-about-a-server-in-a-script)
-  * [Get information about a server channel in a script](#get-information-about-a-server-channel-in-a-script)
-  * [Get information about a user in a script](#get-information-about-a-user-in-a-script)
-  * [Get information about a server member in a script](#get-information-about-a-server-member-in-a-script)
-  * [Get information about a previous message in a script](#get-information-about-a-previous-message-in-a-script)
+- [ioBroker.discord](#iobrokerdiscord)
+  - [Features](#features)
+  - [Creating a Discord bot](#creating-a-discord-bot)
+  - [Adding the bot to a server](#adding-the-bot-to-a-server)
+    - [Remove the bot from a server](#remove-the-bot-from-a-server)
+  - [States](#states)
+    - [discord.0.bot.\*](#discord0bot)
+    - [discord.0.servers.\<server-id\>.\*](#discord0serversserver-id)
+    - [discord.0.servers.\<server-id\>.channels.\<channel-id\>.\*](#discord0serversserver-idchannelschannel-id)
+    - [discord.0.servers.\<server-id\>.members.\<user-id\>.\*](#discord0serversserver-idmembersuser-id)
+    - [discord.0.users.\<user-id\>.\*](#discord0usersuser-id)
+    - [discord.0.slashCommands.\<command-name\>.\*](#discord0slashcommandscommand-name)
+    - [discord.0.raw.\*](#discord0raw)
+  - [Authorization](#authorization)
+  - [Messages](#messages)
+    - [Receiving messages](#receiving-messages)
+      - [Using text2command](#using-text2command)
+    - [Sending messages](#sending-messages)
+      - [Sending simple texts](#sending-simple-texts)
+      - [Sending files](#sending-files)
+      - [Sending reactions](#sending-reactions)
+      - [Sending replies](#sending-replies)
+      - [Sending special custom messages](#sending-special-custom-messages)
+  - [Slash commands](#slash-commands)
+    - [Configure states for slash commands](#configure-states-for-slash-commands)
+    - [Get states](#get-states)
+    - [Set states](#set-states)
+    - [Get an overview about states configured for slash commands](#get-an-overview-about-states-configured-for-slash-commands)
+    - [Custom slash commands](#custom-slash-commands)
+      - [Structure of a custom slash command json state](#structure-of-a-custom-slash-command-json-state)
+  - [Blockly](#blockly)
+    - [Blockly example: Send a message to a user and edit it after three seconds](#blockly-example-send-a-message-to-a-user-and-edit-it-after-three-seconds)
+    - [Blockly example: Send a composed message with an embed and two file attachments](#blockly-example-send-a-composed-message-with-an-embed-and-two-file-attachments)
+    - [Blockly example: Listen to custom slash command executes and send an image of the requested IP cam](#blockly-example-listen-to-custom-slash-command-executes-and-send-an-image-of-the-requested-ip-cam)
+  - [Usage in scripts](#usage-in-scripts)
+    - [Send a message from a script](#send-a-message-from-a-script)
+    - [Edit a message from a script](#edit-a-message-from-a-script)
+    - [Delete a message from a script](#delete-a-message-from-a-script)
+    - [Add a reaction emoji to a message from a script](#add-a-reaction-emoji-to-a-message-from-a-script)
+    - [Await reactions to a message in a script](#await-reactions-to-a-message-in-a-script)
+    - [Reply to a custom slash command from a script](#reply-to-a-custom-slash-command-from-a-script)
+    - [Get information about a server in a script](#get-information-about-a-server-in-a-script)
+    - [Get information about a server channel in a script](#get-information-about-a-server-channel-in-a-script)
+    - [Get information about a user in a script](#get-information-about-a-user-in-a-script)
+    - [Get information about a server member in a script](#get-information-about-a-server-member-in-a-script)
+    - [Get information about a previous message in a script](#get-information-about-a-previous-message-in-a-script)
 
 ## Features
 
@@ -159,7 +160,7 @@ for example, that a server has more channels as displayed.
 
 | Name | Description |
 |---|---|
-| `activityType` | The type of the bot activity. One of `PLAYING`, `STREAMING`, `LISTENING`, `WATCHING`, `COMPETING` or an empty string. |
+| `activityType` | The type of the bot activity. One of `Playing`, `Streaming`, `Listening`, `Watching`, `Competing` or an empty string. |
 | `activityName` | The name of the bot activity. Only used if a type is set. |
 | `status` | The presence status of the bot. One of `online`, `idle`, `dnd` and `invisible`. |
 
@@ -217,8 +218,8 @@ To use the `voiceDisconnect`, `voiceServerDeaf` and `voiceServerMute` actions, t
 |---|---|
 | `tag` | The unique tag of the user in discord. |
 | `status` | The presence status of the user. One of `online`, `offline`, `idle`, `dnd` |
-| `activityType` | The type of the current user activity. One of `PLAYING`, `STREAMING`, `LISTENING`, `WATCHING`, `COMPETING`, `CUSTOM` or an empty string. |
-| `activityName` | The name of the current user activity. E.g. the name of a game while `PLAYING`. |
+| `activityType` | The type of the current user activity. One of `Playing`, `Streaming`, `Listening`, `Watching`, `Competing`, `Custom` or an empty string. |
+| `activityName` | The name of the current user activity. E.g. the name of a game while `Playing`. |
 | `avatarUrl` | URL to the avatar of the user. |
 | `bot` | Indicator if the user is a bot. |
 | `message` | Last received direct message from the user. |
@@ -597,7 +598,7 @@ edit the reply and set it to the new content.
   options: {
     [string]: {
       value: string | number | boolean | null,
-      type: 'STRING' | 'NUMBER' | 'BOOLEAN' | 'USER' | 'ROLE' | 'CHANNEL' | 'MENTIONABLE' | null,
+      type: 'String' | 'Number' | 'Boolean' | 'User' | 'Role' | 'Channel' | 'Mentionable' | null,
       user?: { // if type is USER or MENIONABLE
         id: string,
         tag: string,
@@ -615,7 +616,7 @@ edit the reply and set it to the new content.
       channel?: { // if type is CHANNEL
         id: string,
         name: string,
-        type: 'GUILD_CATEGORY' | 'GUILD_NEWS' | 'GUILD_STAGE_VOICE' | 'GUILD_STORE' | 'GUILD_TEXT' | 'GUILD_VOICE',
+        type: 'GuildCategory' | 'GuildNews' | 'GuildStageVoice' | 'GuildStore' | 'GuildText' | 'GuildVoice',
         lastMessageId: string | null,
       },
     },
@@ -624,7 +625,7 @@ edit the reply and set it to the new content.
 }
 ```
 
-## Blocky
+## Blockly
 
 The adapter ships with it's own Blockly blocks for ...
 
@@ -1176,7 +1177,7 @@ The `content` may be a simple string, or a [MessageOptions] object
 ```js
 on({ id: 'discord.0.slashCommands.iob-test.json', change: 'any', ack: true }, (obj) => {
   log(`Got custom slash command ${obj.state.val}`);
-  // Got custom slash command {"interactionId":"977265764136517725","commandName":"iob-test","channelId":"813364154559102998","serverId":"813364154118963251","user":{"id":"490222742801481728","tag":"cryCode#9911","displayName":"Peter"},"timestamp":1653068714890,"options":{"myopt":{"value":"test","type":"STRING"}}}
+  // Got custom slash command {"interactionId":"977265764136517725","commandName":"iob-test","channelId":"813364154559102998","serverId":"813364154118963251","user":{"id":"490222742801481728","tag":"cryCode#9911","displayName":"Peter"},"timestamp":1653068714890,"options":{"myopt":{"value":"test","type":"String"}}}
 
   const data = JSON.parse(obj.state.val);
 
