@@ -174,6 +174,62 @@
       {
         "admin": ">=5.3.0"
       }
+    ],
+    "messages": [
+      {
+        "condition": {
+          "operand": "and",
+          "rules": [
+            "oldVersion<2.0.0",
+            "newVersion>=2.0.0"
+          ]
+        },
+        "title": {
+          "en": "Important notice!",
+          "de": "Wichtiger Hinweis!",
+          "ru": "Важное замечание!",
+          "pt": "Notícia importante!",
+          "nl": "Belangrijke mededeling!",
+          "fr": "Avis important!",
+          "it": "Avviso IMPORTANTE!",
+          "es": "Noticia importante!",
+          "pl": "Ważna uwaga!",
+          "zh-cn": "重要通知!",
+          "uk": "Важливе повідомлення!"
+        },
+        "text": {
+          "en": "Activity types and channel types are now in title case. Example: PLAYING is now Playing, GUILD_TEXT is now GuildText. In raw states all type field values are now numbers representing the internal enum values of the types. Please make sure to check and update your usages of the types after upgrading to version 2.0.0 or newer.",
+          "de": "Aktivitätstypen und Kanaltypen sind nun in TitleCase. Beispiel: PLAYING ist jetzt Playing, GUILD_TEXT ist jetzt GuildText. In Rohzuständen sind nun alle type-Werte Zahlen, die den internen Enum-Werten der Typen entsprechen. Bitte darauf achten, die Verwenung von Typ-Werten nach dem Upgrade auf Version 2.0.0 oder neuer zu überprüfen und ggf. zu aktualisieren.",
+          "ru": "Типы деятельности и типы каналов теперь в случае заголовка. Пример: PLAYING сейчас Playing, GUILD_TEXT теперь GuildText. В сырых состояниях все значения поля типа теперь цифры, представляющие внутренние значения enum типов. Пожалуйста, убедитесь, что проверить и обновить использование типов после обновления до версии 2.0.0 или новее.",
+          "pt": "Tipos de atividade e tipos de canal estão agora no caso do título. Exemplo: PLAYING is now Playing, GUILD_TEXT is now GuildText. Em estados crus, todos os valores de campo do tipo são agora números que representam os valores enum internos dos tipos. Certifique-se de verificar e atualizar seus usos dos tipos após atualizar para a versão 2.0.0 ou mais recente.",
+          "nl": "Activiteitstypes en kanaaltypes zijn nu in de zaak. PLAYING is nu Playing, GUILDTEXT is nu GuildText. In rauwe staten zijn alle veldwaarden nu cijfers die de interne waarden van de types vertegenwoordigen. Controleer alsjeblieft en update je gebruik van de types na het upgraden naar versie 2.0 of nieuwer.",
+          "fr": "Les types d'activité et les types de canal sont maintenant dans le cas de titre. Exemple: PLAYING est maintenant Playing, GUILD_TEXT est maintenant GuildText. Dans les états bruts, toutes les valeurs de champ de type sont maintenant des nombres représentant les valeurs internes des types. Assurez-vous de vérifier et de mettre à jour vos utilisations des types après la mise à niveau de la version 2.0.0 ou plus récente.",
+          "it": "I tipi di attività e i tipi di canale sono ora in caso di titolo. Esempio: PLAYING ora sta Playing, GUILD_TEXT è ora GuildText. In stati grezzi tutti i valori di campo di tipo sono ora numeri che rappresentano i valori enum interni dei tipi. Assicuratevi di controllare e aggiornare i vostri usi dei tipi dopo l'aggiornamento alla versione 2.0.0 o più recente.",
+          "es": "Tipos de actividad y tipos de canal están ahora en caso de título. Ejemplo: PLAYING es ahora Playing, GUILD_TEXT es ahora GuildText. En estados brutos todos los valores de campo de tipo son ahora números que representan los valores internos de enum de los tipos. Asegúrese de comprobar y actualizar sus usos de los tipos después de actualizar a la versión 2.0.0 o más reciente.",
+          "pl": "Wartość typów i typów kanałów jest obecnie w przypadku tytułowego. Przykład: PLAYING jest obecnie Playing, GUILD_TEXT jest obecnie GuildText. W surowych stanach wszystkie wartości pola są teraz numerami reprezentującymi wartości wewnętrzne typów. Zaświadczasz sobie, że sprawdzać i aktualizuje swoje typy po modernizacji do wersji 2.0.0 lub nowszego.",
+          "uk": "Типи та типи каналів тепер у назвному випадку. Приклад: PLAYING тепер Playing, GUILD_TEXT тепер GuildText. У сирих штатах всі значення поля типу тепер є числа, що представляють внутрішні значення енму типів. Будь ласка, переконайтеся, що перевірити і оновити ваші використання типів після оновлення версії 2.0.0 або новачка.",
+          "zh-cn": "活动类型和渠道类型现处于所有权情况。 例:现在正在推展,古ILD_TEXT现为GuildText。 在原材料中,所有类型的外地价值现在都代表了这些类型的内部价值。 请确保在升级至2.0.0或新版之后检查和更新这些类型。."
+        },
+        "link": "https://github.com/crycode-de/ioBroker.discord#changelog",
+        "level": "warn",
+        "linkText": {
+          "en": "Changelog",
+          "de": "Änderungsprotokoll",
+          "ru": "Список изменений",
+          "pt": "Registro de alterações",
+          "nl": "Wijzigingslog",
+          "fr": "Journal des modifications",
+          "it": "Registro delle modifiche",
+          "es": "registro de cambios",
+          "pl": "Dziennik zmian",
+          "zh-cn": "变更日志",
+          "uk": "Журнал змін"
+        },
+        "buttons": [
+          "agree",
+          "cancel"
+        ]
+      }
     ]
   },
   "protectedNative": [
