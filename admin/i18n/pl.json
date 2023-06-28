@@ -96,7 +96,7 @@
     "When enabled, the received message is send to the configured text2command instance.": "Po włączeniu odebrana wiadomość jest wysyłana do skonfigurowanej instancji text2command.",
     "Enable discord commands for this state": "Włącz polecenia niezgodności dla tego stanu",
     "Make this state available for discord commands.": "Udostępnij ten stan dla poleceń niezgodności.",
-    "Name": "Nazwać",
+    "Name": "Nazwa",
     "A name for this object. Leave empty to use the object name. Must not exceed 100 chars.": "Nazwa tego obiektu. ",
     "Alias": "Alias",
     "An ID alias for this object. Leave empty to use the object ID. Must not exceed 100 chars.": "Alias ​​identyfikatora dla tego obiektu. ",
