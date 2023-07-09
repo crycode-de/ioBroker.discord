@@ -61,6 +61,11 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+* (crycode-de) Detect possible DNS errors during login to prevent restart loops
+* (crycode-de) Better handling for login errors, first 4 errors are now logged just as info
+
 ### 2.0.0 (2023-06-11)
 
 * (crycode-de) Updated discord.js to v14

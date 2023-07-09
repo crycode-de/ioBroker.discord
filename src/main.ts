@@ -410,9 +410,16 @@ class DiscordAdapter extends Adapter {
       return true;
     } catch (err) {
       if (err instanceof Error) {
-        this.log.error(`Discord login error: ${err.toString()}`);
-        if (err.name === 'AbortError') {
-          // AbortError is a result of network errors ... retry
+        // log first 4 errors as info, then as warning
+        if (tryNr < 4) {
+          this.log.info(`Discord login error: ${err.toString()}`);
+        } else {
+          this.log.warn(`Discord login error: ${err.toString()}`);
+        }
+        if (err.name === 'AbortError' || (err as NodeJS.ErrnoException).code === 'EAI_AGAIN') {
+          // AbortError is a result of network errors
+          // EAI_AGAIN ia a result of DNS errors
+          // ... retry
           tryNr++;
           if (tryNr >= LOGIN_WAIT_TIMES.length) {
             tryNr = LOGIN_WAIT_TIMES.length - 1;
