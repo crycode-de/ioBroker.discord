@@ -866,7 +866,7 @@ class DiscordAdapterSlashCommands {
           if (import_i18n.i18n.isFloatComma) {
             min = min.replace(".", ",");
           }
-          await interaction.editReply(import_i18n.i18n.getString("Value %s is below the allowed minium of %s!", `${valueReply}${unit}`, `${min}${unit}`));
+          await interaction.editReply(import_i18n.i18n.getString("Value %s is below the allowed minimum of %s!", `${valueReply}${unit}`, `${min}${unit}`));
           return;
         }
         if (typeof obj.common.max === "number" && value > obj.common.max) {
