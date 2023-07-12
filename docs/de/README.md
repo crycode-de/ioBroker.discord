@@ -188,7 +188,7 @@ Bots festzulegen, wie es den Benutzern angezeigt werden soll.
 | `members` | Mit Komma getrennte Liste der Mitglieder (Anzeigenamen) des Kanals. |
 | `message` | Letzte empfangene Nachricht in diesem Kanal. |
 | `messageId` | ID der letzten empfangenen Nachricht. |
-| `messageAuthor` | Verfasser (Benutzer-Tag) der letzten empfangenen Nachricht. |
+| `messageAuthor` | Verfasser (einmaliger Benutzername oder Benutzer-Tag) der letzten empfangenen Nachricht. |
 | `messageTimestamp` | Zeitstempel der letzten empfangenen Nachricht. |
 | `messageJson` | JSON-Daten der letzten empfangenen Nachricht. |
 | `send` | Senden von Texten oder JSON-formatierten Nachrichten. |
@@ -204,6 +204,7 @@ Zu allen `message*` und `send*` Zuständen siehe den Abschnitt _Nachrichten_ wei
 | Name | Beschreibung |
 |---|---|
 | `tag` | Der eindeutige Tag des Benutzers in Discord. |
+| `name` | Der Name des Benutzers in Discord. (einmalig, wenn `tag` mit `#0` endet) |
 | `displayName` | Der Anzeigename des Benutzers auf dem Server. |
 | `roles` | Mit Komma getrennte Liste der Rollen des Benutzers auf dem Server. |
 | `joinedAt` | Zeitstempel, wann der Benutzer dem Server beigetreten ist. |
@@ -223,6 +224,7 @@ Für die Verwendung der Aktionen `voiceDisconnect`, `voiceServerDeaf` und `voice
 | Name | Beschreibung |
 |---|---|
 | `tag` | Der eindeutige Tag des Benutzers in Discord. |
+| `name` | Der Name des Benutzers in Discord. (einmalig, wenn `tag` mit `#0` endet) |
 | `status` | Der Anwesenheitsstatus des Benutzers. Eins von `online`, `offline`, `idle`, `dnd` |
 | `activityType` | Die Art der momentanen Aktivität des Benutzers. Eins von `Playing`, `Streaming`, `Listening`, `Watching`, `Competing`, `Custom` oder ein leerer String. |
 | `activityName` | Der Name der momentanen Aktivität des Benutzers. Z.B. der Name eines Spiels während `Playing`. |
@@ -257,6 +259,7 @@ aktualisiert.
 | `interactionId` | ID der letzten Nutzung des Befehls. |
 | `userId` | ID des Benutzers, der den Befehl aufgerufen hat. |
 | `userTag` | Eindeutiger Tag des Benutzers, der den Befehl aufgerufen hat. |
+| `userName` | Der Name des Benutzers, der den Befehl aufgerufen hat. (einmalig, wenn `userTag` mit `#0` endet) |
 | `channelId` | ID des Kanals, in dem der Befehl aufgerufen wurde. |
 | `serverId` | ID des Servers, in dem der Befehl aufgerufen wurde, oder `null` wenn der Befehl in einer Direktnachricht aufgerufen wurde. |
 | `timestamp` | Zeitstempel der letzten Nutzung des Befehls. |
@@ -642,6 +645,7 @@ Dabei wird die Antwort editiert und mit dem neuen Inhalt überschrieben.
   user: {
     id: string,
     tag: string,
+    name: string,
     displayName: string,
   },
   channelId: string,
@@ -654,10 +658,13 @@ Dabei wird die Antwort editiert und mit dem neuen Inhalt überschrieben.
       user?: { // wenn type USER oder MENIONABLE ist
         id: string,
         tag: string,
+        name: string,
         bot: boolean,
       },
       member?: { // wenn type USER oder MENIONABLE ist und der Befehl auf einem Server aufgerufen wurde
         id: string,
+        tag: string,
+        name: string,
         displayName: string,
         roles: { id: string, name: string }[],
       },
@@ -702,12 +709,12 @@ Der Adapter bringt eigene Blockly-Blöcke mit, zum ...
   <variables>
     <variable id="KIILW$,(eB?pT`;GDuMF">messageId</variable>
   </variables>
-  <block type="discord_send_message_user" id="?xkCV};-Lk_-|Q`]%(Gt" x="63" y="38">
+  <block type="discord_send_message_user" id="?xkCV};-Lk_-|Q`]%(Gt" x="163" y="38">
     <field name="instance">.0</field>
     <field name="logResultOk">FALSE</field>
     <value name="user">
       <shadow type="text" id="jXN@CluUy_M/ig@4[(Uk">
-        <field name="TEXT">cryCode#9911</field>
+        <field name="TEXT">crycode</field>
       </shadow>
     </value>
     <value name="content">
@@ -734,7 +741,7 @@ Der Adapter bringt eigene Blockly-Blöcke mit, zum ...
             <field name="logResultOk">FALSE</field>
             <value name="user">
               <shadow type="text" id="voJ:{uuYtbBZ!Xe,rtV|">
-                <field name="TEXT">cryCode#9911</field>
+                <field name="TEXT">crycode</field>
               </shadow>
             </value>
             <value name="messageId">
@@ -897,7 +904,7 @@ Der Adapter bringt eigene Blockly-Blöcke mit, zum ...
 <xml xmlns="https://developers.google.com/blockly/xml">
   <variables>
     <variable id="Wcj[Gmy,vX]b,)s,O)`U">interactionId</variable>
-    <variable id="{sXn[Mn@ZN#fWtTV6O^;">userTag</variable>
+    <variable id="{sXn[Mn@ZN#fWtTV6O^;">userName</variable>
     <variable id="ULmVI=-QcXLnD!e60KTV">camID</variable>
   </variables>
   <block type="discord_on_custom_cmd" id="GE,i32wKhz%KGlBhV$j=" x="63" y="13">
@@ -909,11 +916,13 @@ Der Adapter bringt eigene Blockly-Blöcke mit, zum ...
     <value name="varUserId">
       <shadow type="logic_null" id="/}0,E!Gq=C2U]C^.8m1@"></shadow>
     </value>
+    <value name="varUserName">
+      <block type="variables_get" id="Q=v?u?yU}Tw*@FH*|x7.">
+        <field name="VAR" id="{sXn[Mn@ZN#fWtTV6O^;">userName</field>
+      </block>
+    </value>
     <value name="varUserTag">
       <shadow type="logic_null" id="+r2I4SpfhuW%9DE21,[c"></shadow>
-      <block type="variables_get" id="Q=v?u?yU}Tw*@FH*|x7.">
-        <field name="VAR" id="{sXn[Mn@ZN#fWtTV6O^;">userTag</field>
-      </block>
     </value>
     <value name="option0">
       <shadow type="logic_null" id="hL^g}gJg-b.+SOH0s9m1"></shadow>
@@ -944,7 +953,7 @@ Der Adapter bringt eigene Blockly-Blöcke mit, zum ...
                 </value>
                 <value name="ADD1">
                   <block type="variables_get" id="|[[T@|n1Ro{EU56/jJ@P">
-                    <field name="VAR" id="{sXn[Mn@ZN#fWtTV6O^;">userTag</field>
+                    <field name="VAR" id="{sXn[Mn@ZN#fWtTV6O^;">userName</field>
                   </block>
                 </value>
                 <value name="ADD2">
@@ -1031,6 +1040,7 @@ Der `message` Teil von `sendTo(...)` muss ein Objekt mit dem zu sendenden
 
 * `userId`
 * `userTag`
+* `userName`
 * `serverId` und `channelId`
 
 Der `content` kann ein einfacher String oder ein [MessageOptions]-Objekt sein.
@@ -1043,7 +1053,23 @@ Falle eines Fehlers enthält.
 Beispiele:
 
 ```js
-// Senden einer Nachricht zu einem Benutzer
+// Senden einer Nachricht zu einem Benutzer bei Verwendung des einmaligen Benutzernamens
+sendTo('discord.0', 'sendMessage', {
+  userName: 'crycode',
+  content: 'Hi!',
+}, (ret) => {
+  log(ret);
+  // {'result':'Message sent to user crycode','userName':'crycode','content':'Hi!','messageId':'971779972052155891'}
+
+  if (ret.error) {
+    log(ret.error, 'error');
+    return;
+  }
+  log(`Nachricht gesendet mit ID ${ret.messageId}`);
+});
+
+// Senden einer Nachricht zu einem Benutzer bei Verwendung des Benutzer-Tags
+// (für Bots und Benutzer, die noch nicht zu einem einmaligen Benutzernamen migriert sind)
 sendTo('discord.0', 'sendMessage', {
   userTag: 'cryCode#9911',
   content: 'Hi!',
@@ -1069,7 +1095,7 @@ sendTo('discord.0', 'sendMessage', {
   },
 }, (ret) => {
   log(ret);
-  // {'result':'Message sent to user cryCode#9911','userId':'490222742801481728','content':{'content':'Ok!','reply':{'messageReference':'971779972052160552'}},'messageId':'971786369401761832'}
+  // {'result':'Message sent to user crycode','userId':'490222742801481728','content':{'content':'Ok!','reply':{'messageReference':'971779972052160552'}},'messageId':'971786369401761832'}
 });
 
 // Senden einer Datei an einen Serverkanal
@@ -1107,17 +1133,17 @@ Beispiele:
 ```js
 // Eine Nachricht bearbeiten
 sendTo('discord.0', 'editMessage', {
-  userTag: 'cryCode#9911',
+  userName: 'crycode',
   content: 'Hallo!',
   messageId: '971495175367049276',
 }, (ret) => {
   log(ret);
-  // {'result':'Message edited','userTag':'cryCode#9911','content':'Hallo!','messageId':'971495175367049276'}
+  // {'result':'Message edited','userName':'crycode','content':'Hallo!','messageId':'971495175367049276'}
 });
 
 // Nachricht senden und nach fünf Sekunden bearbeiten
 sendTo('discord.0', 'sendMessage', {
-    userTag: 'cryCode#9911',
+    userName: 'crycode',
     content: 'Es ist jetzt: ' + new Date().toLocaleString(),
 }, (ret) => {
   if (ret.error) {
@@ -1126,12 +1152,12 @@ sendTo('discord.0', 'sendMessage', {
   }
   setTimeout(() => {
     sendTo('discord.0', 'editMessage', {
-      userTag: 'cryCode#9911',
+      userName: 'crycode',
       content:  'Es ist jetzt: ' + new Date().toLocaleString(),
       messageId: ret.messageId,
     }, (ret2) => {
       log(ret2);
-      // {'result':'Message edited','userTag':'cryCode#9911','content':'Es ist jetzt: 5.5.2022, 16:25:38','messageId':'971779692166266920'}
+      // {'result':'Message edited','userName':'crycode','content':'Es ist jetzt: 5.5.2022, 16:25:38','messageId':'971779692166266920'}
     });
   }, 5000);
 });
@@ -1153,11 +1179,11 @@ Beispiel:
 ```js
 // Löschen einer Nachricht
 sendTo('discord.0', 'deleteMessage', {
-  userTag: 'cryCode#9911',
+  userName: 'crycode',
   messageId: '971495175367049276',
 }, (ret) => {
   log(ret);
-  // {'result':'Message deleted','userTag':'cryCode#9911','messageId':'971495175367049276'}
+  // {'result':'Message deleted','userName':'crycode','messageId':'971495175367049276'}
 });
 ```
 
@@ -1177,12 +1203,12 @@ Beispiel:
 ```js
 // Hinzufügen einer Reaktion auf eine Nachricht
 sendTo('discord.0', 'addReaction', {
-  userTag: 'cryCode#9911',
+  userName: 'crycode',
   messageId: '971786369401761832',
   emoji: '😎',
 }, (ret) => {
   log(ret);
-  // {'result':'Reaction added to message','userTag':'cryCode#9911','messageId':'971786369401761832','emoji':'😎'}
+  // {'result':'Reaction added to message','userName':'crycode','messageId':'971786369401761832','emoji':'😎'}
 });
 ```
 
@@ -1219,7 +1245,7 @@ sendTo('discord.0', 'awaitMessageReaction', {
   max: 3,
 }, (ret) => {
   log(ret);
-  // {'reactions':[{'emoji':'👍','emojiId':null,'users':[{'id':'490222742801481728','tag':'cryCode#9911'}]}],'serverId':'813364154118963251','channelId':'813364154559102998','messageId':'970754574879162458','timeout':10000,'max':3}
+  // {'reactions':[{'emoji':'👍','emojiId':null,'users':[{'id':'490222742801481728', 'name': 'crycode','tag':'crycode#0'}]}],'serverId':'813364154118963251','channelId':'813364154559102998','messageId':'970754574879162458','timeout':10000,'max':3}
 });
 ```
 
@@ -1237,7 +1263,7 @@ Der `content` kann ein einfacher String oder ein [MessageOptions]-Objekt sein
 ```js
 on({ id: 'discord.0.slashCommands.iob-test.json', change: 'any', ack: true }, (obj) => {
   log(`Benutzerdefinierter Slash-Befehl ${obj.state.val}`);
-  // Benutzerdefinierter Slash-Befehl {"interactionId":"977265764136517725","commandName":"iob-test","channelId":"813364154559102998","serverId":"813364154118963251","user":{"id":"490222742801481728","tag":"cryCode#9911","displayName":"Peter"},"timestamp":1653068714890,"options":{"myopt":{"value":"test","type":"String"}}}
+  // Benutzerdefinierter Slash-Befehl {"interactionId":"977265764136517725","commandName":"iob-test","channelId":"813364154559102998","serverId":"813364154118963251","user":{"id":"490222742801481728", "name":"crycode","tag":"crycode#0","displayName":"Peter"},"timestamp":1653068714890,"options":{"myopt":{"value":"test","type":"String"}}}
 
   const data = JSON.parse(obj.state.val);
 

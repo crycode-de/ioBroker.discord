@@ -657,17 +657,17 @@ The adapter ships with it's own Blockly blocks for ...
   <variables>
     <variable id="KIILW$,(eB?pT`;GDuMF">messageId</variable>
   </variables>
-  <block type="discord_send_message_user" id="?xkCV};-Lk_-|Q`]%(Gt" x="63" y="38">
+  <block type="discord_send_message_user" id="?xkCV};-Lk_-|Q`]%(Gt" x="163" y="38">
     <field name="instance">.0</field>
     <field name="logResultOk">FALSE</field>
     <value name="user">
       <shadow type="text" id="jXN@CluUy_M/ig@4[(Uk">
-        <field name="TEXT">cryCode#9911</field>
+        <field name="TEXT">crycode</field>
       </shadow>
     </value>
     <value name="content">
       <shadow type="text" id="uLWu1CJ$;k}|VTyw1-8}">
-        <field name="TEXT">Hello!</field>
+        <field name="TEXT">Hallo!</field>
       </shadow>
     </value>
     <value name="varMessageId">
@@ -689,7 +689,7 @@ The adapter ships with it's own Blockly blocks for ...
             <field name="logResultOk">FALSE</field>
             <value name="user">
               <shadow type="text" id="voJ:{uuYtbBZ!Xe,rtV|">
-                <field name="TEXT">cryCode#9911</field>
+                <field name="TEXT">crycode</field>
               </shadow>
             </value>
             <value name="messageId">
@@ -702,7 +702,7 @@ The adapter ships with it's own Blockly blocks for ...
             </value>
             <value name="content">
               <shadow type="text" id="rvnV^RF,g$M/3+(npHNC">
-                <field name="TEXT">Hey!</field>
+                <field name="TEXT">Moin!</field>
               </shadow>
             </value>
             <value name="varError">
@@ -851,7 +851,7 @@ The adapter ships with it's own Blockly blocks for ...
 <xml xmlns="https://developers.google.com/blockly/xml">
   <variables>
     <variable id="Wcj[Gmy,vX]b,)s,O)`U">interactionId</variable>
-    <variable id="{sXn[Mn@ZN#fWtTV6O^;">userTag</variable>
+    <variable id="{sXn[Mn@ZN#fWtTV6O^;">userName</variable>
     <variable id="ULmVI=-QcXLnD!e60KTV">camID</variable>
   </variables>
   <block type="discord_on_custom_cmd" id="GE,i32wKhz%KGlBhV$j=" x="63" y="13">
@@ -863,11 +863,13 @@ The adapter ships with it's own Blockly blocks for ...
     <value name="varUserId">
       <shadow type="logic_null" id="/}0,E!Gq=C2U]C^.8m1@"></shadow>
     </value>
+    <value name="varUserName">
+      <block type="variables_get" id="Q=v?u?yU}Tw*@FH*|x7.">
+        <field name="VAR" id="{sXn[Mn@ZN#fWtTV6O^;">userName</field>
+      </block>
+    </value>
     <value name="varUserTag">
       <shadow type="logic_null" id="+r2I4SpfhuW%9DE21,[c"></shadow>
-      <block type="variables_get" id="Q=v?u?yU}Tw*@FH*|x7.">
-        <field name="VAR" id="{sXn[Mn@ZN#fWtTV6O^;">userTag</field>
-      </block>
     </value>
     <value name="option0">
       <shadow type="logic_null" id="hL^g}gJg-b.+SOH0s9m1"></shadow>
@@ -898,7 +900,7 @@ The adapter ships with it's own Blockly blocks for ...
                 </value>
                 <value name="ADD1">
                   <block type="variables_get" id="|[[T@|n1Ro{EU56/jJ@P">
-                    <field name="VAR" id="{sXn[Mn@ZN#fWtTV6O^;">userTag</field>
+                    <field name="VAR" id="{sXn[Mn@ZN#fWtTV6O^;">userName</field>
                   </block>
                 </value>
                 <value name="ADD2">
@@ -1034,7 +1036,7 @@ sendTo('discord.0', 'sendMessage', {
   },
 }, (ret) => {
   log(ret);
-  // {'result':'Message sent to user cryCode#9911','userId':'490222742801481728','content':{'content':'Ok!','reply':{'messageReference':'971779972052160552'}},'messageId':'971786369401761832'}
+  // {'result':'Message sent to user crycode','userId':'490222742801481728','content':{'content':'Ok!','reply':{'messageReference':'971779972052160552'}},'messageId':'971786369401761832'}
 });
 
 // send a file to a server channel
