@@ -63,6 +63,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 -->
 ### **WORK IN PROGRESS**
 
+* (crycode-de) Added support for unique user names
 * (crycode-de) Detect possible DNS errors during login to prevent restart loops
 * (crycode-de) Better handling for login errors, first 4 errors are now logged just as info
 

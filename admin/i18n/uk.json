@@ -56,7 +56,7 @@
     "Set not allowed for state `%s`!": "Встановлення заборонено для стану `%s`!",
     "No value provided!": "Значення не надано!",
     "The given value is not a number!": "Дане значення не є числом!",
-    "Value %s is below the allowed minium of %s!": "Значення %s нижче дозволеного мінімуму %s!",
+    "Value %s is below the allowed minimum of %s!": "Значення %s нижче дозволеного мінімуму %s!",
     "Value %s is above the allowed maximum of %s!": "Значення %s перевищує допустимий максимум %s!",
     "on": "на",
     "off": "вимкнено",

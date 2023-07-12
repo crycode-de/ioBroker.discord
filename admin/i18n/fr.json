@@ -41,7 +41,7 @@
     "Set not allowed for state `%s`!": "Définir non autorisé pour l'état `%s` !",
     "No value provided!": "Aucune valeur fournie !",
     "The given value is not a number!": "La valeur donnée n'est pas un nombre !",
-    "Value %s is below the allowed minium of %s!": "La valeur %s est inférieure au minimum autorisé de %s !",
+    "Value %s is below the allowed minimum of %s!": "La valeur %s est inférieure au minimum autorisé de %s !",
     "Value %s is above the allowed maximum of %s!": "La valeur %s est supérieure au maximum autorisé de %s !",
     "on": "sur",
     "off": "désactivé",

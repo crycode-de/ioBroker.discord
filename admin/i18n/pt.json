@@ -41,7 +41,7 @@
     "Set not allowed for state `%s`!": "Conjunto não permitido para o estado `%s`!",
     "No value provided!": "Nenhum valor fornecido!",
     "The given value is not a number!": "O valor dado não é um número!",
-    "Value %s is below the allowed minium of %s!": "O valor %s está abaixo do mínimo permitido de %s!",
+    "Value %s is below the allowed minimum of %s!": "O valor %s está abaixo do mínimo permitido de %s!",
     "Value %s is above the allowed maximum of %s!": "O valor %s está acima do máximo permitido de %s!",
     "on": "em",
     "off": "fora",

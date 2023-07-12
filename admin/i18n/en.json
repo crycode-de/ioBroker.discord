@@ -56,7 +56,7 @@
     "Set not allowed for state `%s`!": "Set not allowed for state `%s`!",
     "No value provided!": "No value provided!",
     "The given value is not a number!": "The given value is not a number!",
-    "Value %s is below the allowed minium of %s!": "Value %s is below the allowed minium of %s!",
+    "Value %s is below the allowed minimum of %s!": "Value %s is below the allowed minimum of %s!",
     "Value %s is above the allowed maximum of %s!": "Value %s is above the allowed maximum of %s!",
     "on": "on",
     "off": "off",

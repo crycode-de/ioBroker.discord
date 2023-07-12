@@ -41,7 +41,7 @@
     "Set not allowed for state `%s`!": "Установка не разрешена для состояния `%s`!",
     "No value provided!": "Значение не указано!",
     "The given value is not a number!": "Данное значение не является числом!",
-    "Value %s is below the allowed minium of %s!": "Значение %s ниже допустимого минимума %s!",
+    "Value %s is below the allowed minimum of %s!": "Значение %s ниже допустимого минимума %s!",
     "Value %s is above the allowed maximum of %s!": "Значение %s превышает допустимый максимум %s!",
     "on": "на",
     "off": "выключенный",
