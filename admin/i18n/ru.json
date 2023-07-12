@@ -23,6 +23,7 @@
     "Activity type": "Тип деятельности",
     "Activity name": "Название деятельности",
     "User tag": "Тег пользователя",
+    "User name": "Имя пользователя",
     "Get an ioBroker state value": "Получить значение состояния ioBroker",
     "Set an ioBroker state value": "Установите значение состояния ioBroker",
     "The ioBroker state to get": "Состояние ioBroker для получения",

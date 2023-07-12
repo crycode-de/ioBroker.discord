@@ -1,3 +1,4 @@
+import { User } from 'discord.js';
 import { basename } from 'node:path';
 import { URL } from 'node:url';
 
@@ -64,4 +65,13 @@ export function getObjName (common: ioBroker.ObjectCommon): string {
   }
 
   return common.name['en'];
+}
+
+/**
+ * Get the unique username of a discord user or the tag if no unique name is set.
+ * @param user The discord user.
+ * @returns The username or tag.
+ */
+export function userNameOrTag (user: User): string {
+  return user.discriminator === '0' ? user.username : user.tag;
 }

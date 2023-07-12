@@ -182,7 +182,7 @@ This is used to set the presence status and activity of the bot which should be 
 | `members` | Comma separated list of members (display names) in the channel. |
 | `message` | Last received message in the channel. |
 | `messageId` | The ID of the last received message. |
-| `messageAuthor` | The author (tag) of the last received message. |
+| `messageAuthor` | The author (unique username or tag) of the last received message. |
 | `messageTimestamp` | Timestamp of the last received message. |
 | `messageJson` | JSON data for the last received message. |
 | `send` | Send some text or JSON formated message. |
@@ -198,6 +198,7 @@ For all `message*` and `send*` states see _Messages_ section below.
 | Name | Description |
 |---|---|
 | `tag` | The unique tag of the user in discord. |
+| `name` | The name of the user in discord. (unique if the `tag` ends with `#0`) |
 | `displayName` | The display name of the user on the server. |
 | `roles` | Comma separated list of roles of this member on the server. |
 | `joinedAt` | Time when the user joined the server. |
@@ -217,6 +218,7 @@ To use the `voiceDisconnect`, `voiceServerDeaf` and `voiceServerMute` actions, t
 | Name | Description |
 |---|---|
 | `tag` | The unique tag of the user in discord. |
+| `name` | The name of the user in discord. (unique if the `tag` ends with `#0`) |
 | `status` | The presence status of the user. One of `online`, `offline`, `idle`, `dnd` |
 | `activityType` | The type of the current user activity. One of `Playing`, `Streaming`, `Listening`, `Watching`, `Competing`, `Custom` or an empty string. |
 | `activityName` | The name of the current user activity. E.g. the name of a game while `Playing`. |
@@ -249,6 +251,7 @@ All this states will be updated on each call of the custom command.
 | `interactionId` | ID of the last use of the command. |
 | `userId` | ID of the user, who called the command. |
 | `userTag` | Tag of the user, who called the command. |
+| `userName` | The name of the user, who called the command. (unique if the `userTag` ends with `#0`) |
 | `channelId` | ID of the channel, where the command is called. |
 | `serverId` | ID of the server, where the command is called or `null` if the command is used in a direct message. |
 | `timestamp` | Timestamp of the last use of the command. |
@@ -590,6 +593,7 @@ edit the reply and set it to the new content.
   user: {
     id: string,
     tag: string,
+    name: string,
     displayName: string,
   },
   channelId: string,
@@ -602,10 +606,13 @@ edit the reply and set it to the new content.
       user?: { // if type is USER or MENIONABLE
         id: string,
         tag: string,
+        name: string,
         bot: boolean,
       },
       member?: { // if type is USER or MENIONABLE and command is called on a server
         id: string,
+        tag: string,
+        name: string,
         displayName: string,
         roles: { id: string, name: string }[],
       },
@@ -976,6 +983,7 @@ send and one of the following parameters to identify the target:
 
 * `userId`
 * `userTag`
+* `userName`
 * `serverId` and `channelId`
 
 The `content` may be a simple string, or a [MessageOptions] object.
@@ -985,7 +993,22 @@ The return value in the `sendTo(...)` callback is an object containing your mess
 Examples:
 
 ```js
-// send to user
+// send to user using the unique user name
+sendTo('discord.0', 'sendMessage', {
+  userName: 'crycode',
+  content: 'Hi!',
+}, (ret) => {
+  log(ret);
+  // {'result':'Message sent to user crycode','userName':'crycode','content':'Hi!','messageId':'971779972052155891'}
+
+  if (ret.error) {
+    log(ret.error, 'error');
+    return;
+  }
+  log(`Message sent with ID ${ret.messageId}`);
+});
+
+// send to user using the user tag (for bots or users not migrated to unique user name)
 sendTo('discord.0', 'sendMessage', {
   userTag: 'cryCode#9911',
   content: 'Hi!',
@@ -1049,17 +1072,17 @@ Examples:
 ```js
 // edit a message
 sendTo('discord.0', 'editMessage', {
-  userTag: 'cryCode#9911',
+  userName: 'crycode',
   content: 'Hello!',
   messageId: '971495175367049276',
 }, (ret) => {
   log(ret);
-  // {'result':'Message edited','userTag':'cryCode#9911','content':'Hello!','messageId':'971495175367049276'}
+  // {'result':'Message edited','userName':'crycode','content':'Hello!','messageId':'971495175367049276'}
 });
 
 // send a message and edit it after five seconds
 sendTo('discord.0', 'sendMessage', {
-    userTag: 'cryCode#9911',
+    userName: 'crycode',
     content: 'Now: ' + new Date().toLocaleString(),
 }, (ret) => {
   if (ret.error) {
@@ -1068,12 +1091,12 @@ sendTo('discord.0', 'sendMessage', {
   }
   setTimeout(() => {
     sendTo('discord.0', 'editMessage', {
-      userTag: 'cryCode#9911',
+      userName: 'crycode',
       content:  'Now: ' + new Date().toLocaleString(),
       messageId: ret.messageId,
     }, (ret2) => {
       log(ret2);
-      // {'result':'Message edited','userTag':'cryCode#9911','content':'Now: 5.5.2022, 16:25:38','messageId':'971779692166266920'}
+      // {'result':'Message edited','userName':'crycode','content':'Now: 5.5.2022, 16:25:38','messageId':'971779692166266920'}
     });
   }, 5000);
 });
@@ -1095,11 +1118,11 @@ Example:
 ```js
 // delete a message
 sendTo('discord.0', 'deleteMessage', {
-  userTag: 'cryCode#9911',
+  userName: 'crycode',
   messageId: '971495175367049276',
 }, (ret) => {
   log(ret);
-  // {'result':'Message deleted','userTag':'cryCode#9911','messageId':'971495175367049276'}
+  // {'result':'Message deleted','userName':'crycode','messageId':'971495175367049276'}
 });
 ```
 
@@ -1119,12 +1142,12 @@ Example:
 ```js
 // add a reaction to a message
 sendTo('discord.0', 'addReaction', {
-  userTag: 'cryCode#9911',
+  userName: 'crycode',
   messageId: '971786369401761832',
   emoji: '😎',
 }, (ret) => {
   log(ret);
-  // {'result':'Reaction added to message','userTag':'cryCode#9911','messageId':'971786369401761832','emoji':'😎'}
+  // {'result':'Reaction added to message','userName':'crycode','messageId':'971786369401761832','emoji':'😎'}
 });
 ```
 
@@ -1159,7 +1182,7 @@ sendTo('discord.0', 'awaitMessageReaction', {
   max: 3,
 }, (ret) => {
   log(ret);
-  // {'reactions':[{'emoji':'👍','emojiId':null,'users':[{'id':'490222742801481728','tag':'cryCode#9911'}]}],'serverId':'813364154118963251','channelId':'813364154559102998','messageId':'970754574879162458','timeout':10000,'max':3}
+  // {'reactions':[{'emoji':'👍','emojiId':null,'users':[{'id':'490222742801481728', 'name': 'crycode','tag':'crycode#0'}]}],'serverId':'813364154118963251','channelId':'813364154559102998','messageId':'970754574879162458','timeout':10000,'max':3}
 });
 ```
 
@@ -1177,7 +1200,7 @@ The `content` may be a simple string, or a [MessageOptions] object
 ```js
 on({ id: 'discord.0.slashCommands.iob-test.json', change: 'any', ack: true }, (obj) => {
   log(`Got custom slash command ${obj.state.val}`);
-  // Got custom slash command {"interactionId":"977265764136517725","commandName":"iob-test","channelId":"813364154559102998","serverId":"813364154118963251","user":{"id":"490222742801481728","tag":"cryCode#9911","displayName":"Peter"},"timestamp":1653068714890,"options":{"myopt":{"value":"test","type":"String"}}}
+  // Got custom slash command {"interactionId":"977265764136517725","commandName":"iob-test","channelId":"813364154559102998","serverId":"813364154118963251","user":{"id":"490222742801481728","tag":"crycode#0", "name": "crycode","displayName":"Peter"},"timestamp":1653068714890,"options":{"myopt":{"value":"test","type":"String"}}}
 
   const data = JSON.parse(obj.state.val);
 

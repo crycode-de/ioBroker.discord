@@ -20,7 +20,8 @@ var utils_exports = {};
 __export(utils_exports, {
   getBasenameFromFilePathOrUrl: () => getBasenameFromFilePathOrUrl,
   getBufferAndNameFromBase64String: () => getBufferAndNameFromBase64String,
-  getObjName: () => getObjName
+  getObjName: () => getObjName,
+  userNameOrTag: () => userNameOrTag
 });
 module.exports = __toCommonJS(utils_exports);
 var import_node_path = require("node:path");
@@ -57,10 +58,14 @@ function getObjName(common) {
   }
   return common.name["en"];
 }
+function userNameOrTag(user) {
+  return user.discriminator === "0" ? user.username : user.tag;
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   getBasenameFromFilePathOrUrl,
   getBufferAndNameFromBase64String,
-  getObjName
+  getObjName,
+  userNameOrTag
 });
 //# sourceMappingURL=utils.js.map

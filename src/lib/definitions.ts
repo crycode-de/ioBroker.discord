@@ -34,6 +34,7 @@ export interface SetBotPresenceOptions {
 export interface JsonServersMembersObj {
   id: Snowflake;
   tag: string;
+  name: string;
   displayName: string;
   roles: string[];
   joined: number | null;
@@ -52,6 +53,7 @@ export interface JsonServersChannelsObj {
   members: {
     id: Snowflake;
     tag: string;
+    name: string;
     displayName: string;
   }[];
   type: ChannelTypeNames;
@@ -60,6 +62,7 @@ export interface JsonServersChannelsObj {
 export interface JsonUsersObj {
   id: Snowflake;
   tag: string;
+  name: string;
   activityName: string;
   activityType: ActivityTypeNames;
   avatarUrl: string;
@@ -79,6 +82,7 @@ export interface JsonMessageObj {
   mentions: {
     id: Snowflake;
     tag: string;
+    name: string;
     displayName: string;
   }[];
   mentioned: boolean;
@@ -88,6 +92,7 @@ export interface JsonMessageObj {
   author?: {
     id: Snowflake;
     tag: string;
+    name: string;
     displayName: string;
   };
 }
@@ -98,6 +103,7 @@ export interface JsonSlashCommandObj {
   user: {
     id: Snowflake;
     tag: string;
+    name: string;
     displayName: string;
   };
   channelId: Snowflake;
@@ -112,10 +118,13 @@ export interface JsonSlashCommandObjOption {
   user?: {
     id: Snowflake;
     tag: string;
+    name: string;
     bot: boolean;
   };
   member?: {
     id: Snowflake;
+    tag: string;
+    name: string;
     displayName: string;
     roles: { id: Snowflake, name: string }[];
   };
@@ -144,6 +153,7 @@ export type CheckAuthorizationOpts = Partial<ioBroker.AdapterConfigAuthorizedFla
  * One of the following is needed:
  * - `userId`
  * - `userTag`
+ * - `userName`
  * - `serverId` and `channelId`
  */
 export interface MessageTargetIdentifier {
@@ -152,6 +162,7 @@ export interface MessageTargetIdentifier {
 
   userId?: Snowflake;
   userTag?: Snowflake;
+  userName?: Snowflake;
 }
 
 /**
@@ -209,7 +220,8 @@ export interface SendToActionChannelIdentifier extends SendToActionServerIdentif
  */
 export interface SendToActionUserIdentifier {
   userId?: Snowflake;
-  userTag?: Snowflake;
+  userTag?: string;
+  userName?: string;
 }
 
 /**

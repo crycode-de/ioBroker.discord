@@ -23,6 +23,7 @@
     "Activity type": "Activiteitstype",
     "Activity name": "Naam activiteit",
     "User tag": "Gebruikerstag",
+    "User name": "Noem",
     "Get an ioBroker state value": "Een ioBroker-statuswaarde verkrijgen",
     "Set an ioBroker state value": "Stel een ioBroker-statuswaarde in",
     "The ioBroker state to get": "De ioBroker-status om te krijgen",

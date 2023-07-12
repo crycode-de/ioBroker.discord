@@ -28,6 +28,7 @@ import { i18n } from './lib/i18n';
 import {
   getBasenameFromFilePathOrUrl,
   getBufferAndNameFromBase64String,
+  userNameOrTag,
 } from './lib/utils';
 import { ChannelTypeNames, JsonSlashCommandObj } from './lib/definitions';
 
@@ -622,6 +623,18 @@ export class DiscordAdapterSlashCommands {
         },
         native: {},
       }),
+      this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.userName`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('User name'),
+          role: 'text',
+          type: 'string',
+          read: true,
+          write: false,
+          def: '',
+        },
+        native: {},
+      }),
       this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.serverId`, {
         type: 'state',
         common: {
@@ -840,7 +853,7 @@ export class DiscordAdapterSlashCommands {
         await this.handleCmdGetState(interaction);
       } else {
         // user not authorized
-        this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
+        this.adapter.log.warn(`User ${userNameOrTag(user)} (id:${user.id}) is not authorized to call /${commandName} commands!`);
         await interaction.reply({
           content: i18n.getString('You are not authorized to call this command!'),
           ephemeral: true,
@@ -854,7 +867,7 @@ export class DiscordAdapterSlashCommands {
         await this.handleCmdSetState(interaction);
       } else {
         // user not authorized
-        this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
+        this.adapter.log.warn(`User ${userNameOrTag(user)} (id:${user.id}) is not authorized to call /${commandName} commands!`);
         await interaction.reply({
           content: i18n.getString('You are not authorized to call this command!'),
           ephemeral: true,
@@ -868,7 +881,7 @@ export class DiscordAdapterSlashCommands {
         await this.handleCmdCustom(interaction);
       } else {
         // user not authorized
-        this.adapter.log.warn(`User ${user.tag} (id:${user.id}) is not authorized to call /${commandName} commands!`);
+        this.adapter.log.warn(`User ${userNameOrTag(user)} (id:${user.id}) is not authorized to call /${commandName} commands!`);
         await interaction.reply({
           content: i18n.getString('You are not authorized to call this command!'),
           ephemeral: true,
@@ -1295,6 +1308,7 @@ export class DiscordAdapterSlashCommands {
       user: {
         id: user.id,
         tag: user.tag,
+        name: user.username,
         displayName: interaction.member instanceof GuildMember ? interaction.member.displayName : user.username,
       },
       timestamp: interaction.createdTimestamp,
@@ -1314,12 +1328,15 @@ export class DiscordAdapterSlashCommands {
           json.options[optCfg.name].user = {
             id: opt.user.id,
             tag: opt.user.tag,
+            name: opt.user.username,
             bot: opt.user.bot,
           };
         }
         if (opt.member instanceof GuildMember) {
           json.options[optCfg.name].member = {
             id: opt.member.id,
+            tag: opt.member.user.tag,
+            name: opt.member.user.username,
             displayName: opt.member.displayName,
             roles: opt.member.roles.cache.map((r) => ({ id: r.id, name: r.name })),
           };
@@ -1354,6 +1371,7 @@ export class DiscordAdapterSlashCommands {
       this.adapter.setStateAsync(`slashCommands.${commandName}.serverId`, guildId ?? null, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.userId`, user.id, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.userTag`, user.tag, true),
+      this.adapter.setStateAsync(`slashCommands.${commandName}.userName`, user.username, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.timestamp`, interaction.createdTimestamp, true),
       this.adapter.setStateAsync(`slashCommands.${commandName}.json`, JSON.stringify(json), true),
       ...proms,

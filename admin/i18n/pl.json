@@ -23,6 +23,7 @@
     "Activity type": "Rodzaj aktywności",
     "Activity name": "Nazwa działania",
     "User tag": "Tag użytkownika",
+    "User name": "Imię User",
     "Get an ioBroker state value": "Uzyskaj wartość stanu ioBroker",
     "Set an ioBroker state value": "Ustaw wartość stanu ioBroker",
     "The ioBroker state to get": "Stan ioBroker do uzyskania",

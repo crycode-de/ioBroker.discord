@@ -69,6 +69,7 @@ import {
   getBasenameFromFilePathOrUrl,
   getBufferAndNameFromBase64String,
   getObjName,
+  userNameOrTag,
 } from './lib/utils';
 import { LocalizedNotification, getNewestDate } from './lib/notification-manager';
 
@@ -564,7 +565,7 @@ class DiscordAdapter extends Adapter {
         await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}`, {
           type: 'channel',
           common: {
-            name: `${member.displayName} (${member.user.tag})`,
+            name: `${member.displayName} (${userNameOrTag(member.user)})`,
           },
           native: {},
         });
@@ -574,6 +575,18 @@ class DiscordAdapter extends Adapter {
             type: 'state',
             common: {
               name: i18n.getStringOrTranslated('User tag'),
+              role: 'text',
+              type: 'string',
+              read: true,
+              write: false,
+              def: '',
+            },
+            native: {},
+          }),
+          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.name`, {
+            type: 'state',
+            common: {
+              name: i18n.getStringOrTranslated('User name'),
               role: 'text',
               type: 'string',
               read: true,
@@ -711,6 +724,7 @@ class DiscordAdapter extends Adapter {
         const memberRoles = member.roles.cache.map((role) => role.name);
         await Promise.all([
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.tag`, member.user.tag, true),
+          this.setStateAsync(`servers.${guild.id}.members.${member.id}.name`, member.user.username, true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.displayName`, member.displayName, true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.roles`, memberRoles.join(', '), true),
           this.setStateAsync(`servers.${guild.id}.members.${member.id}.joinedAt`, member.joinedTimestamp, true),
@@ -723,6 +737,7 @@ class DiscordAdapter extends Adapter {
 
         const json: JsonServersMembersObj = {
           tag: member.user.tag,
+          name: member.user.username,
           id: member.id,
           displayName: member.displayName,
           roles: memberRoles,
@@ -972,7 +987,7 @@ class DiscordAdapter extends Adapter {
       await this.extendObjectAsyncCached(`users.${user.id}`, {
         type: 'channel',
         common: {
-          name: user.tag,
+          name: userNameOrTag(user),
         },
         native: {
           userId: user.id,
@@ -997,6 +1012,19 @@ class DiscordAdapter extends Adapter {
           type: 'state',
           common: {
             name: i18n.getStringOrTranslated('User tag'),
+            role: 'text',
+            type: 'string',
+            read: true,
+            write: false,
+            def: '',
+          },
+          native: {},
+        }),
+
+        this.extendObjectAsyncCached(`users.${user.id}.name`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('User name'),
             role: 'text',
             type: 'string',
             read: true,
@@ -1178,6 +1206,7 @@ class DiscordAdapter extends Adapter {
       const json: JsonUsersObj = {
         id: user.id,
         tag: user.tag,
+        name: user.username,
         activityName: ps.activityName,
         activityType: ps.activityType,
         avatarUrl: user.displayAvatarURL(),
@@ -1190,6 +1219,7 @@ class DiscordAdapter extends Adapter {
       }
       await Promise.all([
         this.setStateAsync(`users.${user.id}.tag`, user.tag, true),
+        this.setStateAsync(`users.${user.id}.name`, user.username, true),
         this.setStateAsync(`users.${user.id}.avatarUrl`, json.avatarUrl, true),
         this.setStateAsync(`users.${user.id}.bot`, user.bot, true),
         ...proms,
@@ -1260,6 +1290,7 @@ class DiscordAdapter extends Adapter {
       members: members.map((m) => ({
         id: m.user.id,
         tag: m.user.tag,
+        name: m.user.username,
         displayName: m.displayName,
       })),
     };
@@ -1397,7 +1428,7 @@ class DiscordAdapter extends Adapter {
     const isAuthorAuthorized = this.checkUserAuthorization(authCheckTarget);
 
     if (!this.config.processMessagesFromUnauthorizedUsers && !isAuthorAuthorized) {
-      this.log.debug(`Ignore message from unauthorized user ${author.tag} (id:${author.id})`);
+      this.log.debug(`Ignore message from unauthorized user ${userNameOrTag(author)} (id:${author.id})`);
       return;
     }
 
@@ -1440,7 +1471,7 @@ class DiscordAdapter extends Adapter {
       content,
       attachments: message.attachments.map((att) => ({ attachment: att.url, name: att.name, description: att.description ?? '', size: att.size, contentType: att.contentType ?? '', id: att.id })),
       id: message.id,
-      mentions: message.mentions.members?.map((m) => ({ id: m.id, tag: m.user.tag, displayName: m.displayName })) ?? [],
+      mentions: message.mentions.members?.map((m) => ({ id: m.id, tag: m.user.tag, name: m.user.username, displayName: m.displayName })) ?? [],
       mentioned,
       timestamp: message.createdTimestamp,
       authorized: isAuthorAuthorized,
@@ -1450,9 +1481,10 @@ class DiscordAdapter extends Adapter {
       json.author = {
         id: author.id,
         tag: author.tag,
+        name: author.username,
         displayName: this.client.guilds.cache.get(message.guildId)?.members.cache.get(author.id)?.displayName ?? author.username,
       };
-      proms.push(this.setStateAsync(`${msgStateIdPrefix}.messageAuthor`, author.tag, true));
+      proms.push(this.setStateAsync(`${msgStateIdPrefix}.messageAuthor`, userNameOrTag(author), true));
     }
     if (!isDeepStrictEqual(json, this.jsonStateCache.get(`${this.namespace}.${msgStateIdPrefix}.messageJson`))) {
       proms.push(this.setStateAsync(`${msgStateIdPrefix}.messageJson`, JSON.stringify(json), true));
@@ -1501,7 +1533,7 @@ class DiscordAdapter extends Adapter {
         });
       } else {
         // user NOT allowed to text2command
-        this.log.debug(`User ${author.tag} (id:${author.id}) NOT allowed to use text2command`);
+        this.log.debug(`User ${userNameOrTag(author)} (id:${author.id}) NOT allowed to use text2command`);
       }
     }
 
@@ -1787,7 +1819,7 @@ class DiscordAdapter extends Adapter {
       }
 
       target = user;
-      targetName = user.tag;
+      targetName = userNameOrTag(user);
     }
 
     let mo: MessageCreateOptions;
@@ -2008,17 +2040,17 @@ class DiscordAdapter extends Adapter {
             return false;
           }
           await member.voice.disconnect();
-          this.log.debug(`Voice member ${member.user.tag} of server ${guild.name} disconnected.`);
+          this.log.debug(`Voice member ${userNameOrTag(member.user)} of server ${guild.name} disconnected.`);
           break;
 
         case 'ServerDeaf':
           await member.voice.setDeaf(!!state.val);
-          this.log.debug(`Voice server deafen of member ${member.user.tag} of server ${guild.name} set to ${!!state.val}.`);
+          this.log.debug(`Voice server deafen of member ${userNameOrTag(member.user)} of server ${guild.name} set to ${!!state.val}.`);
           break;
 
         case 'ServerMute':
           await member.voice.setMute(!!state.val);
-          this.log.debug(`Voice server mute of member ${member.user.tag} of server ${guild.name} set to ${!!state.val}.`);
+          this.log.debug(`Voice server mute of member ${userNameOrTag(member.user)} of server ${guild.name} set to ${!!state.val}.`);
           break;
 
         default:
@@ -2027,7 +2059,7 @@ class DiscordAdapter extends Adapter {
       }
       return true;
     } catch (err) {
-      this.log.warn(`Voice server action of member ${member.user.tag} of server ${guild.name} can't be done! ${err}`);
+      this.log.warn(`Voice server action of member ${userNameOrTag(member.user)} of server ${guild.name} can't be done! ${err}`);
       return false;
     }
   }
@@ -2076,7 +2108,7 @@ class DiscordAdapter extends Adapter {
 
         // users
         this.client?.users.cache.forEach((u) => {
-          targets.push({ label: u.tag, value: u.id });
+          targets.push({ label: userNameOrTag(u), value: u.id });
         });
 
         // server channels
@@ -2104,7 +2136,7 @@ class DiscordAdapter extends Adapter {
           return;
         }
 
-        const users = this.client?.users.cache.map((u) => ({ label: u.tag, value: u.id })) ?? [];
+        const users = this.client?.users.cache.map((u) => ({ label: userNameOrTag(u), value: u.id })) ?? [];
         this.log.debug(`Users: ${users.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, users, obj.callback);
         break;
@@ -2195,7 +2227,7 @@ class DiscordAdapter extends Adapter {
           return;
         }
 
-        if (sendPayload.userId || sendPayload.userTag) {
+        if (sendPayload.userId || sendPayload.userTag || sendPayload.userName) {
           // send to a user
           if (sendPayload.userId) {
             // by userId
@@ -2204,19 +2236,26 @@ class DiscordAdapter extends Adapter {
               this.sendToIfCb(obj.from, obj.command, { error: `No user with userId ${sendPayload.userId} found`, ...sendPayload }, obj.callback);
               return;
             }
-          } else {
+          } else if (sendPayload.userTag) {
             // by userTag
             user = this.client?.users.cache.find((u) => u.tag === sendPayload.userTag);
             if (!user) {
               this.sendToIfCb(obj.from, obj.command, { error: `No user with userTag ${sendPayload.userTag} found`, ...sendPayload }, obj.callback);
               return;
             }
+          } else {
+            // by unique userName
+            user = this.client?.users.cache.find((u) => u.discriminator === '0' && u.username === sendPayload.userName);
+            if (!user) {
+              this.sendToIfCb(obj.from, obj.command, { error: `No user with unique userName ${sendPayload.userName} found`, ...sendPayload }, obj.callback);
+              return;
+            }
           }
           try {
             msg = await user.send(sendPayload.content);
-            this.sendToIfCb(obj.from, obj.command, { result: `Message sent to user ${user.tag}`, ...sendPayload, messageId: msg.id }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { result: `Message sent to user ${userNameOrTag(user)}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
-            this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to user ${user.tag}: ${err}`, ...sendPayload }, obj.callback);
+            this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to user ${userNameOrTag(user)}: ${err}`, ...sendPayload }, obj.callback);
           }
 
         } else if (sendPayload.serverId && sendPayload.channelId) {
@@ -2235,7 +2274,7 @@ class DiscordAdapter extends Adapter {
 
         } else {
           // missing arguments
-          this.sendToIfCb(obj.from, obj.command, { error: 'userId, userTag or serverId and channelId needs to be set', ...sendPayload }, obj.callback);
+          this.sendToIfCb(obj.from, obj.command, { error: 'userId, userTag, userName or serverId and channelId needs to be set', ...sendPayload }, obj.callback);
         }
 
         break; // send / sendMessage
@@ -2403,7 +2442,7 @@ class DiscordAdapter extends Adapter {
           time: awaitMessageReactionPayload.timeout,
         });
         reactionCollector.on('end', (collected) => {
-          const reactions = collected.map((r) => ({ emoji: r.emoji.name, emojiId: r.emoji.id, users: r.users.cache.map((u) => ({ id: u.id, tag: u.tag })) }));
+          const reactions = collected.map((r) => ({ emoji: r.emoji.name, emojiId: r.emoji.id, users: r.users.cache.map((u) => ({ id: u.id, name: u.username, tag: u.tag })) }));
           this.sendTo(obj.from, obj.command, { reactions, ...awaitMessageReactionPayload }, obj.callback);
         });
 
@@ -2509,6 +2548,7 @@ class DiscordAdapter extends Adapter {
           members: server.members.cache.map((m) => ({
             id: m.id,
             tag: m.user.tag,
+            name: m.user.username,
             displayName: m.displayName,
           })),
           roles: server.roles.cache.map((r) => ({
@@ -2562,6 +2602,7 @@ class DiscordAdapter extends Adapter {
           members: !channel.isThread() && channel.members.map((m) => ({
             id: m.id,
             tag: m.user.tag,
+            name: m.user.username,
             displayName: m.displayName,
           })),
         }, obj.callback);
@@ -2585,8 +2626,8 @@ class DiscordAdapter extends Adapter {
         const getServerMemberInfoPayload = obj.message as SendToActionServerMemberIdentifier;
 
         // check payload
-        if (!getServerMemberInfoPayload.serverId || (!getServerMemberInfoPayload.userId && !getServerMemberInfoPayload.userTag)) {
-          this.sendTo(obj.from, obj.command, { error: 'serverId and userlId or userTag need to be set', ...getServerMemberInfoPayload }, obj.callback);
+        if (!getServerMemberInfoPayload.serverId || (!getServerMemberInfoPayload.userId && !getServerMemberInfoPayload.userTag && !getServerMemberInfoPayload.userName)) {
+          this.sendTo(obj.from, obj.command, { error: 'serverId and userlId, userTag or userName need to be set', ...getServerMemberInfoPayload }, obj.callback);
           return;
         }
 
@@ -2597,10 +2638,16 @@ class DiscordAdapter extends Adapter {
             this.sendTo(obj.from, obj.command, { error: `No member with ID ${getServerMemberInfoPayload.userId} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
             return;
           }
-        } else {
+        } else if (getServerMemberInfoPayload.userTag) {
           member = this.client?.guilds.cache.get(getServerMemberInfoPayload.serverId)?.members.cache.find((m) => m.user.tag === getServerMemberInfoPayload.userTag);
           if (!member) {
             this.sendTo(obj.from, obj.command, { error: `No member with tag ${getServerMemberInfoPayload.userTag} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
+            return;
+          }
+        } else {
+          member = this.client?.guilds.cache.get(getServerMemberInfoPayload.serverId)?.members.cache.find((m) => m.user.discriminator === '0' && m.user.username === getServerMemberInfoPayload.userName);
+          if (!member) {
+            this.sendTo(obj.from, obj.command, { error: `No member with unique name ${getServerMemberInfoPayload.userName} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
             return;
           }
         }
@@ -2608,6 +2655,7 @@ class DiscordAdapter extends Adapter {
         this.sendTo(obj.from, obj.command, {
           id: member.id,
           tag: member.user.tag,
+          name: member.user.username,
           displayName: member.displayName,
           displayColor: member.displayHexColor,
           displayAvatarUrl: member.displayAvatarURL(),
@@ -2641,8 +2689,8 @@ class DiscordAdapter extends Adapter {
         const getUserInfoPayload = obj.message as SendToActionUserIdentifier;
 
         // check payload
-        if (!getUserInfoPayload.userId && !getUserInfoPayload.userTag) {
-          this.sendTo(obj.from, obj.command, { error: 'userlId needs to be set', ...getUserInfoPayload }, obj.callback);
+        if (!getUserInfoPayload.userId && !getUserInfoPayload.userTag && !getUserInfoPayload.userName) {
+          this.sendTo(obj.from, obj.command, { error: 'userId, userTag or userName need to be set', ...getUserInfoPayload }, obj.callback);
           return;
         }
 
@@ -2652,10 +2700,16 @@ class DiscordAdapter extends Adapter {
             this.sendTo(obj.from, obj.command, { error: `No user with ID ${getUserInfoPayload.userId} found`, ...getUserInfoPayload }, obj.callback);
             return;
           }
-        } else {
+        } else if (getUserInfoPayload.userTag) {
           user = this.client?.users.cache.find((u) => u.tag === getUserInfoPayload.userTag);
           if (!user) {
             this.sendTo(obj.from, obj.command, { error: `No user with tag ${getUserInfoPayload.userTag} found`, ...getUserInfoPayload }, obj.callback);
+            return;
+          }
+        } else {
+          user = this.client?.users.cache.find((u) => u.discriminator === '0' && u.username === getUserInfoPayload.userName);
+          if (!user) {
+            this.sendTo(obj.from, obj.command, { error: `No user with unique name ${getUserInfoPayload.userName} found`, ...getUserInfoPayload }, obj.callback);
             return;
           }
         }
@@ -2663,6 +2717,7 @@ class DiscordAdapter extends Adapter {
         this.sendTo(obj.from, obj.command, {
           id: user.id,
           tag: user.tag,
+          name: user.username,
           avatarUrl: user.avatarURL(),
           bot: user.bot,
           accentColor: user.hexAccentColor,
@@ -2702,6 +2757,7 @@ class DiscordAdapter extends Adapter {
           author: {
             id: msg.author.id,
             tag: msg.author.tag,
+            name: msg.author.username,
           },
           content: msg.content,
           embeds: msg.embeds.map((e) => e.toJSON()),
@@ -2858,7 +2914,7 @@ ${readableInstances.join('\n')}`;
       throw new Error('messageId needs to be set');
     }
 
-    if (identifier.userId || identifier.userTag) {
+    if (identifier.userId || identifier.userTag || identifier.userName) {
       // a user
       let user: User | undefined;
       if (identifier.userId) {
@@ -2867,11 +2923,17 @@ ${readableInstances.join('\n')}`;
         if (!user) {
           throw new Error(`No user with userId ${identifier.userId} found`);
         }
-      } else {
+      } else if (identifier.userTag) {
         // by userTag
         user = this.client?.users.cache.find((u) => u.tag === identifier.userTag);
         if (!user) {
           throw new Error(`No user with userTag ${identifier.userTag} found`);
+        }
+      } else {
+        // by unique userName
+        user = this.client?.users.cache.find((u) => u.discriminator === '0' && u.username === identifier.userName);
+        if (!user) {
+          throw new Error(`No user with unique userName ${identifier.userName} found`);
         }
       }
       try {
@@ -2880,11 +2942,11 @@ ${readableInstances.join('\n')}`;
         }
         const msg = user.dmChannel?.messages.cache.get(identifier.messageId) ?? await user.dmChannel?.messages.fetch(identifier.messageId);
         if (!msg) {
-          throw new Error(`No message with messageId ${identifier.messageId} for user ${user.tag} found`);
+          throw new Error(`No message with messageId ${identifier.messageId} for user ${userNameOrTag(user)} found`);
         }
         return msg;
       } catch (err) {
-        throw new Error(`Error finding message for user ${user.tag}: ${err}`);
+        throw new Error(`Error finding message for user ${userNameOrTag(user)}: ${err}`);
       }
 
     } else if (identifier.serverId && identifier.channelId) {
@@ -2905,7 +2967,7 @@ ${readableInstances.join('\n')}`;
 
     } else {
       // missing arguments
-      throw new Error('userId, userTag or serverId and channelId needs to be set');
+      throw new Error('userId, userTag, userName or serverId and channelId needs to be set');
     }
   }
 

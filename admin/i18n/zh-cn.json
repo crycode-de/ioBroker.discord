@@ -23,6 +23,7 @@
     "Activity type": "活动类型",
     "Activity name": "活动名称",
     "User tag": "用户标签",
+    "User name": "使用名称",
     "Get an ioBroker state value": "获取 ioBroker 状态值",
     "Set an ioBroker state value": "设置 ioBroker 状态值",
     "The ioBroker state to get": "要获取的 ioBroker 状态",
