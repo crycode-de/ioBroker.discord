@@ -3032,7 +3032,7 @@ ${readableInstances.join('\n')}`;
    * @param time Time to wait in ms.
    */
   public wait (time: number): Promise<void> {
-    return new Promise((resolve) => this.setTimeout(resolve, time));
+    return new Promise((resolve: () => void) => this.setTimeout(resolve, time));
   }
 
   /**
