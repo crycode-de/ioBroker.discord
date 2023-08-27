@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "discord",
-    "version": "2.1.0",
+    "version": "2.1.1",
     "news": {
+      "2.1.1": {
+        "en": "Updated dependencies\nUpdated translations",
+        "de": "Abhängigkeiten aktualisiert\nÜbersetzungen aktualisiert",
+        "ru": "Обновленные зависимости\nОбновленные переводы",
+        "pt": "Dependências atualizadas\nTraduções atualizadas",
+        "nl": "Verouderde afhankelijkheid\nVertaling:",
+        "fr": "Mise à jour des dépendances\nTraductions actualisées",
+        "it": "Dipendenze aggiornate\nTraduzioni aggiornate",
+        "es": "Dependencias actualizadas\nTraducciones actualizadas",
+        "pl": "Zależność od upoważnienia\nTłumaczenia poprawione",
+        "uk": "Оновлені залежності\nОновлені переклади",
+        "zh-cn": "A. 最新依赖情况\n最新翻译"
+      },
       "2.1.0": {
         "en": "Added support for unique user names\nDetect possible DNS errors during login to prevent restart loops\nBetter handling for login errors, first 4 errors are now logged just as info",
         "de": "Unterstützung für einzigartige Benutzernamen hinzugefügt\nErkennung möglicher DNS-Fehler während des Logins, um Neustartschleifen zu verhindern\nBessere Handhabung für Login-Fehler, die ersten 4 Fehler werden jetzt lediglich als Info geloggt",
@@ -80,19 +93,6 @@
         "pl": "Aktualizacja",
         "uk": "Оновлення залежностей",
         "zh-cn": "B. 附属更新"
-      },
-      "1.1.2": {
-        "en": "Fixed adapter termination on discord errors to let the js-controller restart the adapter",
-        "de": "Beendigung des Adapters bei Diskord-Fehlern verbessert, damit der js-Controller den Adapter im Fehlerfall automatisch neu startet",
-        "ru": "Исправлено прекращение адаптера на дискордовых ошибках, чтобы позволить js-контроллеру перезапустить адаптер",
-        "pt": "Terminação do adaptador fixo em erros de discórdia para deixar o js-controller reiniciar o adaptador",
-        "nl": "De adapter beëindiging van de fouten om de js-controller te laten herstarten",
-        "fr": "Résiliation de l'adaptateur fixe sur les erreurs de discord pour laisser le js-controller redémarrer l'adaptateur",
-        "it": "Risolto la terminazione dell'adattatore sugli errori di discord per far riavviare l'adattatore",
-        "es": "Terminación del adaptador fijo en errores de discordia para permitir que el js-controller reinicie el adaptador",
-        "pl": "Fixed adapter termination on discord error to let js-controller restartuje adapter",
-        "uk": "Виправлено завершення адаптера через помилки Discord, щоб дозволити js-контролеру перезапустити адаптер",
-        "zh-cn": "对失误的混合适应人员终止,以便控制的行贿者重新启动适应者。"
       }
     },
     "title": "Discord",
