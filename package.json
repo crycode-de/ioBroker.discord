@@ -1,6 +1,6 @@
 {
   "name": "iobroker.discord",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "ioBroker Discord bot integration",
   "author": {
     "name": "Peter Müller",
