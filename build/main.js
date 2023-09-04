@@ -2184,10 +2184,10 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         if (!this.config.sendNotificationsTo) {
           this.log.debug(`New notification received from ${obj.from}, but sending notifications is not enabled in adapter config`);
-          this.sendTo(obj.from, obj.command, { send: false }, obj.callback);
+          this.sendTo(obj.from, obj.command, { sent: false }, obj.callback);
           return;
         }
-        this.log.info(`New notification received from ${obj.from}`);
+        this.log.info(`New notification received from ${obj.from.replace(/^system\.adapter\./, "")}`);
         let target = void 0;
         if (this.config.sendNotificationsTo.indexOf("/") > 0) {
           const [serverId, channelId] = this.config.sendNotificationsTo.split("/");
@@ -2200,13 +2200,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         if (!target) {
           this.log.error(`Cannot send notification because the configured target is invalid!`);
-          this.sendTo(obj.from, obj.command, { send: false }, obj.callback);
+          this.sendTo(obj.from, obj.command, { sent: false }, obj.callback);
           return;
         }
         const message = obj.message;
         if (!((_B = message == null ? void 0 : message.category) == null ? void 0 : _B.instances) || !message.category.name) {
           this.log.warn(`Cannot send notification because the received message object is invalid`);
-          this.sendTo(obj.from, obj.command, { send: false }, obj.callback);
+          this.sendTo(obj.from, obj.command, { sent: false }, obj.callback);
           return;
         }
         const { instances, severity } = message.category;
@@ -2229,8 +2229,14 @@ ${message.category.description ?? ""}
 
 ${message.host}:
 ${readableInstances.join("\n")}`;
-        await target.send(text);
-        this.sendTo(obj.from, obj.command, { send: true }, obj.callback);
+        try {
+          const msg2 = await target.send(text);
+          this.log.debug(`Sent message from notification-manager adapter with message ID ${msg2.id}`);
+          this.sendTo(obj.from, obj.command, { sent: true }, obj.callback);
+        } catch (err) {
+          this.log.warn(`Error sending message from notification-manager adapter: ${err}`);
+          this.sendTo(obj.from, obj.command, { sent: false }, obj.callback);
+        }
         break;
       default:
         this.log.warn(`Got message with unknown command: ${obj.command}`);
