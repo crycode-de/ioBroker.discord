@@ -2178,8 +2178,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }, obj.callback);
         break;
       case "sendNotification":
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
+          return;
+        }
         if (!this.config.sendNotificationsTo) {
           this.log.debug(`New notification received from ${obj.from}, but sending notifications is not enabled in adapter config`);
+          this.sendTo(obj.from, obj.command, { send: false }, obj.callback);
           return;
         }
         this.log.info(`New notification received from ${obj.from}`);
@@ -2195,11 +2200,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         if (!target) {
           this.log.error(`Cannot send notification because the configured target is invalid!`);
+          this.sendTo(obj.from, obj.command, { send: false }, obj.callback);
           return;
         }
         const message = obj.message;
         if (!((_B = message == null ? void 0 : message.category) == null ? void 0 : _B.instances) || !message.category.name) {
           this.log.warn(`Cannot send notification because the received message object is invalid`);
+          this.sendTo(obj.from, obj.command, { send: false }, obj.callback);
           return;
         }
         const { instances, severity } = message.category;
@@ -2223,6 +2230,7 @@ ${message.category.description ?? ""}
 ${message.host}:
 ${readableInstances.join("\n")}`;
         await target.send(text);
+        this.sendTo(obj.from, obj.command, { send: true }, obj.callback);
         break;
       default:
         this.log.warn(`Got message with unknown command: ${obj.command}`);

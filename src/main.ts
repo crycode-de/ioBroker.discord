@@ -2775,10 +2775,17 @@ class DiscordAdapter extends Adapter {
          * notification from ioBrokers notification system
          * see https://github.com/foxriver76/ioBroker.notification-manager
          */
-        if (!this.config.sendNotificationsTo) {
-          this.log.debug(`New notification received from ${obj.from}, but sending notifications is not enabled in adapter config`);
+        if (!obj.callback) {
+          this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
+
+        if (!this.config.sendNotificationsTo) {
+          this.log.debug(`New notification received from ${obj.from}, but sending notifications is not enabled in adapter config`);
+          this.sendTo(obj.from, obj.command, { send: false }, obj.callback);
+          return;
+        }
+
         this.log.info(`New notification received from ${obj.from}`);
 
         let target: User | TextChannel | undefined = undefined;
@@ -2797,6 +2804,7 @@ class DiscordAdapter extends Adapter {
 
         if (!target) {
           this.log.error(`Cannot send notification because the configured target is invalid!`);
+          this.sendTo(obj.from, obj.command, { send: false }, obj.callback);
           return;
         }
 
@@ -2805,6 +2813,7 @@ class DiscordAdapter extends Adapter {
         // check the message object
         if (!message?.category?.instances || !message.category.name) {
           this.log.warn(`Cannot send notification because the received message object is invalid`);
+          this.sendTo(obj.from, obj.command, { send: false }, obj.callback);
           return;
         }
 
@@ -2833,6 +2842,8 @@ ${message.host}:
 ${readableInstances.join('\n')}`;
 
         await target.send(text);
+
+        this.sendTo(obj.from, obj.command, { send: true }, obj.callback);
 
         break;
 
