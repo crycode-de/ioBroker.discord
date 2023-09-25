@@ -270,7 +270,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         } else {
           this.log.warn(`Discord login error: ${err.toString()}`);
         }
-        if (err.name === "AbortError" || err.code === "EAI_AGAIN") {
+        if (err.name === "AbortError" || err.name === "ConnectTimeoutError" || err.code === "EAI_AGAIN") {
           tryNr++;
           if (tryNr >= LOGIN_WAIT_TIMES.length) {
             tryNr = LOGIN_WAIT_TIMES.length - 1;

@@ -417,8 +417,8 @@ class DiscordAdapter extends Adapter {
         } else {
           this.log.warn(`Discord login error: ${err.toString()}`);
         }
-        if (err.name === 'AbortError' || (err as NodeJS.ErrnoException).code === 'EAI_AGAIN') {
-          // AbortError is a result of network errors
+        if (err.name === 'AbortError' || err.name === 'ConnectTimeoutError' || (err as NodeJS.ErrnoException).code === 'EAI_AGAIN') {
+          // AbortError and ConnectTimeoutError are results of network errors
           // EAI_AGAIN ia a result of DNS errors
           // ... retry
           tryNr++;
