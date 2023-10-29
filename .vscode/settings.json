@@ -12,10 +12,11 @@
         },
         {
             "fileMatch": [
-                "jsonConfig.json",
-                "jsonCustom.json"
+                "admin/jsonConfig.json",
+                "admin/jsonCustom.json",
+                "admin/jsonTab.json"
             ],
-            "url": "https://raw.githubusercontent.com/ioBroker/adapter-react/master/schemas/jsonConfig.json"
+            "url": "https://raw.githubusercontent.com/ioBroker/adapter-react-v5/main/schemas/jsonConfig.json"
         }
     ],
     "cSpell.words": [
