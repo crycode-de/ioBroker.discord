@@ -597,7 +597,7 @@
         "_link": {
           "type": "textSendTo",
           "container": "text",
-          "newline": true,
+          "newLine": true,
           "sm": 12,
           "hidden": "!_alive",
           "command": "getAddToServerLink",
