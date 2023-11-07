@@ -65,6 +65,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 
 * (crycode-de) Optimized error handling - Network related errors should now be handled completely without adapter restarts and better logging
 * (crycode-de) Fixed small issues in config UI
+* (crycode-de) Updated dependencies
 
 ### 2.1.2 (2023-09-04)
 
