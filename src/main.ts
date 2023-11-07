@@ -142,6 +142,13 @@ class DiscordAdapter extends Adapter {
   public initialCustomObjectSetupDone: boolean = false;
 
   /**
+   * Flag if we are currently in shard error state from discord.js.
+   * `false` currently not on error state, A `string` containing the error name in
+   * case of en error.
+   */
+  private isShardError: false | string = false;
+
+  /**
    * Flag if the adapter is unloaded or is unloading.
    * Used to check this in some async operations.
    */
@@ -298,25 +305,39 @@ class DiscordAdapter extends Adapter {
       this.setInfoConnectionState(false);
     });
 
-    this.client.on('shardError', (err) => {
+    this.client.on('shardError', (err: Error, shardId: number) => {
       // discord.js internally handles websocket errors and reconnects
-      // this is just for some logging
-      this.log.warn(`Discord client websocket error: ${err.toString()}`);
-      this.setInfoConnectionState(false);
+      // this is just for some logging and setting the connection state
+
+      // just handle the error if it's not the already handled error
+      let errorMsg: string;
+      if (err instanceof AggregateError) {
+        // create a list of unique error code entries
+        errorMsg = Array.from(new Set(err.errors.map((e: NodeJS.ErrnoException) => e.code))).join(', ');
+      } else {
+        errorMsg = err.toString();
+      }
+
+      if (this.isShardError != errorMsg) {
+        this.isShardError = errorMsg;
+        this.log.warn(`Discord client websocket error (shardId:${shardId}): ${errorMsg}`);
+        this.setInfoConnectionState(false);
+      } else {
+        this.log.debug(`Discord client websocket error (shardId:${shardId}): ${errorMsg}`);
+      }
     });
-    this.client.on('shardReady', (shardId) => {
+
+    this.client.on('shardReady', (shardId: number) => {
       // discord.js websocket is ready (connected)
+      this.isShardError = false;
       this.log.info(`Discord client websocket connected (shardId:${shardId})`);
       this.setInfoConnectionState(true);
       this.setBotPresence();
     });
+
     this.client.on('shardResume', (shardId: number, replayedEvents: number) => this.log.debug(`Discord client websocket resume (shardId:${shardId} replayedEvents:${replayedEvents})`));
     this.client.on('shardDisconnect', (event: DjsCloseEvent, shardId: number) => this.log.debug(`Discord client websocket disconnect (shardId:${shardId} code:${event.code})`));
     this.client.on('shardReconnecting', (shardId: number) => this.log.debug(`Discord client websocket reconnecting (shardId:${shardId})`));
-    this.client.on('shardError', (err: Error, shardId: number) => {
-      this.log.error(`Discord client websocket error (shardId:${shardId}) ${err}`);
-      this.terminate('Discord client websocket error', EXIT_CODES.START_IMMEDIATELY_AFTER_STOP);
-    });
 
     this.client.on('messageCreate', this.onClientMessageCreate);
 
@@ -411,15 +432,24 @@ class DiscordAdapter extends Adapter {
       return true;
     } catch (err) {
       if (err instanceof Error) {
+        let errorMsg: string;
+        if (err instanceof AggregateError) {
+          // create a list of unique error code entries
+          errorMsg = Array.from(new Set(err.errors.map((e: NodeJS.ErrnoException) => e.code))).join(', ');
+        } else {
+          errorMsg = err.toString();
+        }
         // log first 4 errors as info, then as warning
         if (tryNr < 4) {
-          this.log.info(`Discord login error: ${err.toString()}`);
+          this.log.info(`Discord login error: ${errorMsg}`);
         } else {
-          this.log.warn(`Discord login error: ${err.toString()}`);
+          this.log.warn(`Discord login error: ${errorMsg}`);
         }
-        if (err.name === 'AbortError' || err.name === 'ConnectTimeoutError' || (err as NodeJS.ErrnoException).code === 'EAI_AGAIN') {
+        if (err.name === 'AbortError' || err.name === 'ConnectTimeoutError' || (err as NodeJS.ErrnoException).code === 'EAI_AGAIN'
+          || (err instanceof AggregateError && err.errors.map((e: NodeJS.ErrnoException) => e.code).includes('ENETUNREACH')) ) {
           // AbortError and ConnectTimeoutError are results of network errors
-          // EAI_AGAIN ia a result of DNS errors
+          // EAI_AGAIN is a result of DNS errors
+          // AggregateError containing ENETUNREACH occurs in case routing problems
           // ... retry
           tryNr++;
           if (tryNr >= LOGIN_WAIT_TIMES.length) {

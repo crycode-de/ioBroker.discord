@@ -60,6 +60,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.extendObjectCache = new import_discord.Collection();
     this.jsonStateCache = new import_discord.Collection();
     this.initialCustomObjectSetupDone = false;
+    this.isShardError = false;
     this.unloaded = false;
     this.discordSlashCommands = new import_commands.DiscordAdapterSlashCommands(this);
     this.on("ready", this.onReady);
@@ -181,11 +182,23 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       this.log.warn("Discord client session invalidated");
       this.setInfoConnectionState(false);
     });
-    this.client.on("shardError", (err) => {
-      this.log.warn(`Discord client websocket error: ${err.toString()}`);
-      this.setInfoConnectionState(false);
+    this.client.on("shardError", (err, shardId) => {
+      let errorMsg;
+      if (err instanceof AggregateError) {
+        errorMsg = Array.from(new Set(err.errors.map((e) => e.code))).join(", ");
+      } else {
+        errorMsg = err.toString();
+      }
+      if (this.isShardError != errorMsg) {
+        this.isShardError = errorMsg;
+        this.log.warn(`Discord client websocket error (shardId:${shardId}): ${errorMsg}`);
+        this.setInfoConnectionState(false);
+      } else {
+        this.log.debug(`Discord client websocket error (shardId:${shardId}): ${errorMsg}`);
+      }
     });
     this.client.on("shardReady", (shardId) => {
+      this.isShardError = false;
       this.log.info(`Discord client websocket connected (shardId:${shardId})`);
       this.setInfoConnectionState(true);
       this.setBotPresence();
@@ -193,10 +206,6 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.client.on("shardResume", (shardId, replayedEvents) => this.log.debug(`Discord client websocket resume (shardId:${shardId} replayedEvents:${replayedEvents})`));
     this.client.on("shardDisconnect", (event, shardId) => this.log.debug(`Discord client websocket disconnect (shardId:${shardId} code:${event.code})`));
     this.client.on("shardReconnecting", (shardId) => this.log.debug(`Discord client websocket reconnecting (shardId:${shardId})`));
-    this.client.on("shardError", (err, shardId) => {
-      this.log.error(`Discord client websocket error (shardId:${shardId}) ${err}`);
-      this.terminate("Discord client websocket error", import_adapter_core.EXIT_CODES.START_IMMEDIATELY_AFTER_STOP);
-    });
     this.client.on("messageCreate", this.onClientMessageCreate);
     if (this.config.dynamicServerUpdates) {
       this.client.on("channelCreate", () => this.updateGuilds());
@@ -265,12 +274,18 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       return true;
     } catch (err) {
       if (err instanceof Error) {
-        if (tryNr < 4) {
-          this.log.info(`Discord login error: ${err.toString()}`);
+        let errorMsg;
+        if (err instanceof AggregateError) {
+          errorMsg = Array.from(new Set(err.errors.map((e) => e.code))).join(", ");
         } else {
-          this.log.warn(`Discord login error: ${err.toString()}`);
+          errorMsg = err.toString();
         }
-        if (err.name === "AbortError" || err.name === "ConnectTimeoutError" || err.code === "EAI_AGAIN") {
+        if (tryNr < 4) {
+          this.log.info(`Discord login error: ${errorMsg}`);
+        } else {
+          this.log.warn(`Discord login error: ${errorMsg}`);
+        }
+        if (err.name === "AbortError" || err.name === "ConnectTimeoutError" || err.code === "EAI_AGAIN" || err instanceof AggregateError && err.errors.map((e) => e.code).includes("ENETUNREACH")) {
           tryNr++;
           if (tryNr >= LOGIN_WAIT_TIMES.length) {
             tryNr = LOGIN_WAIT_TIMES.length - 1;
