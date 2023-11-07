@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "discord",
-    "version": "2.1.2",
+    "version": "2.2.0",
     "news": {
+      "2.2.0": {
+        "en": "Optimized error handling - Network related errors should now be handled completely without adapter restarts and better logging\nFixed small issues in config UI\nUpdated dependencies",
+        "de": "Optimierte Fehlerbehandlung - Netzwerkfehler sollten jetzt vollständig ohne Adapter-Neustart behandelt und besser protokolliert werden\nKleine Probleme in der Config-UI behoben\nAbhängigkeiten aktualisiert",
+        "ru": "Оптимизированная обработка ошибок - Сетевые связанные ошибки теперь должны быть обработаны полностью без перезагрузок адаптеров и лучшего входа\nИсправлены небольшие проблемы в config UI\nОбновленные зависимости",
+        "pt": "Manuseio de erro otimizado - Os erros relacionados à rede agora devem ser tratados completamente sem reinicializações do adaptador e melhor registro\nCorrigido pequenos problemas em UI de configuração\nDependências atualizadas",
+        "nl": "Geoptimiseerde fouten, netwerk gerelateerde fouten, moeten nu volledig afgehandeld worden zonder adapterresten en beter vegen\nKleine kwesties opgelost in UI\nVerouderde afhankelijkheid",
+        "fr": "Manipulation optimisée des erreurs - Les erreurs liées au réseau devraient maintenant être gérées complètement sans redémarrage d'adaptateur et une meilleure connexion\nCorrection de petits problèmes dans config UI\nMise à jour des dépendances",
+        "it": "Gestione degli errori ottimizzata - Gli errori relativi alla rete dovrebbero essere gestiti completamente senza riavviamento dell'adattatore e migliore registrazione\nRisolto piccoli problemi in configurazione UI\nDipendenze aggiornate",
+        "es": "Tratamiento optimizado de errores - Los errores relacionados con la red ahora deben manejarse completamente sin reiniciar el adaptador y mejor registro\nProblemas fijos pequeños en config UI\nDependencias actualizadas",
+        "pl": "Optymizowana obsługa błędów (ang. Optimized error handling) – błędy związane z siecią powinny być obecnie przejmowane bez ponownego uruchomienia i lepszego logowania\nDrobne problemy w konfiguście\nZależność od upoważnienia",
+        "uk": "Оптимізоване поводження з похибками - Пов'язані помилки мережі повинні бути повністю оброблятися без перезавантаження адаптера і краще завантажувати\nВиправлено маленькі питання в конфігурації UI\nОновлені залежності",
+        "zh-cn": "减少错误处理——网络相关的错误现在应该完全处理,而不适应其他艺术和更好的伐木。\n混凝土的小问题\nA. 最新依赖情况"
+      },
       "2.1.2": {
         "en": "Fixed response to notification-manager adapter",
         "de": "Antwort auf Benachrichtigungen vom notification-manager Adapter korrigiert",
@@ -80,19 +93,6 @@
         "pl": "Czytelnia ta jest mniej ścisła",
         "uk": "Перевірка токенів стала менш суворою",
         "zh-cn": "D. 证据不足"
-      },
-      "1.1.4": {
-        "en": "Fixed crash if custom command choices name was empty",
-        "de": "Absturz behoben, wenn der Name einer Option eines benutzerdefinierten Befehls Name war leer",
-        "ru": "Исправлена ошибка, если пользовательский выбор команды имя было пусто",
-        "pt": "Corrigido acidente se o nome de escolhas de comando personalizado estava vazio",
-        "nl": "Een crash als de gebruikelijke commando-naam leeg was",
-        "fr": "Accident fixe si le nom de la commande personnalisée était vide",
-        "it": "Crash fisso se il nome delle scelte di comando personalizzate era vuoto",
-        "es": "Accidente fijo si las opciones de comando personalizado nombre estaba vacío",
-        "pl": "Szczegółowa katastrofa, jeśli nazwa dowodzenia była pusta",
-        "uk": "Виправлено збій, якщо ім’я вибору команди було порожнім",
-        "zh-cn": "如果定制指挥选择名称是空洞,则固定的坠落。"
       }
     },
     "title": "Discord",
