@@ -95,7 +95,6 @@
         "zh-cn": "D. 证据不足"
       }
     },
-    "title": "Discord",
     "titleLang": {
       "en": "Discord",
       "de": "Discord",
@@ -128,7 +127,6 @@
     "keywords": [
       "bot",
       "discord",
-      "iobroker",
       "message",
       "notification"
     ],
