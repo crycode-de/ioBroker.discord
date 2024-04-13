@@ -35,16 +35,27 @@ var import_utils = require("./lib/utils");
 var import_notification_manager = require("./lib/notification-manager");
 const LOGIN_WAIT_TIMES = [
   0,
+  // none - first try!
   5e3,
+  // 5 sek
   1e4,
+  // 10 sek
   3e4,
+  // 30 sek
   6e4,
+  // 1 min
   12e4,
+  // 2 min
   12e4,
+  // 2 min
   3e5,
+  // 5 min
   3e5,
+  // 5 min
   3e5,
+  // 5 min
   6e5
+  // 10 min
 ];
 class DiscordAdapter extends import_adapter_core.Adapter {
   constructor(options = {}) {
@@ -52,15 +63,52 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       ...options,
       name: "discord"
     });
+    /**
+     * Local cache for `info.connection` state.
+     */
     this.infoConnected = false;
+    /**
+     * Instance of the discord client.
+     */
     this.client = null;
+    /**
+     * Set of state IDs where received discord messages will be stored to.
+     * Used to identify target states for received discord messages.
+     */
     this.messageReceiveStates = /* @__PURE__ */ new Set();
+    /**
+     * Set user IDs known to set up.
+     * Used to check if the user objects are created on some events.
+     */
     this.knownUsers = /* @__PURE__ */ new Set();
+    /**
+     * Set of objects from this instance with text2command enabled.
+     */
     this.text2commandObjects = /* @__PURE__ */ new Set();
+    /**
+     * Cache for `extendObjectCache(...)` calls to extend objects only when changed.
+     */
     this.extendObjectCache = new import_discord.Collection();
+    /**
+     * Cache for `.json` states.
+     */
     this.jsonStateCache = new import_discord.Collection();
+    /**
+     * Flag if the initial setup of the custom object configurations is done or not.
+     * While not done, custom object configuration changes will not trigger a
+     * slash commands registration automatically.
+     */
     this.initialCustomObjectSetupDone = false;
+    /**
+     * Flag if we are currently in shard error state from discord.js.
+     * `false` currently not on error state, A `string` containing the error name in
+     * case of en error.
+     */
     this.isShardError = false;
+    /**
+     * Flag if the adapter is unloaded or is unloading.
+     * Used to check this in some async operations.
+     */
     this.unloaded = false;
     this.discordSlashCommands = new import_commands.DiscordAdapterSlashCommands(this);
     this.on("ready", this.onReady);
@@ -168,6 +216,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       ],
       partials: [
         import_discord.Partials.Channel
+        // needed for DMs
       ]
     });
     this.client.on("ready", this.onClientReady);
@@ -265,6 +314,16 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     await this.discordSlashCommands.registerSlashCommands();
   }
+  /**
+   * Try to log in the discord client.
+   *
+   * This will also handle network related errors.
+   * In case of networt related errors this will retry the login after some time.
+   * The wait time before each retry will be increased for each try, as defined
+   * in `LOGIN_WAIT_TIMES`.
+   * @param tryNr Number of the login try. Should be `0` when login process is started and is increased internally in each try.
+   * @returns Promise which resolves to `true` if logged in, or an error name/message otherwise.
+   */
   async loginClient(tryNr = 0) {
     if (!this.client || this.unloaded) {
       return "No Client";
@@ -336,6 +395,10 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       this.log.error(`Error while updating server information: ${err}`);
     }
   }
+  /**
+   * Update the guilds (servers), channels and users seen by the discord bot.
+   * This will create/update all dynamic objects for all servers and users if needed.
+   */
   async updateGuilds() {
     var _a, _b, _c, _d;
     if (!((_a = this.client) == null ? void 0 : _a.user)) {
@@ -1054,6 +1117,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       }
     }
   }
+  /**
+   * Update the states containing basic information about a channel.
+   *
+   * This includes the following channel states: `.json`, `.memberCount`, `.members`
+   * @param channel The channel to update the states for.
+   */
   async updateChannelInfoStates(channel) {
     const channelIdPrefix = channel.parentId ? `servers.${channel.guildId}.channels.${channel.parentId}.channels.${channel.id}` : `servers.${channel.guild.id}.channels.${channel.id}`;
     const members = [...channel.members.values()];
@@ -1080,6 +1149,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       ...proms
     ]);
   }
+  /**
+   * Update the presence states of a user.
+   * @param userId ID of the user.
+   * @param presence The user presence.
+   * @param skipJsonStateUpdate If the json state of the user should not be updated.
+   */
   async updateUserPresence(userId, presence, skipJsonStateUpdate = false) {
     var _a, _b, _c, _d;
     if (!this.config.observeUserPresence) {
@@ -1118,6 +1193,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       return { activityName: "", activityType: "", status: "" };
     }
   }
+  /**
+   * Set the presence status of the discord bot.
+   */
   async setBotPresence(opts) {
     var _a, _b, _c, _d;
     if (!((_a = this.client) == null ? void 0 : _a.user))
@@ -1318,6 +1396,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     await Promise.all(proms);
   }
+  /**
+   * Setup for objects custom config related to the adapter instance.
+   * E.g. text2command enabled or state availability for commands.
+   * @param objId The object ID.
+   * @param customCfg The custom config part of the object for this adapter instance.
+   */
   async setupObjCustom(objId, customCfg, objCommon) {
     if (objId.startsWith(`${this.namespace}.`) && objId.endsWith(".message")) {
       if ((customCfg == null ? void 0 : customCfg.enabled) && customCfg.enableText2command) {
@@ -1417,6 +1501,11 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       });
     }
   }
+  /**
+   * Handler for changes on own .send or .sendFile states.
+   * Sends the given text, json or file to the corresponding discord channel.
+   * @returns `true` if the message is send.
+   */
   async onSendStateChange(stateId, state) {
     var _a, _b, _c;
     if (!((_a = this.client) == null ? void 0 : _a.isReady())) {
@@ -1569,6 +1658,11 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       return false;
     }
   }
+  /**
+   * Handler for changes on own custom commands .sendReply states.
+   * Sends the given text, json or file to the corresponding discord channel.
+   * @returns `true` if the reply is send.
+   */
   async onCustomCommandSendReplyStateChange(stateId, state) {
     var _a, _b;
     if (!((_a = this.client) == null ? void 0 : _a.isReady())) {
@@ -1607,6 +1701,10 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       return false;
     }
   }
+  /**
+   * Handler for changes of own .voiceDisconnect, .voiceServerMute or .voiceServerDeaf states.
+   * @returns `true` if successfull.
+   */
   async onVoiceStateChange(stateId, state) {
     var _a;
     const m = stateId.match(/^discord\.\d+\.servers\.(\d+)\.members\.(\d+)\.voice(Disconnect|ServerMute|ServerDeaf)$/);
@@ -2260,6 +2358,13 @@ ${readableInstances.join("\n")}`;
         }
     }
   }
+  /**
+   * Like `sendTo(...)` but only sends if a callback is given.
+   *
+   * If no callback given, but `message.error` is defined, the error will be
+   * logged as a warning.
+   * @see sendTo
+   */
   sendToIfCb(instanceName, command, message, callback) {
     if (callback) {
       this.sendTo(instanceName, command, message, callback);
@@ -2267,6 +2372,19 @@ ${readableInstances.join("\n")}`;
       this.log.warn(message.error);
     }
   }
+  /**
+   * Try to detect and parse stringified JSON MessageOptions.
+   *
+   * If the `content` starts/ends with curly braces if will be treated as
+   * stringified JSON. Then the JSON will be parsed and some basic checks will
+   * be run against the parsed object.
+   *
+   * Otherwise the content will be treated as a simple string and wrapped into
+   * a `MessageOptions` object.
+   * @param content The stringified content to be parsed.
+   * @returns A `MessageOptions` object.
+   * @throws An error if parsing JSON or a check failed.
+   */
   parseStringifiedMessageOptions(content) {
     let mo;
     if (content.startsWith("{") && content.endsWith("}")) {
@@ -2286,6 +2404,11 @@ ${readableInstances.join("\n")}`;
     }
     return mo;
   }
+  /**
+   * Find a previous message from/to a user or in a server text channel.
+   * @param identifier Parameters to find the message.
+   * @throws An error if some parameters are missing or the message could not be found.
+   */
   async getPreviousMessage(identifier) {
     var _a, _b, _c, _d, _e, _f, _g;
     if (!identifier.messageId) {
@@ -2339,6 +2462,13 @@ ${readableInstances.join("\n")}`;
       throw new Error("userId, userTag, userName or serverId and channelId needs to be set");
     }
   }
+  /**
+   * Check if a user or guild member is authorized to do something.
+   * For guild members their roles will also be checked.
+   * @param user The User or GuildMember to check.
+   * @param required Object containing the required flags. If not provided the check returns if the user in the list of authorized users.
+   * @returns `true` if the user is authorized or authorization is not enabled, `false` otherwise
+   */
   checkUserAuthorization(user, required) {
     if (!this.config.enableAuthorization) {
       return true;
@@ -2372,15 +2502,34 @@ ${readableInstances.join("\n")}`;
     }
     return true;
   }
+  /**
+   * Awaitable function to just wait some time.
+   *
+   * Uses `Adapter.setTimeout(...)` internally to make sure the timeout is cleared on adapter unload.
+   * @param time Time to wait in ms.
+   */
   wait(time) {
     return new Promise((resolve) => this.setTimeout(resolve, time));
   }
+  /**
+   * Set the `info.connection` state if changed.
+   * @param connected If connected.
+   * @param force `true` to skip local cache check and always set the state.
+   */
   async setInfoConnectionState(connected, force = false) {
     if (force || connected !== this.infoConnected) {
       await this.setStateAsync("info.connection", connected, true);
       this.infoConnected = connected;
     }
   }
+  /**
+   * Internal replacemend for `extendObjectAsync(...)` which compares the given
+   * object for each `id` against a cached version and only calls na original
+   * `extendObjectAsync(...)` if the object changed.
+   * Using this, the object gets only updated if
+   *  a) it's the first call for this `id` or
+   *  b) the object needs to be changed.
+   */
   async extendObjectAsyncCached(id, objPart, options) {
     const cachedObj = this.extendObjectCache.get(id);
     if ((0, import_node_util.isDeepStrictEqual)(cachedObj, objPart)) {
@@ -2390,6 +2539,10 @@ ${readableInstances.join("\n")}`;
     this.extendObjectCache.set(id, objPart);
     return ret;
   }
+  /**
+   * Internal replacement for `delObjectAsync(...)` which also removes the local
+   * cache entry for the given `id`.
+   */
   async delObjectAsyncCached(id, options) {
     if (options == null ? void 0 : options.recursive) {
       this.extendObjectCache.filter((_obj, id2) => id2.startsWith(id)).each((_obj, id2) => this.extendObjectCache.delete(id2));

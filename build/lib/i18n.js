@@ -18,6 +18,10 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
   isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
   mod
 ));
@@ -39,9 +43,21 @@ var import_ru = __toESM(require("../../admin/i18n/ru.json"));
 var import_zh_cn = __toESM(require("../../admin/i18n/zh-cn.json"));
 class I18n {
   constructor() {
+    /**
+     * Language configured in `system.config` object.
+     */
     this.language = "en";
+    /**
+     * If float numbers should be displayed using a comma instead of a dot.
+     */
     this.isFloatComma = false;
   }
+  /**
+   * Get a translation object or a single string for a given translation key.
+   * Uses the i18n files in `admin/i18n`.
+   * @param key The key from `en.json`.
+   * @param args Array of strings to be inserted at `%s` in the translated strings.
+   */
   getStringOrTranslated(key, ...args) {
     if (import_en.default[key]) {
       return {
@@ -60,6 +76,12 @@ class I18n {
       return key;
     }
   }
+  /**
+   * Get a translated string string for a given translation key and language.
+   * Uses the i18n files in `admin/i18n`.
+   * @param key The key from `en.json`.
+   * @param args Array of strings to be inserted at `%s` in the translated string.
+   */
   getString(key, ...args) {
     let str;
     switch (this.language) {
@@ -98,6 +120,11 @@ class I18n {
     }
     return this.replacePlaceholders(str, ...args);
   }
+  /**
+   * Replace `%s` placeholders in the given text.
+   * @param text The text.
+   * @param args Array of strings to be inserted at `%s` in the text.
+   */
   replacePlaceholders(text, ...args) {
     for (const s of args) {
       text = text.replace("%s", s);

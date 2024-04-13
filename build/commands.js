@@ -40,20 +40,64 @@ var import_i18n = require("./lib/i18n");
 var import_utils = require("./lib/utils");
 class DiscordAdapterSlashCommands {
   constructor(adapter) {
+    /**
+     * Discord REST api interface.
+     */
     this.rest = new import_rest.REST({ version: "10" });
+    /**
+     * Command name for the get state command.
+     */
     this.cmdGetStateName = "iob-get";
+    /**
+     * Command name for the set state command.
+     */
     this.cmdSetStateName = "iob-set";
+    /**
+     * Possible choices for get state command state-option.
+     */
     this.cmdGetStateChoices = [];
+    /**
+     * Possible choices for set state command state-option.
+     */
     this.cmdSetStateChoices = [];
+    /**
+     * Collection of the known (registered) custom commands and their option choices.
+     */
     this.customCommands = new import_discord.Collection();
+    /**
+     * If commands are fully registered including their permissions.
+     */
     this.registerCommandsDone = false;
+    /**
+     * The last registered commands.
+     * Used to check if something changed an we need to register the commands again.
+     */
     this.lastCommandsJson = null;
+    /**
+     * Collection of configurations for objects with commands enabled.
+     */
     this.commandObjectConfig = new import_discord.Collection();
+    /**
+     * Collection of the last seen interactions of custom commands (not iob-get/-set).
+     * Need to cache this here since there seams be no way to get an interaction by ID from discord.js.
+     */
     this.lastInteractions = new import_discord.Collection();
+    /**
+     * Timeout to trigger the delayed registration of the slash commands.
+     */
     this.triggerDelayedRegisterSlashCommandsTimeout = null;
+    /**
+     * Set of well known values that will be interperted as true.
+     * This is extended by some localized strings at runtime.
+     * Used to determine true values from iob-set slash commands.
+     */
     this.wellKnownbooleanTrueValues = /* @__PURE__ */ new Set(["true", "on", "yes", "1"]);
     this.adapter = adapter;
   }
+  /**
+   * When the adapter is Ready.
+   * Called by `adapter.onReady()` after some basic checks and setup.
+   */
   async onReady() {
     if (this.adapter.config.cmdGetStateName) {
       if (this.adapter.config.cmdGetStateName.match(/^[a-z][0-9a-z-_]{1,32}$/)) {
@@ -80,6 +124,9 @@ class DiscordAdapterSlashCommands {
     }
     this.adapter.client.on("interactionCreate", this.onInteractionCreate);
   }
+  /**
+   * Register the commands on discord, if enabled.
+   */
   async registerSlashCommands() {
     var _a, _b;
     this.registerCommandsDone = false;
@@ -298,6 +345,9 @@ class DiscordAdapterSlashCommands {
     }
     this.registerCommandsDone = true;
   }
+  /**
+   * Remove registered global commands if any.
+   */
   async removeGlobalCommands() {
     var _a, _b;
     if (!((_a = this.adapter.client) == null ? void 0 : _a.user)) {
@@ -320,6 +370,10 @@ class DiscordAdapterSlashCommands {
       }
     }
   }
+  /**
+   * Remove registered guild commands if any.
+   * @param guild The guild.
+   */
   async removeGuildCommands(guild) {
     var _a;
     if (!((_a = this.adapter.client) == null ? void 0 : _a.user)) {
@@ -342,6 +396,9 @@ class DiscordAdapterSlashCommands {
       }
     }
   }
+  /**
+   * Setup the ioBroker object tree for the configured custom commands.
+   */
   async setupCustomCommandIobObjects(cmdCfg) {
     var _a;
     const cmdName = cmdCfg.name;
@@ -536,6 +593,11 @@ class DiscordAdapterSlashCommands {
     }
     await Promise.all(proms);
   }
+  /**
+   * Setup an ioBroker object for discord slash commands.
+   * @param objId ID of the ioBroker object to set up.
+   * @param cfg Command configuration for the ioBroker object or null to remove a possibly existing configuration.
+   */
   setupCommandObject(objId, cfg) {
     if (cfg) {
       const conflictingAlias = this.commandObjectConfig.find((coc) => coc.alias === (cfg == null ? void 0 : cfg.alias) && coc.id !== cfg.id);
@@ -558,6 +620,17 @@ class DiscordAdapterSlashCommands {
       this.triggerDelayedRegisterSlashCommands();
     }
   }
+  /**
+   * Initialize a delayed registration of the slash commands.
+   * Calls `registerSlashCommands()` five seconds after the last call of this method.
+   * If called again within the five seconds the timeout starts again.
+   *
+   * This is used to handle object changes better and concat multiple changed
+   * object configurations into a single API call.
+   *
+   * If the initial custom objects setup of the adapter isn't done, this method
+   * does nothing since the command registration is called during this explicit.
+   */
   triggerDelayedRegisterSlashCommands() {
     if (!this.adapter.initialCustomObjectSetupDone)
       return;
@@ -584,6 +657,9 @@ class DiscordAdapterSlashCommands {
       this.handleAutocompleteInteraction(interaction);
     }
   }
+  /**
+   * Handle command interactions.
+   */
   async handleCommandInteraction(interaction) {
     const { commandName, user } = interaction;
     if (!this.registerCommandsDone) {
@@ -627,6 +703,9 @@ class DiscordAdapterSlashCommands {
       await interaction.editReply(import_i18n.i18n.getString("Unknown command!"));
     }
   }
+  /**
+   * Handle autocomplete for command interactions.
+   */
   async handleAutocompleteInteraction(interaction) {
     var _a;
     const { commandName, user } = interaction;
@@ -663,6 +742,15 @@ class DiscordAdapterSlashCommands {
     matchedChoices.splice(25);
     return interaction.respond(matchedChoices);
   }
+  /**
+   * Try to get the ioBroker object and CommandObjectConfig for a given object alias.
+   * The object will be checked if it's a valid state object.
+   *
+   * In case of an error, a reply will be sent to the interaction.
+   * @param objAlias The alias of the object.
+   * @param interaction The interaction for replies on errors.
+   * @returns Array containing the object and the config or null and null.
+   */
   async getObjectAndCfgFromAlias(objAlias, interaction) {
     const cfg = this.commandObjectConfig.find((coc) => coc.alias === objAlias);
     if (!cfg) {
@@ -707,6 +795,10 @@ class DiscordAdapterSlashCommands {
     }
     return [obj, cfg];
   }
+  /**
+   * Handler for "get state" slash commands.
+   * @param interaction The interaction which triggered this.
+   */
   async handleCmdGetState(interaction) {
     var _a;
     const objAlias = interaction.options.get("state", true).value;
@@ -807,6 +899,10 @@ class DiscordAdapterSlashCommands {
       this.adapter.log.warn(`Error sending interaction reply for /${this.cmdGetStateName} command! ${err}`);
     }
   }
+  /**
+   * Handler for "set state" slash commands.
+   * @param interaction The interaction which triggered this.
+   */
   async handleCmdSetState(interaction) {
     var _a, _b, _c;
     const objAlias = interaction.options.get("state", true).value;
@@ -892,6 +988,10 @@ class DiscordAdapterSlashCommands {
     }
     await interaction.editReply(`${cfg.name}: ${valueReply}${unit}`);
   }
+  /**
+   * Handler for custom slash commands.
+   * @param interaction The interaction which triggered this.
+   */
   async handleCmdCustom(interaction) {
     const {
       commandName,
@@ -985,6 +1085,13 @@ class DiscordAdapterSlashCommands {
       this.adapter.log.debug(`Removed ${removedInteractions} outdated interactions from cache`);
     }
   }
+  /**
+   * Send a reply to a custom slash command.
+   * @param interactionId The ID of the interaction to reply to. The interactions needs to be cached in this instance.
+   * @param msg The message to reply with. May be a simple string, a MessageOptions object or a stringified JSON MessageOptions object.
+   * @returns Promise which resolves withe the ID of the reply message if the reply is sent.
+   * @throws Error if the reply could not be sent for some reason (i.e. some check failed).
+   */
   async sendCmdCustomReply(interactionId, msg) {
     const interaction = this.lastInteractions.get(interactionId);
     if (!interaction) {
@@ -1008,6 +1115,9 @@ class DiscordAdapterSlashCommands {
     const replyMsg = await interaction.editReply(msg);
     return replyMsg.id;
   }
+  /**
+   * Write a summay of all currently for commands configured objects to the log.
+   */
   logConfiguredCommandObjects() {
     this.adapter.log.info("Configured state objects for discord slash commands:");
     for (const [, cmdObjCfg] of this.commandObjectConfig) {
