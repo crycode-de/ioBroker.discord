@@ -193,7 +193,7 @@ const DiscordHelpers = {
     let contentCode = null;
 
     if (opts.content) {
-      contentCode = `      const content = ${opts.content};
+      contentCode = `const content = ${opts.content};
 
       if (typeof content === 'object') {
         // remove empty content
@@ -242,14 +242,29 @@ const DiscordHelpers = {
       }\n`;
     }
 
+    let userCode = null;
+    if (opts.user) {
+      userCode = `if (typeof ${opts.user} === 'string') {
+        if (${opts.user}.match(/^\\d+$/)) {
+          data.userId = ${opts.user};
+        } else if (${opts.user}.match(/^.*#(\\d|\\d{4})$/)) {
+          data.userTag = ${opts.user};
+        } else {
+          data.userName = ${opts.user};
+        }
+      }`;
+    }
+
     return `await new Promise((resolve) => {
       ${contentCode || ''}
-      sendTo('discord${opts.instance}', '${opts.action}', {
-        ${opts.target},
+      const data =  {
+        ${opts.target ? `${opts.target},` : ''}
         ${opts.messageId ? `messageId: ${opts.messageId},` : ''}
         ${contentCode ? `content: content,` : ''}
         ${opts.emoji ? `emoji: ${opts.emoji},` : ''}
-      }, (result) => {
+      };
+      ${userCode || ''}
+      sendTo('discord${opts.instance}', '${opts.action}', data, (result) => {
         if (result.error) {
           log(\`[discord${opts.instance}] sendTo error: \${result.error}\\n\${JSON.stringify(result)}\`, 'warn');
           resolve();
@@ -336,16 +351,6 @@ const DiscordHelpers = {
       block.setTooltip(Blockly.Translate(opts.tooltip));
     }
   },
-
-  getTragetFromUser: (user) => {
-    if (user.match(/^['"]\d+['"]$/)) {
-      return `userId: ${user}`;
-    }
-    if (user.match(/^['"].*#(\d|\d{4})['"]$/)) {
-      return `userTag: ${user}`;
-    }
-    return `userName: ${user}`;
-  },
 };
 
 // --- Block send message to user ----------------------------------------------
@@ -373,7 +378,7 @@ Blockly.JavaScript['discord_send_message_user'] = function (block) {
   return DiscordHelpers.createSendToJs({
     action: 'sendMessage',
     instance: block.getFieldValue('instance'),
-    target: DiscordHelpers.getTragetFromUser(user),
+    user: user,
     content: Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC),
     varMessageId: Blockly.JavaScript.valueToCode(block, 'varMessageId', Blockly.JavaScript.ORDER_ATOMIC),
     varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
@@ -440,7 +445,7 @@ Blockly.JavaScript['discord_edit_message_user'] = function (block) {
   return DiscordHelpers.createSendToJs({
     action: 'editMessage',
     instance: block.getFieldValue('instance'),
-    target: DiscordHelpers.getTragetFromUser(user),
+    user: user,
     messageId: Blockly.JavaScript.valueToCode(block, 'messageId', Blockly.JavaScript.ORDER_ATOMIC),
     content: Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC),
     varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
@@ -505,7 +510,7 @@ Blockly.JavaScript['discord_delete_message_user'] = function (block) {
   return DiscordHelpers.createSendToJs({
     action: 'deleteMessage',
     instance: block.getFieldValue('instance'),
-    target: DiscordHelpers.getTragetFromUser(user),
+    user: user,
     messageId: Blockly.JavaScript.valueToCode(block, 'messageId', Blockly.JavaScript.ORDER_ATOMIC),
     varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
     logResultOk: block.getFieldValue('logResultOk'),
@@ -568,7 +573,7 @@ Blockly.JavaScript['discord_add_message_reaction_user'] = function (block) {
   return DiscordHelpers.createSendToJs({
     action: 'addReaction',
     instance: block.getFieldValue('instance'),
-    target: DiscordHelpers.getTragetFromUser(user),
+    user: user,
     messageId: Blockly.JavaScript.valueToCode(block, 'messageId', Blockly.JavaScript.ORDER_ATOMIC),
     emoji: Blockly.JavaScript.valueToCode(block, 'emoji', Blockly.JavaScript.ORDER_ATOMIC),
     varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
