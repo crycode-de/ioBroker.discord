@@ -61,6 +61,11 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+* (crycode-de) Fixed blockly target detection if user is provided by a variable (You may need to move a block to update the generated code)
+* (crycode-de) Updated dependencies
+
 ### 2.2.0 (2023-11-07)
 
 * (crycode-de) Optimized error handling - Network related errors should now be handled completely without adapter restarts and better logging
