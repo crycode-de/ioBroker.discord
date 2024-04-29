@@ -21,8 +21,7 @@
     "url": "https://github.com/crycode-de/ioBroker.discord"
   },
   "engines": {
-    "node": ">=16.9.0",
-    "npm": ">=7.0.0"
+    "node": ">=18"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^3.0.6",
