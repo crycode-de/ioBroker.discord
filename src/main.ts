@@ -1356,7 +1356,7 @@ class DiscordAdapter extends Adapter {
       const p: UpdateUserPresenceResult = {
         status: presence?.status ?? '',
         activityName: (presence?.activities[0]?.type === ActivityType.Custom ? presence?.activities[0]?.state : presence?.activities[0]?.name) ?? '',
-        activityType: presence?.activities[0]?.type !== undefined ? ActivityType[presence.activities[0].type] as ActivityTypeNames : '' ?? '',
+        activityType: (presence?.activities[0]?.type !== undefined ? ActivityType[presence.activities[0].type] as ActivityTypeNames : '') ?? '',
       };
       const proms: Promise<any>[] = [];
       if (!skipJsonStateUpdate) {
