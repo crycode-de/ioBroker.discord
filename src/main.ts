@@ -33,6 +33,9 @@ import {
   VoiceState,
   ActivityType,
   TextChannel,
+  APIEmbed,
+  resolveColor,
+  HexColorString,
 } from 'discord.js';
 
 import {
@@ -1984,7 +1987,7 @@ class DiscordAdapter extends Adapter {
 
     this.log.debug(`Send to ${targetName}: ${JSON.stringify(mo)}`);
     try {
-      const msg = await target.send(mo);
+      const msg = await target.send(this.prepareMessageForSend(mo));
       this.log.debug(`Sent with message ID ${msg.id}`);
       return true;
     } catch (err) {
@@ -2282,7 +2285,7 @@ class DiscordAdapter extends Adapter {
             }
           }
           try {
-            msg = await user.send(sendPayload.content);
+            msg = await user.send(this.prepareMessageForSend(sendPayload.content));
             this.sendToIfCb(obj.from, obj.command, { result: `Message sent to user ${userNameOrTag(user)}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
             this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to user ${userNameOrTag(user)}: ${err}`, ...sendPayload }, obj.callback);
@@ -2296,7 +2299,7 @@ class DiscordAdapter extends Adapter {
             return;
           }
           try {
-            msg = await channel.send(sendPayload.content);
+            msg = await channel.send(this.prepareMessageForSend(sendPayload.content));
             this.sendToIfCb(obj.from, obj.command, { result: `Message sent to channel ${channel.name}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
             this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to channel ${channel.name}: ${err}`, ...sendPayload }, obj.callback);
@@ -2948,6 +2951,45 @@ ${readableInstances.join('\n')}`;
     }
 
     return mo;
+  }
+
+  /**
+   * Prepare a message for sending.
+   *
+   * This some message parts to be valid discord message data.
+   * @param msg The message as `string` or `MessageCreateOptions`.
+   * @returns The prepared message.
+   */
+  private prepareMessageForSend (msg: string | MessageCreateOptions): string | MessageCreateOptions {
+    if (typeof msg === 'string') {
+      return msg;
+    }
+
+    // replace hexo color codes in embeds
+    if (msg.embeds) {
+      for (const embed of msg.embeds) {
+        // color codes may be given as string in user defined embeds
+        if (typeof (embed as APIEmbed).color === 'string') {
+          const colorStr: string = (embed as APIEmbed).color as unknown as string;
+          if (colorStr.match(/^\d+$/)) {
+            // it's a number color given as string
+            (embed as APIEmbed).color = parseInt(colorStr, 10);
+          } else {
+            // it's something else (maybe a color name or hexo color)
+            // try to resolve the color
+            try {
+              (embed as APIEmbed).color = resolveColor(colorStr as HexColorString);
+            } catch (err) {
+              // color could not be resolved, use a default color
+              (embed as APIEmbed).color = resolveColor('Greyple');
+              this.log.warn(`Error embed color '${colorStr}': ${err}`);
+            }
+          }
+        }
+      }
+    }
+
+    return msg;
   }
 
   /**

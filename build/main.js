@@ -1418,7 +1418,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         if ((obj == null ? void 0 : obj.type) === "state") {
           objCommon = obj.common;
         } else {
-          this.log.warn(`Object ${objId} has commands enabled but this seams to be an error because it is not a state object!`);
+          this.log.warn(`Object ${objId} has commands enabled but this seems to be an error because it is not a state object!`);
         }
       }
       let name = customCfg.commandsName;
@@ -1650,7 +1650,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     this.log.debug(`Send to ${targetName}: ${JSON.stringify(mo)}`);
     try {
-      const msg = await target.send(mo);
+      const msg = await target.send(this.prepareMessageForSend(mo));
       this.log.debug(`Sent with message ID ${msg.id}`);
       return true;
     } catch (err) {
@@ -1896,7 +1896,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             }
           }
           try {
-            msg = await user.send(sendPayload.content);
+            msg = await user.send(this.prepareMessageForSend(sendPayload.content));
             this.sendToIfCb(obj.from, obj.command, { result: `Message sent to user ${(0, import_utils.userNameOrTag)(user)}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
             this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to user ${(0, import_utils.userNameOrTag)(user)}: ${err}`, ...sendPayload }, obj.callback);
@@ -1908,7 +1908,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             return;
           }
           try {
-            msg = await channel.send(sendPayload.content);
+            msg = await channel.send(this.prepareMessageForSend(sendPayload.content));
             this.sendToIfCb(obj.from, obj.command, { result: `Message sent to channel ${channel.name}`, ...sendPayload, messageId: msg.id }, obj.callback);
           } catch (err) {
             this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to channel ${channel.name}: ${err}`, ...sendPayload }, obj.callback);
@@ -2388,14 +2388,14 @@ ${readableInstances.join("\n")}`;
   parseStringifiedMessageOptions(content) {
     let mo;
     if (content.startsWith("{") && content.endsWith("}")) {
-      this.log.debug(`Content seams to be json`);
+      this.log.debug(`Content seems to be json`);
       try {
         mo = JSON.parse(content);
       } catch (err) {
-        throw new Error(`Content seams to be json but cannot be parsed!`);
+        throw new Error(`Content seems to be json but cannot be parsed!`);
       }
       if (!(mo == null ? void 0 : mo.files) && !mo.content || mo.files && !Array.isArray(mo.files) || mo.embeds && !Array.isArray(mo.embeds)) {
-        throw new Error(`Content is json but seams to be invalid!`);
+        throw new Error(`Content is json but seems to be invalid!`);
       }
     } else {
       mo = {
@@ -2403,6 +2403,36 @@ ${readableInstances.join("\n")}`;
       };
     }
     return mo;
+  }
+  /**
+   * Prepare a message for sending.
+   *
+   * This some message parts to be valid discord message data.
+   * @param msg The message as `string` or `MessageCreateOptions`.
+   * @returns The prepared message.
+   */
+  prepareMessageForSend(msg) {
+    if (typeof msg === "string") {
+      return msg;
+    }
+    if (msg.embeds) {
+      for (const embed of msg.embeds) {
+        if (typeof embed.color === "string") {
+          const colorStr = embed.color;
+          if (colorStr.match(/^\d+$/)) {
+            embed.color = parseInt(colorStr, 10);
+          } else {
+            try {
+              embed.color = (0, import_discord.resolveColor)(colorStr);
+            } catch (err) {
+              embed.color = (0, import_discord.resolveColor)("Greyple");
+              this.log.warn(`Error embed color '${colorStr}': ${err}`);
+            }
+          }
+        }
+      }
+    }
+    return msg;
   }
   /**
    * Find a previous message from/to a user or in a server text channel.
