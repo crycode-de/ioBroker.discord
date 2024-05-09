@@ -1665,7 +1665,7 @@ class DiscordAdapter extends Adapter {
         if (obj?.type === 'state') {
           objCommon = obj.common;
         } else {
-          this.log.warn(`Object ${objId} has commands enabled but this seams to be an error because it is not a state object!`);
+          this.log.warn(`Object ${objId} has commands enabled but this seems to be an error because it is not a state object!`);
         }
       }
 
@@ -2926,18 +2926,18 @@ ${readableInstances.join('\n')}`;
     let mo: MessageCreateOptions;
 
     if (content.startsWith('{') && content.endsWith('}')) {
-      // seams to be json
-      this.log.debug(`Content seams to be json`);
+      // seems to be json
+      this.log.debug(`Content seems to be json`);
 
       try {
         mo = JSON.parse(content) as MessageCreateOptions;
       } catch (err) {
-        throw new Error(`Content seams to be json but cannot be parsed!`);
+        throw new Error(`Content seems to be json but cannot be parsed!`);
       }
 
       // do some basic checks against the parsed object
       if ((!mo?.files && !mo.content) || (mo.files && !Array.isArray(mo.files)) || (mo.embeds && !Array.isArray(mo.embeds))) {
-        throw new Error(`Content is json but seams to be invalid!`);
+        throw new Error(`Content is json but seems to be invalid!`);
       }
 
     } else {
