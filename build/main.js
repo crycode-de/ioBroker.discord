@@ -2058,7 +2058,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         try {
-          const messageId = await this.discordSlashCommands.sendCmdCustomReply(sendCustomCommandReplyPayload.interactionId, sendCustomCommandReplyPayload.content);
+          const messageId = await this.discordSlashCommands.sendCmdCustomReply(sendCustomCommandReplyPayload.interactionId, this.prepareMessageForSend(sendCustomCommandReplyPayload.content));
           this.sendToIfCb(obj.from, obj.command, { result: `Reply sent`, ...sendCustomCommandReplyPayload, messageId }, obj.callback);
         } catch (err) {
           this.sendToIfCb(obj.from, obj.command, { error: `Error sending reply: ${err}`, ...sendCustomCommandReplyPayload }, obj.callback);
