@@ -3,8 +3,8 @@ export const VALID_PRESENCE_STATUS_DATA = <const>['online', 'idle', 'dnd', 'invi
 export const ACTIVITY_TYPES = <const>['', 'Playing', 'Streaming', 'Listening', 'Watching', 'Custom', 'Competing'];
 export type ActivityTypeNames = typeof ACTIVITY_TYPES[number];
 
-export const VALID_ACTIVITY_TYPES = <const>['', 'Playing', 'Streaming', 'Listening', 'Watching', 'Competing'];
-export type ValidActivityTypeNames = typeof VALID_ACTIVITY_TYPES[number];
+//export const VALID_ACTIVITY_TYPES = <const>['', 'Playing', 'Streaming', 'Listening', 'Watching', 'Competing'];
+//export type ValidActivityTypeNames = typeof VALID_ACTIVITY_TYPES[number];
 
 /**
  * Valid channel types.
@@ -27,7 +27,7 @@ export interface Text2commandMessagePayload {
 
 export interface SetBotPresenceOptions {
   status?: PresenceStatusData;
-  activityType?: ValidActivityTypeNames;
+  activityType?: ActivityTypeNames;
   activityName?: string;
 }
 

@@ -61,6 +61,12 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+* (crycode-de) Added support for custom bot activities
+* (crycode-de) Fixed Issue with embed colors not accepting hex color codes
+* (crycode-de) Fixed user activities for users with custom activities (see [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))
+
 ### 2.2.1 (2024-04-13)
 
 * (crycode-de) Fixed blockly target detection if user is provided by a variable (You may need to move a block to update the generated code)

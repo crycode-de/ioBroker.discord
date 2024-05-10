@@ -1216,7 +1216,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     if (opts.activityType === void 0) {
       opts.activityType = ((_c = await this.getStateAsync("bot.activityType")) == null ? void 0 : _c.val) ?? "";
     }
-    if (!import_definitions.VALID_ACTIVITY_TYPES.includes(opts.activityType)) {
+    if (!import_definitions.ACTIVITY_TYPES.includes(opts.activityType)) {
       this.log.warn(`Invalid activityType! ${opts.activityType}`);
       opts.activityType = "";
     }

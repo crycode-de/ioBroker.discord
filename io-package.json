@@ -390,7 +390,8 @@
           "Streaming": "streaming",
           "Listening": "listening",
           "Watching": "watching",
-          "Competing": "competing"
+          "Competing": "competing",
+          "Custom": "custom"
         }
       },
       "native": {}

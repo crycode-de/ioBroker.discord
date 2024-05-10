@@ -45,7 +45,6 @@ import {
 import {
   SetBotPresenceOptions,
   Text2commandMessagePayload,
-  VALID_ACTIVITY_TYPES,
   VALID_PRESENCE_STATUS_DATA,
   JsonServersMembersObj,
   JsonServersChannelsObj,
@@ -63,8 +62,8 @@ import {
   SendToActionChannelIdentifier,
   SendToActionServerMemberIdentifier,
   SendToActionUserIdentifier,
+  ACTIVITY_TYPES,
   ActivityTypeNames,
-  ValidActivityTypeNames,
   ChannelTypeNames,
 } from './lib/definitions';
 import { i18n } from './lib/i18n';
@@ -1408,9 +1407,9 @@ class DiscordAdapter extends Adapter {
     };
 
     if (opts.activityType === undefined) {
-      opts.activityType = ((await this.getStateAsync('bot.activityType'))?.val as ValidActivityTypeNames | undefined) ?? '';
+      opts.activityType = ((await this.getStateAsync('bot.activityType'))?.val as ActivityTypeNames | undefined) ?? '';
     }
-    if (!VALID_ACTIVITY_TYPES.includes(opts.activityType)) {
+    if (!ACTIVITY_TYPES.includes(opts.activityType)) {
       this.log.warn(`Invalid activityType! ${opts.activityType}`);
       opts.activityType = '';
     }
@@ -1750,7 +1749,7 @@ class DiscordAdapter extends Adapter {
           setAck = true;
           break;
         case `${this.namespace}.bot.activityType`:
-          await this.setBotPresence({ activityType: state.val as ValidActivityTypeNames });
+          await this.setBotPresence({ activityType: state.val as ActivityTypeNames });
           setAck = true;
           break;
         case `${this.namespace}.bot.activityName`:
