@@ -1170,6 +1170,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         activityName: (((_a = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _a.type) === import_discord.ActivityType.Custom ? (_b = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _b.state : (_c = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _c.name) ?? "",
         activityType: (((_d = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _d.type) !== void 0 ? import_discord.ActivityType[presence.activities[0].type] : "") ?? ""
       };
+      this.log.debug(`User presence of user ${userId}: ${JSON.stringify(p)} ${JSON.stringify(presence == null ? void 0 : presence.activities[0])}`);
       const proms = [];
       if (!skipJsonStateUpdate) {
         const json = this.jsonStateCache.get(`${this.namespace}.users.${userId}.json`);
