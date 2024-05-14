@@ -27,11 +27,9 @@ A detailed documentation is available in the `docs` directory of the repository:
 
 ## Requirements
 
-* **Node.js >= 16.9**, NPM >= 7.0.0
+* Node.js >= 18
 * js-controller >= 4.0
 * admin >= 5.3
-
-Node.js 16 is required by the underlaying [discord.js](https://github.com/discordjs) library.
 
 ## Features
 
@@ -66,6 +64,7 @@ Node.js 16 is required by the underlaying [discord.js](https://github.com/discor
 * (crycode-de) Added support for custom bot activities
 * (crycode-de) Fixed Issue with embed colors not accepting hex color codes
 * (crycode-de) Fixed user activities for users with custom activities (see [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))
+* (crycode-de) Updated dependencies
 
 ### 2.2.1 (2024-04-13)
 
