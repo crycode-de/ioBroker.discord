@@ -1361,9 +1361,6 @@ class DiscordAdapter extends Adapter {
         activityType: (presence?.activities[0]?.type !== undefined ? ActivityType[presence.activities[0].type] as ActivityTypeNames : '') ?? '',
       };
 
-      // XXX: Just for debugging
-      this.log.debug(`User presence of user ${userId}: ${JSON.stringify(p)} ${JSON.stringify(presence?.activities[0])}`);
-
       const proms: Promise<any>[] = [];
       if (!skipJsonStateUpdate) {
         const json = this.jsonStateCache.get(`${this.namespace}.users.${userId}.json`) as JsonUsersObj | undefined;
