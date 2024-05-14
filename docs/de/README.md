@@ -165,7 +165,7 @@ als angezeigt werden.
 
 | Name | Beschreibung |
 |---|---|
-| `activityType` | Die Art der Bot-Aktivität. Mögliche Werte sind `Playing`, `Streaming`, `Listening`, `Watching`, `Competing` oder ein leerer String. |
+| `activityType` | Die Art der Bot-Aktivität. Mögliche Werte sind `Playing`, `Streaming`, `Listening`, `Watching`, `Competing`, `Custom` oder ein leerer String. |
 | `activityName` | Der Name der Bot-Aktivität. Wird nur verwendet, wenn eine Art gesetzt ist. |
 | `status` | Der Anwesenheitsstatus des Bots. Mögliche Werte sind `online`, `idle`, `dnd` und `invisible`. |
 

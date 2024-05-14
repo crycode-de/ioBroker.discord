@@ -160,7 +160,7 @@ for example, that a server has more channels as displayed.
 
 | Name | Description |
 |---|---|
-| `activityType` | The type of the bot activity. One of `Playing`, `Streaming`, `Listening`, `Watching`, `Competing` or an empty string. |
+| `activityType` | The type of the bot activity. One of `Playing`, `Streaming`, `Listening`, `Watching`, `Competing`, `Custom` or an empty string. |
 | `activityName` | The name of the bot activity. Only used if a type is set. |
 | `status` | The presence status of the bot. One of `online`, `idle`, `dnd` and `invisible`. |
 

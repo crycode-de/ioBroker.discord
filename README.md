@@ -61,6 +61,7 @@ A detailed documentation is available in the `docs` directory of the repository:
 -->
 ### **WORK IN PROGRESS**
 
+* (crycode-de) 💥 Node.js 18+ is now required!
 * (crycode-de) Added support for custom bot activities
 * (crycode-de) Fixed Issue with embed colors not accepting hex color codes
 * (crycode-de) Fixed user activities for users with custom activities (see [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))
