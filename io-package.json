@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "discord",
-    "version": "2.2.1",
+    "version": "2.3.0",
     "news": {
+      "2.3.0": {
+        "en": "💥 Node.js 18+ is now required!\nAdded support for custom bot activities\nFixed Issue with embed colors not accepting hex color codes\nFixed user activities for users with custom activities (see [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nUpdated dependencies",
+        "de": "💥 Node.js 18+ ist jetzt erforderlich!\nUnterstützung für benutzerdefinierte Bot-Aktivitäten hinzugefügt\nFehler behoben, dass Einbettungen keine Hex-Farbwerte akzeptiert haben\nFehler bei benutzerdefinierten Aktivitäten behoben (siehe [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nAbhängigkeiten aktualisiert",
+        "ru": "💥 Node.js 18+ теперь требуется!\nДобавлена поддержка пользовательских действий бота\nФиксированный выпуск с встроенными цветами, не принимая коды цвета гекса\nFixed user activities for users with custom activities (see [#60] (https://github.com/crycode-de/ioBroker.discord/issues/60)\nОбновленные зависимости",
+        "pt": "! Node.js 18+ é agora necessário!\nAdicionado suporte para atividades de bot personalizadas\nCorrigido Problema com cores embutidas não aceitando códigos de cores hexagonais\nAtividades fixas para usuários com atividades personalizadas (ver [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))))\nDependências atualizadas",
+        "nl": "Node.js 18+ is nu nodig!\nExtra ondersteuning voor aangepaste botactiviteiten\nFixed Issue met ingebedde kleuren die geen hex kleurcodes accepteren\nVaste gebruikersactiviteiten voor gebruikers met aangepaste activiteiten (zie [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nBijgewerkte afhankelijkheden",
+        "fr": "Le Node.js 18+ est maintenant requis!\nAjout d'un support pour les activités bot personnalisées\nProblème corrigé avec les couleurs d'intégration n'acceptant pas les codes de couleur hexagonale\nActivités d'utilisateurs fixes pour les utilisateurs ayant des activités personnalisées (voir [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nDépendances actualisées",
+        "it": "💥 Node.js 18+ è ora richiesto!\nAggiunto supporto per attività bot personalizzate\nProblema fisso con colori incorporati non accettare codici colore esagonale\nAttività utente fissa per gli utenti con attività personalizzate (vedere [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nDipendenze aggiornate",
+        "es": "💥 Node.js 18+ se requiere ahora!\nApoyo añadido para actividades de bot personalizado\nEdición fija con colores incrustados que no aceptan códigos de color hex\nActividades de usuario fijas para usuarios con actividades personalizadas (véase [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nDependencias actualizadas",
+        "pl": "XionNode.js 18 + jest teraz wymagane!\nDodano wsparcie dla niestandardowych działań bot\nNaprawiono wydanie z osadzonymi kolorami, które nie akceptują kodów kolorów szesnastkowych\nDziałalność użytkowników stałych dla użytkowników prowadzących działalność na własny rachunek (zob. [# 60] (https: / / github.com / crycode- de / ioBroker.discord / issues / 60))\nAktualizacja zależności",
+        "uk": "浜у 涓 蹇!\nДодано підтримку користувацьких ботів\nВиправлено проблему з рельєфними кольорами, не приймається кольорові коди шестигранного кольору\nВиправлено роботу користувача для користувачів з індивідуальною діяльністю (див. [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nОновлені залежності",
+        "zh-cn": "现在需要18+节点!\n为自定义机器人活动添加支持\n嵌入颜色的固定问题, 不接受十六进制颜色代码\n有自定义活动的用户的固定用户活动(见[#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\n更新的依赖关系"
+      },
       "2.2.1": {
         "en": "Fixed blockly target detection if user is provided by a variable (You may need to move a block to update the generated code)\nUpdated dependencies",
         "de": "Fehler in Blockly bei der Erkennung des Ziel behoben, wenn der Benutzer durch eine Variable definiert wird. Es muss ein Block bewegt werden, um den generierten Code zu aktualisieren)\nAbhängigkeiten Aktualisiert",
@@ -80,19 +93,6 @@
         "pl": "Zmniejszenie rozporządzenia do v14\nżyczenie Breaking: Wartość typów i typów kanałów jest obecnie w przypadku tytułowego. Przykład: PLAYING jest obecnie Playing, GUILD_TEXT jest obecnie GuildText.\nżyczenie Breaking: W surowych stanach wszystkie wartości pola są teraz numerami reprezentującymi wartości wewnętrzne typów.\nAddd support for the message of the notification-manager adapter\nZależność od upoważnienia\nTłumaczenie ukraińskie\nTłumaczenia poprawione",
         "uk": "Оновлено discord.js до v14\nй Перерва: Типи та типи каналів тепер у назвному випадку. Приклад: PLAYING тепер грає, GUILD_TEXT тепер GuildText.\nй Перерва: У сирих штатах всі значення поля типу тепер є числа, що представляють внутрішні значення енму типів.\nДодавання підтримки повідомлень з адаптера повідомлення-manager\nОновлені залежності\nДодано українські переклади\nОновлені переклади",
         "zh-cn": "最新差异\n评 注 处理: 活动类型和渠道类型现处于所有权情况。 例:现在正在推展,古ILD_TEXT现为GuildText。.\n评 注 处理: 在原材料中,所有类型的外地价值现在都代表了这种种类的内部价值。.\n增加通知-manager的电讯\nA. 最新依赖情况\n增加乌克兰翻译\n最新翻译"
-      },
-      "1.1.6": {
-        "en": "Fixed voice channel member count/list",
-        "de": "Die Anzahl und Liste der Mitglieder in Sprachkanälen werden nun korrekt aktualisiert",
-        "ru": "Фиксированный счет/список голосового канала",
-        "pt": "Contagem/lista de membro fixo do canal de voz",
-        "nl": "Vertaling:",
-        "fr": "Compte/liste des membres du canal vocal fixe",
-        "it": "Conto/elenco dei membri del canale vocale fisso",
-        "es": "Cuenta/lista miembro del canal de voz fijo",
-        "pl": "Członek grupy głosowej liczy/list",
-        "uk": "Виправлена ​​кількість/список учасників голосового каналу",
-        "zh-cn": "固定声音传送成员计票/名单"
       }
     },
     "titleLang": {

@@ -59,7 +59,7 @@ A detailed documentation is available in the `docs` directory of the repository:
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 2.3.0 (2024-05-14)
 
 * (crycode-de) 💥 Node.js 18+ is now required!
 * (crycode-de) Added support for custom bot activities
