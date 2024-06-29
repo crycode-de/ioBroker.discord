@@ -59,7 +59,7 @@ A detailed documentation is available in the `docs` directory of the repository:
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 2.3.1 (2024-06-29)
 
 * (crycode-de) Fixed Blockly for the latest JavaScript adapter changes
 * (crycode-de) Updated dependencies
