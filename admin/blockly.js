@@ -959,7 +959,13 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
     this.setInputsInline(false);
     this.setPreviousStatement(true, null);
     this.setNextStatement(true, null);
-    this.setMutator(new Blockly.Mutator(['discord_on_custom_cmd_item']));
+    if (typeof Blockly.icons === 'object') {
+      // Blockly >= 10
+      this.setMutator(new Blockly.icons.MutatorIcon(['discord_on_custom_cmd_item'], this));
+    } else {
+      // Blockly 9.x
+      this.setMutator(new Blockly.Mutator(['discord_on_custom_cmd_item']));
+    }
     this.setTooltip(Blockly.Translate('discord_on_custom_cmd_tooltip'));
     this.setHelpUrl(DiscordHelpers.helpUrl);
   },
@@ -1172,7 +1178,7 @@ Blockly.JavaScript['discord_on_custom_cmd'] = function (block) {
         log(\`[discord${instance}] JSON state \${id} could not be parsed!\`, 'warn');
         return;
       }
-      ${Blockly.JavaScript.variableDB_.getName(block.getFieldValue('varInteractionId'), Blockly.Variables.NAME_TYPE)} = data.interactionId;
+      ${Blockly.JavaScript.nameDB_.getName(block.getFieldValue('varInteractionId'), Blockly.Variables.NAME_TYPE)} = data.interactionId;
       ${varAssigns}
 
       ${statement}
@@ -1203,7 +1209,7 @@ Blockly.JavaScript['discord_send_custom_command_reply'] = function (block) {
   return DiscordHelpers.createSendToJs({
     action: 'sendCustomCommandReply',
     instance: block.getFieldValue('instance'),
-    target: `interactionId: ${Blockly.JavaScript.variableDB_.getName(block.getFieldValue('interactionId'), Blockly.Variables.NAME_TYPE)}`,
+    target: `interactionId: ${Blockly.JavaScript.nameDB_.getName(block.getFieldValue('interactionId'), Blockly.Variables.NAME_TYPE)}`,
     content: Blockly.JavaScript.valueToCode(block, 'content', Blockly.JavaScript.ORDER_ATOMIC),
     varMessageId: Blockly.JavaScript.valueToCode(block, 'varMessageId', Blockly.JavaScript.ORDER_ATOMIC),
     varError: Blockly.JavaScript.valueToCode(block, 'varError', Blockly.JavaScript.ORDER_ATOMIC),
