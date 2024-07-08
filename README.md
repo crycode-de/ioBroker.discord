@@ -52,6 +52,7 @@ A detailed documentation is available in the `docs` directory of the repository:
 * Send, edit and delete messages, add and await message reactions using Scripts
 * Optional raw states to allow more flexibility in custom scripts
 * Support for Blockly with custom blocks to send and edit messages and to handle custom slash commands
+* Basic support for interactions unknown to the adapter (custom Javascript required to handle them)
 
 ## Changelog
 
@@ -59,6 +60,12 @@ A detailed documentation is available in the `docs` directory of the repository:
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+* (crycode-de) Added basic support for interactions unknown to the adapter (custom scripts required for handling)
+* (crycode-de) Raw interaction JSON is now written to the state after the interaction is initially handled to prevent some race conditions
+* (crycode-de) Updated dependencies
+
 ### 2.3.1 (2024-06-29)
 
 * (crycode-de) Fixed Blockly for the latest JavaScript adapter changes

@@ -102,10 +102,13 @@ export class DiscordAdapterSlashCommands {
   private commandObjectConfig: Collection<string, CommandObjectConfig> = new Collection();
 
   /**
-   * Collection of the last seen interactions of custom commands (not iob-get/-set).
-   * Need to cache this here since there seams be no way to get an interaction by ID from discord.js.
+   * Collection of the last seen interactions of custom commands (not iob-get/-set)
+   * or other interactions which are not directly handled by the adapter.
+   *
+   * Need to cache this here since there seems to be no way to get an interaction
+   * by ID from discord.js.
    */
-  private lastInteractions: Collection<Snowflake, CommandInteraction<CacheType>> = new Collection();
+  private lastInteractions: Collection<Snowflake, CommandInteraction<CacheType> | Interaction<CacheType>> = new Collection();
 
   /**
    * Timeout to trigger the delayed registration of the slash commands.
@@ -813,6 +816,25 @@ export class DiscordAdapterSlashCommands {
    */
   @boundMethod
   private async onInteractionCreate (interaction: Interaction<CacheType>): Promise<void> {
+    if (interaction.isCommand()) {
+      // handle command interaction for build in commands and custom commands
+      this.handleCommandInteraction(interaction);
+
+    } else if (interaction.isAutocomplete()) {
+      // handle auto complete interaction
+      this.handleAutocompleteInteraction(interaction);
+
+    } else {
+      // handle other interaction types to allow the usage of them in scripts
+
+      // add this interaction to the collection of last interactions
+      this.lastInteractions.set(interaction.id, interaction);
+
+      // defer reply for all other interaction types to be hadled later
+      if (interaction.isRepliable() && !interaction.deferred) {
+        await interaction.deferReply({ ephemeral: this.adapter.config.commandRepliesEphemeral });
+      }
+    }
 
     // raw states enabled?
     if (this.adapter.config.enableRawStates) {
@@ -824,10 +846,11 @@ export class DiscordAdapterSlashCommands {
       this.adapter.setState('raw.interactionJson', JSON.stringify(interactionJson, (_key, value) => typeof value === 'bigint' ? value.toString() : value), true);
     }
 
-    if (interaction.isCommand()) {
-      this.handleCommandInteraction(interaction);
-    } else if (interaction.isAutocomplete()) {
-      this.handleAutocompleteInteraction(interaction);
+    // remove outdated interactions
+    const outdatedTs = Date.now() - 15 * 60000; // 15 min
+    const removedInteractions = this.lastInteractions.sweep((ia) => ia.createdTimestamp < outdatedTs);
+    if (removedInteractions > 0) {
+      this.adapter.log.debug(`Removed ${removedInteractions} outdated interactions from cache`);
     }
   }
 
@@ -1381,13 +1404,6 @@ export class DiscordAdapterSlashCommands {
      * Hint: Interaction reply is deferred, but no reply will be send here.
      *       The reply must be triggered by the user using the .sendReply state or a `sendTo(...)` action.
      *****/
-
-    // remove outdated interactions
-    const outdatedTs = Date.now() - 15 * 60000; // 15 min
-    const removedInteractions = this.lastInteractions.sweep((ia) => ia.createdTimestamp < outdatedTs);
-    if (removedInteractions > 0) {
-      this.adapter.log.debug(`Removed ${removedInteractions} outdated interactions from cache`);
-    }
   }
 
   /**
@@ -1405,15 +1421,22 @@ export class DiscordAdapterSlashCommands {
       throw new Error(`No current interaction with ID ${interactionId} found for reply!`);
     }
 
-    const { commandName } = interaction;
+    let cscTxt: string = '';
 
-    const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
-    if (!cmdCfg) {
-      throw new Error(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
+    if (interaction.isCommand()) {
+      // command interaction
+      const { commandName } = interaction;
+
+      const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
+      if (!cmdCfg) {
+        throw new Error(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
+      }
+
+      cscTxt = ` of custom slash command ${commandName}`;
     }
 
     if (!interaction.isRepliable()) {
-      throw new Error(`Interaction ${interactionId} of custom slash command ${commandName} is not repliable!`);
+      throw new Error(`Interaction ${interactionId}${cscTxt} is not repliable!`);
     }
 
     // if a string is given try to parse it and prepare it as MessageOptions object
@@ -1421,7 +1444,7 @@ export class DiscordAdapterSlashCommands {
       try {
         msg = this.adapter.parseStringifiedMessageOptions(msg);
       } catch (err) {
-        throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} is invalid: ${err}`);
+        throw new Error(`Reply to interaction ${interactionId}${cscTxt} is invalid: ${err}`);
       }
     }
 

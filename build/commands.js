@@ -78,8 +78,11 @@ class DiscordAdapterSlashCommands {
      */
     this.commandObjectConfig = new import_discord.Collection();
     /**
-     * Collection of the last seen interactions of custom commands (not iob-get/-set).
-     * Need to cache this here since there seams be no way to get an interaction by ID from discord.js.
+     * Collection of the last seen interactions of custom commands (not iob-get/-set)
+     * or other interactions which are not directly handled by the adapter.
+     *
+     * Need to cache this here since there seems to be no way to get an interaction
+     * by ID from discord.js.
      */
     this.lastInteractions = new import_discord.Collection();
     /**
@@ -644,6 +647,16 @@ class DiscordAdapterSlashCommands {
     }, 5e3);
   }
   async onInteractionCreate(interaction) {
+    if (interaction.isCommand()) {
+      this.handleCommandInteraction(interaction);
+    } else if (interaction.isAutocomplete()) {
+      this.handleAutocompleteInteraction(interaction);
+    } else {
+      this.lastInteractions.set(interaction.id, interaction);
+      if (interaction.isRepliable() && !interaction.deferred) {
+        await interaction.deferReply({ ephemeral: this.adapter.config.commandRepliesEphemeral });
+      }
+    }
     if (this.adapter.config.enableRawStates) {
       const interactionJson = interaction.toJSON();
       if (interaction.isCommand()) {
@@ -651,10 +664,10 @@ class DiscordAdapterSlashCommands {
       }
       this.adapter.setState("raw.interactionJson", JSON.stringify(interactionJson, (_key, value) => typeof value === "bigint" ? value.toString() : value), true);
     }
-    if (interaction.isCommand()) {
-      this.handleCommandInteraction(interaction);
-    } else if (interaction.isAutocomplete()) {
-      this.handleAutocompleteInteraction(interaction);
+    const outdatedTs = Date.now() - 15 * 6e4;
+    const removedInteractions = this.lastInteractions.sweep((ia) => ia.createdTimestamp < outdatedTs);
+    if (removedInteractions > 0) {
+      this.adapter.log.debug(`Removed ${removedInteractions} outdated interactions from cache`);
     }
   }
   /**
@@ -1079,11 +1092,6 @@ class DiscordAdapterSlashCommands {
       this.adapter.setStateAsync(`slashCommands.${commandName}.json`, JSON.stringify(json), true),
       ...proms
     ]);
-    const outdatedTs = Date.now() - 15 * 6e4;
-    const removedInteractions = this.lastInteractions.sweep((ia) => ia.createdTimestamp < outdatedTs);
-    if (removedInteractions > 0) {
-      this.adapter.log.debug(`Removed ${removedInteractions} outdated interactions from cache`);
-    }
   }
   /**
    * Send a reply to a custom slash command.
@@ -1097,19 +1105,23 @@ class DiscordAdapterSlashCommands {
     if (!interaction) {
       throw new Error(`No current interaction with ID ${interactionId} found for reply!`);
     }
-    const { commandName } = interaction;
-    const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
-    if (!cmdCfg) {
-      throw new Error(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
+    let cscTxt = "";
+    if (interaction.isCommand()) {
+      const { commandName } = interaction;
+      const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
+      if (!cmdCfg) {
+        throw new Error(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
+      }
+      cscTxt = ` of custom slash command ${commandName}`;
     }
     if (!interaction.isRepliable()) {
-      throw new Error(`Interaction ${interactionId} of custom slash command ${commandName} is not repliable!`);
+      throw new Error(`Interaction ${interactionId}${cscTxt} is not repliable!`);
     }
     if (typeof msg === "string") {
       try {
         msg = this.adapter.parseStringifiedMessageOptions(msg);
       } catch (err) {
-        throw new Error(`Reply to interaction ${interactionId} of custom slash command ${commandName} is invalid: ${err}`);
+        throw new Error(`Reply to interaction ${interactionId}${cscTxt} is invalid: ${err}`);
       }
     }
     const replyMsg = await interaction.editReply(msg);
