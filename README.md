@@ -60,7 +60,7 @@ A detailed documentation is available in the `docs` directory of the repository:
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 2.4.0 (2024-07-10)
 
 * (crycode-de) Added basic support for interactions unknown to the adapter (custom scripts required for handling)
 * (crycode-de) Raw interaction JSON is now written to the state after the interaction is initially handled to prevent some race conditions

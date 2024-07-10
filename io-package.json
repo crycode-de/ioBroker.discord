@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "discord",
-    "version": "2.3.1",
+    "version": "2.4.0",
     "news": {
+      "2.4.0": {
+        "en": "Added basic support for interactions unknown to the adapter (custom scripts required for handling)\nRaw interaction JSON is now written to the state after the interaction is initially handled to prevent some race conditions\nUpdated dependencies",
+        "de": "Grundlegende Unterstützung für Interaktionen, die dem Adapter unbekannt sind, hinzugefügt (eigene Skripte für die Nutzung erforderlich)\nDas JSON einer Interaktion wird nun in den Zustand geschrieben, nachdem die Interaktion vom Adapter bearbeitet wurde, um einige Race Conditions zu verhindern\nAbhängigkeiten aktualisiert",
+        "ru": "Добавлена базовая поддержка взаимодействий, неизвестных адаптеру (стандартные сценарии, необходимые для обработки)\nРавное взаимодействие JSON теперь написана государству после того, как взаимодействие первоначально обработано, чтобы предотвратить некоторые расовые условия\nОбновленные зависимости",
+        "pt": "Adicionado suporte básico para interações desconhecidas ao adaptador (scripts personalizados necessários para manipulação)\nInteração bruta JSON está agora escrito para o estado depois que a interação é tratada inicialmente para evitar algumas condições de corrida\nDependências atualizadas",
+        "nl": "Toegevoegd basisondersteuning voor interacties onbekend aan de adapter (custom scripts vereist voor het hanteren)\nRauwe interactie JSON is nu geschreven aan de staat nadat de interactie in eerste instantie is behandeld om sommige race voorwaarden te voorkomen\nBijgewerkte afhankelijkheden",
+        "fr": "Ajout du support de base pour les interactions inconnues de l'adaptateur ( scripts personnalisés requis pour la manipulation)\nInteractions brutes JSON est maintenant écrit à l'état après l'interaction est initialement manipulée pour empêcher certaines conditions de course\nDépendances actualisées",
+        "it": "Aggiunto supporto di base per le interazioni sconosciute all'adattatore (scrizioni personalizzate necessarie per la gestione)\nInterazione raw JSON è ora scritto allo stato dopo che l'interazione è inizialmente gestita per prevenire alcune condizioni di gara\nDipendenze aggiornate",
+        "es": "Añadido soporte básico para interacciones desconocidas para el adaptador ( scripts de uso requerido para el manejo)\nInteracción en bruto JSON ahora está escrito al estado después de que la interacción se maneja inicialmente para prevenir algunas condiciones de raza\nDependencias actualizadas",
+        "pl": "Dodano podstawowe wsparcie dla interakcji nieznanych adaptera (niestandardowe skrypty wymagane do obsługi)\nInterakcje surowe JSON jest teraz napisane do stanu po interakcja jest początkowo obsługiwane, aby zapobiec niektórych warunków rasowych\nAktualizacja zależności",
+        "uk": "Додана базова підтримка взаємодій, невідомих до адаптера (обов’язкові скрипти, необхідні для обробки)\nСира взаємодія JSON тепер написаний на стан після взаємодії спочатку керуються для запобігання деяких умов раси\nОновлені залежності",
+        "zh-cn": "添加适配器未知的相互作用的基本支持( 处理所需的定制脚本)\n原始交互 JSON现在被写到州里 在最初处理互动之后 以防止一些种族条件\n更新的依赖关系"
+      },
       "2.3.1": {
         "en": "Fixed Blockly for the latest JavaScript adapter changes\nUpdated dependencies",
         "de": "Blockly für die neuesten Änderungen vom JavaScript Adapter repariert\nAbhängigkeiten Aktualisiert",
@@ -80,19 +93,6 @@
         "pl": "Zależność od upoważnienia\nTłumaczenia poprawione",
         "uk": "Оновлені залежності\nОновлені переклади",
         "zh-cn": "A. 最新依赖情况\n最新翻译"
-      },
-      "2.1.0": {
-        "en": "Added support for unique user names\nDetect possible DNS errors during login to prevent restart loops\nBetter handling for login errors, first 4 errors are now logged just as info",
-        "de": "Unterstützung für einzigartige Benutzernamen hinzugefügt\nErkennung möglicher DNS-Fehler während des Logins, um Neustartschleifen zu verhindern\nBessere Handhabung für Login-Fehler, die ersten 4 Fehler werden jetzt lediglich als Info geloggt",
-        "ru": "Добавлена поддержка уникальных имен пользователей\nОпределите возможные ошибки DNS во время входа, чтобы предотвратить перезагрузочные циклы\nУлучшение обработки для ошибок входа, первые 4 ошибки теперь вошли как info",
-        "pt": "Adicionado suporte para nomes de usuário únicos\nDetectar possíveis erros de DNS durante o login para evitar loops de reinício\nMelhor manuseio para erros de login, os primeiros 4 erros agora são registrados como informações",
-        "nl": "Vermeld ondersteuning voor unieke gebruikersnamen\nVernietig mogelijke DNS fouten tijdens de login om herstarten te voorkomen\nBeter omgaan met loginfouten, de eerste vier fouten zijn nu net als info",
-        "fr": "Support ajouté pour les noms d'utilisateurs uniques\nDétecter d'éventuelles erreurs DNS lors de la connexion pour éviter les boucles de redémarrage\nMeilleure manipulation des erreurs de connexion, les 4 premières erreurs sont maintenant enregistrées comme info",
-        "it": "Aggiunto supporto per nomi utente unici\nRileva possibili errori DNS durante il login per prevenire i loop di riavvio\nMigliore gestione degli errori di login, i primi 4 errori sono ora registrati come info",
-        "es": "Soporte añadido para nombres de usuario únicos\nDetectar posibles errores de DNS durante el inicio de sesión para evitar bucles de reinicio\nMejor manejo para errores de inicio de sesión, los primeros 4 errores ahora se registran como información",
-        "pl": "Wsparcie dla unikalnych użytkowników nazw\nUmożliwia to błędy DNS podczas loginu, aby zapobiec zmianie pętli\nLepiejsza obsługa błędów loginowych, pierwsze 4 błędy są odczytane jako infoin",
-        "uk": "Додано підтримку унікальних імен користувачів\nВизначити можливі помилки DNS під час входу, щоб запобігти перезавантаження петель\nНайкраща робота для помилок логіну, перші 4 помилки тепер записуються лише за інформацією",
-        "zh-cn": "增加对独特的用户名称的支持\nB. 在伐木期间可能出现DROP的错误,以防止重新开工。\n更妥善地处理伐木错误,目前有4个错误被认定为泡沫。"
       }
     },
     "titleLang": {
