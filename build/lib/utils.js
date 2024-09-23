@@ -27,7 +27,7 @@ module.exports = __toCommonJS(utils_exports);
 var import_node_path = require("node:path");
 var import_node_url = require("node:url");
 function getBufferAndNameFromBase64String(base64String, name) {
-  const b64match = base64String.match(/^data:([^/]+)\/([^;]+);base64,([a-zA-Z0-9+/]+=*)$/);
+  const b64match = /^data:([^/]+)\/([^;]+);base64,([a-zA-Z0-9+/]+=*)$/.exec(base64String);
   if (!b64match) {
     return null;
   }
@@ -41,11 +41,11 @@ function getBufferAndNameFromBase64String(base64String, name) {
   };
 }
 function getBasenameFromFilePathOrUrl(file) {
-  if (file.match(/^\w+:\/\//)) {
+  if (/^\w+:\/\//.exec(file)) {
     try {
       const url = new import_node_url.URL(file);
       return (0, import_node_path.basename)(url.pathname);
-    } catch (err) {
+    } catch (_err) {
       return (0, import_node_path.basename)(file);
     }
   } else {
@@ -56,7 +56,7 @@ function getObjName(common) {
   if (typeof common.name === "string") {
     return common.name;
   }
-  return common.name["en"];
+  return common.name.en;
 }
 function userNameOrTag(user) {
   return user.discriminator === "0" ? user.username : user.tag;

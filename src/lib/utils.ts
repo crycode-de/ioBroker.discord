@@ -15,7 +15,7 @@ interface BufferAndName {
  */
 export function getBufferAndNameFromBase64String (base64String: string, name?: string): BufferAndName | null {
   // check for base64 encoded data
-  const b64match = base64String.match(/^data:([^/]+)\/([^;]+);base64,([a-zA-Z0-9+/]+=*)$/);
+  const b64match = /^data:([^/]+)\/([^;]+);base64,([a-zA-Z0-9+/]+=*)$/.exec(base64String);
   if (!b64match) {
     return null;
   }
@@ -40,11 +40,11 @@ export function getBufferAndNameFromBase64String (base64String: string, name?: s
  * @returns The basename of the file.
  */
 export function getBasenameFromFilePathOrUrl (file: string): string {
-  if (file.match(/^\w+:\/\//)) {
+  if (/^\w+:\/\//.exec(file)) {
     try {
       const url = new URL(file);
       return basename(url.pathname);
-    } catch (err) {
+    } catch (_err) {
       return basename(file);
     }
   } else {
@@ -64,7 +64,7 @@ export function getObjName (common: ioBroker.ObjectCommon): string {
     return common.name;
   }
 
-  return common.name['en'];
+  return common.name.en;
 }
 
 /**

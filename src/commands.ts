@@ -83,7 +83,7 @@ export class DiscordAdapterSlashCommands {
   /**
    * Collection of the known (registered) custom commands and their option choices.
    */
-  private customCommands: Collection<string, Collection<string, CommandOptionChoiceData[]>> = new Collection();
+  private customCommands: Collection<string, Collection<string, CommandOptionChoiceData[]>> = new Collection<string, Collection<string, CommandOptionChoiceData[]>>();
 
   /**
    * If commands are fully registered including their permissions.
@@ -94,12 +94,12 @@ export class DiscordAdapterSlashCommands {
    * The last registered commands.
    * Used to check if something changed an we need to register the commands again.
    */
-  private lastCommandsJson: any[] | null = null;
+  private lastCommandsJson: unknown[] | null = null;
 
   /**
    * Collection of configurations for objects with commands enabled.
    */
-  private commandObjectConfig: Collection<string, CommandObjectConfig> = new Collection();
+  private commandObjectConfig: Collection<string, CommandObjectConfig> = new Collection<string, CommandObjectConfig>();
 
   /**
    * Collection of the last seen interactions of custom commands (not iob-get/-set)
@@ -108,7 +108,7 @@ export class DiscordAdapterSlashCommands {
    * Need to cache this here since there seems to be no way to get an interaction
    * by ID from discord.js.
    */
-  private lastInteractions: Collection<Snowflake, CommandInteraction<CacheType> | Interaction<CacheType>> = new Collection();
+  private lastInteractions: Collection<Snowflake, CommandInteraction<CacheType> | Interaction<CacheType>> = new Collection<Snowflake, CommandInteraction<CacheType> | Interaction<CacheType>>();
 
   /**
    * Timeout to trigger the delayed registration of the slash commands.
@@ -120,7 +120,7 @@ export class DiscordAdapterSlashCommands {
    * This is extended by some localized strings at runtime.
    * Used to determine true values from iob-set slash commands.
    */
-  private wellKnownbooleanTrueValues: Set<string> = new Set(['true', 'on', 'yes', '1']);
+  private wellKnownbooleanTrueValues: Set<string> = new Set<string>([ 'true', 'on', 'yes', '1' ]);
 
   constructor (adapter: DiscordAdapter) {
     this.adapter = adapter;
@@ -130,10 +130,11 @@ export class DiscordAdapterSlashCommands {
    * When the adapter is Ready.
    * Called by `adapter.onReady()` after some basic checks and setup.
    */
+  // eslint-disable-next-line @typescript-eslint/require-await
   public async onReady (): Promise<void> {
     // apply custom command names if configured
     if (this.adapter.config.cmdGetStateName) {
-      if (this.adapter.config.cmdGetStateName.match(/^[a-z][0-9a-z-_]{1,32}$/)) {
+      if (/^[a-z][0-9a-z-_]{1,32}$/.exec(this.adapter.config.cmdGetStateName)) {
         this.cmdGetStateName = this.adapter.config.cmdGetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom get state command name '${this.adapter.config.cmdGetStateName}' provied! Using default 'iob-get'.`);
@@ -141,7 +142,7 @@ export class DiscordAdapterSlashCommands {
     }
     if (this.adapter.config.cmdSetStateName) {
       this.cmdSetStateName = this.adapter.config.cmdSetStateName;
-      if (this.adapter.config.cmdSetStateName.match(/^[a-z][0-9a-z-_]{1,32}$/)) {
+      if (/^[a-z][0-9a-z-_]{1,32}$/.exec(this.adapter.config.cmdSetStateName)) {
         this.cmdSetStateName = this.adapter.config.cmdSetStateName;
       } else {
         this.adapter.log.warn(`Invalid custom set state command name '${this.adapter.config.cmdSetStateName}' provied! Using default 'iob-set'.`);
@@ -185,7 +186,7 @@ export class DiscordAdapterSlashCommands {
       this.adapter.log.debug('Commands not enabled');
 
       // check for commands and remove them all
-      for (const [, guild] of this.adapter.client.guilds.cache) {
+      for (const [ , guild ] of this.adapter.client.guilds.cache) {
         await this.removeGuildCommands(guild);
       }
 
@@ -241,7 +242,7 @@ export class DiscordAdapterSlashCommands {
     // setup choices for get and set commands
     this.cmdGetStateChoices = [];
     this.cmdSetStateChoices = [];
-    for (const [, objCfg] of this.commandObjectConfig) {
+    for (const [ , objCfg ] of this.commandObjectConfig) {
       if (objCfg.get) {
         this.cmdGetStateChoices.push({
           name: objCfg.name,
@@ -270,7 +271,7 @@ export class DiscordAdapterSlashCommands {
     if (this.adapter.config.enableCustomCommands) {
       loopCustomCommands:
       for (const customCommandCfg of this.adapter.config.customCommands) {
-        if (!customCommandCfg.name.match(/^[a-z][0-9a-z-_]{1,32}$/) || customCommandCfg.description.length === 0 || customCommandCfg.description.length > 100) {
+        if (!(/^[a-z][0-9a-z-_]{1,32}$/.exec(customCommandCfg.name)) || customCommandCfg.description.length === 0 || customCommandCfg.description.length > 100) {
           this.adapter.log.warn(`Custom command "${customCommandCfg.name}" has an invalid name or description configured!`);
           continue;
         }
@@ -297,7 +298,7 @@ export class DiscordAdapterSlashCommands {
         const optionsChoices = new Collection<string, CommandOptionChoiceData[]>();
 
         // add configured options
-        const cmdOpts: Set<string> = new Set();
+        const cmdOpts: Set<string> = new Set<string>();
         if (Array.isArray(customCommandCfg.options)) {
           // max 25 options are allowed
           if (customCommandCfg.options.length > 25) {
@@ -312,7 +313,7 @@ export class DiscordAdapterSlashCommands {
         await this.setupCustomCommandIobObjects(customCommandCfg);
 
         for (const customCommandCfgOpt of customCommandCfg.options) {
-          if (!customCommandCfgOpt.name.match(/^[a-z][0-9a-z-_]{1,32}$/) || customCommandCfgOpt.description.length === 0 || customCommandCfgOpt.description.length > 100) {
+          if (!(/^[a-z][0-9a-z-_]{1,32}$/.exec(customCommandCfgOpt.name)) || customCommandCfgOpt.description.length === 0 || customCommandCfgOpt.description.length > 100) {
             this.adapter.log.warn(`Custom command "${customCommandCfg.name}" option "${customCommandCfgOpt.name}" has an invalid name or description configured!`);
             continue loopCustomCommands;
           }
@@ -324,7 +325,7 @@ export class DiscordAdapterSlashCommands {
           cmdOpts.add(customCommandCfgOpt.name);
 
           switch (customCommandCfgOpt.type) {
-            case 'string':
+            case 'string': {
               // string options may have choices from the ioBroker object
               let choices: (string | CommandOptionChoiceData)[] = [];
               try {
@@ -332,7 +333,7 @@ export class DiscordAdapterSlashCommands {
                 if (typeof val !== 'string') {
                   this.adapter.log.warn(`Value of ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices is not a string!`);
                 } else {
-                  choices = JSON.parse(val);
+                  choices = JSON.parse(val) as (string | CommandOptionChoiceData)[];
                 }
               } catch (err) {
                 this.adapter.log.warn(`Could not parse JSON from ${this.adapter.namespace}.slashCommands.${customCommandCfg.name}.option-${customCommandCfgOpt.name}.choices! ${err}`);
@@ -361,6 +362,7 @@ export class DiscordAdapterSlashCommands {
                 return opt;
               });
               break;
+            }
 
             case 'number':
               cmdCustom.addNumberOption((opt) => opt.setName(customCommandCfgOpt.name).setDescription(customCommandCfgOpt.description).setRequired(!!customCommandCfgOpt.required));
@@ -433,7 +435,7 @@ export class DiscordAdapterSlashCommands {
       this.adapter.log.debug('Commands needs to be updated');
 
       // register commands for all servers of the bot (guild commands are applied instant and may have permissions per user set)
-      for (const [, guild] of this.adapter.client.guilds.cache) {
+      for (const [ , guild ] of this.adapter.client.guilds.cache) {
         try {
           if (this.adapter.config.commandsGlobal) {
             // global commands enabled, remove per guild commands
@@ -446,7 +448,8 @@ export class DiscordAdapterSlashCommands {
           }
 
         } catch (err) {
-          if (err instanceof DiscordAPIError && err.message === 'Missing Access'){
+          if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
             this.adapter.log.warn(`Error registering commands for server ${guild.name} (id:${guild.id}). Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
           } else {
             this.adapter.log.warn(`Error registering commands for server ${guild.name} (id:${guild.id}): ${err}`);
@@ -468,6 +471,7 @@ export class DiscordAdapterSlashCommands {
 
       } catch (err) {
         if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string
           this.adapter.log.warn(`Error registering global commands. Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
         } else {
           this.adapter.log.warn(`Error registering global commands: ${err}`);
@@ -482,274 +486,6 @@ export class DiscordAdapterSlashCommands {
     }
 
     this.registerCommandsDone = true;
-  }
-
-
-  /**
-   * Remove registered global commands if any.
-   */
-  private async removeGlobalCommands (): Promise<void> {
-    if (!this.adapter.client?.user) {
-      throw new Error('Discord client not available');
-    }
-
-    try {
-      const globalCommands = await this.adapter.client.application?.commands.fetch();
-      if (this.adapter.unloaded) return;
-
-      if (globalCommands && globalCommands.size > 0) {
-        this.adapter.log.debug(`Currently ${globalCommands.size} global commands registered. Removing them...`);
-        await this.rest.put(Routes.applicationCommands(this.adapter.client.user.id), { body: [] });
-        this.adapter.log.info(`Removed global commands cause commands they are not used anymore.`);
-      }
-    } catch (err) {
-      if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
-        this.adapter.log.warn(`Error while removing registered global commands. Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
-      } else {
-        this.adapter.log.warn(`Error while removing registered global commands: ${err}`);
-      }
-    }
-  }
-
-  /**
-   * Remove registered guild commands if any.
-   * @param guild The guild.
-   */
-  private async removeGuildCommands (guild: Guild): Promise<void> {
-    if (!this.adapter.client?.user) {
-      throw new Error('Discord client not available');
-    }
-
-    try {
-      const guildCommands = await guild.commands.fetch();
-      if (this.adapter.unloaded) return;
-
-      if (guildCommands.size > 0) {
-        this.adapter.log.debug(`Currently ${guildCommands.size} commands registered for server ${guild.name}. Removing them...`);
-        await this.rest.put(Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: [] });
-        this.adapter.log.info(`Removed commands for server ${guild.name} cause commands they are not used anymore.`);
-      }
-    } catch (err) {
-      if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
-        this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}). Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
-      } else {
-        this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}): ${err}`);
-      }
-    }
-  }
-
-  /**
-   * Setup the ioBroker object tree for the configured custom commands.
-   */
-  private async setupCustomCommandIobObjects (cmdCfg: ioBroker.AdapterConfigCustomCommand): Promise<void> {
-    const cmdName = cmdCfg.name;
-
-    await this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}`, {
-      type: 'channel',
-      common: {
-        name: cmdCfg.description,
-      },
-      native: {},
-    });
-
-    // generic custom command objects
-    await Promise.all([
-      this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.json`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('JSON data'),
-          role: 'json',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      }),
-      this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.timestamp`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Last use timestamp'),
-          role: 'date',
-          type: 'number',
-          read: true,
-          write: false,
-          def: 0,
-        },
-        native: {},
-      }),
-      this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.sendReply`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Send reply'),
-          role: 'text',
-          type: 'string',
-          read: false,
-          write: true,
-          def: '',
-        },
-        native: {},
-      }),
-      this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.interactionId`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Interaction ID'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      }),
-      this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.userId`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('User ID'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      }),
-      this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.userTag`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('User tag'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      }),
-      this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.userName`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('User name'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      }),
-      this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.serverId`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Server ID'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      }),
-      this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.channelId`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Channel ID'),
-          role: 'text',
-          type: 'string',
-          read: true,
-          write: false,
-          def: '',
-        },
-        native: {},
-      }),
-    ]);
-
-    // custom command option objects
-    const proms: Promise<any>[] = [];
-    for (const cmdCfgOpt of cmdCfg.options) {
-      await this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.option-${cmdCfgOpt.name}`, {
-        type: 'channel',
-        common: {
-          name: i18n.getStringOrTranslated('Option %s', cmdCfgOpt.description),
-        },
-        native: {},
-      });
-
-      let role: string;
-      let type: ioBroker.CommonType;
-      let def: any;
-      switch (cmdCfgOpt.type) {
-        case 'number':
-          role = 'value';
-          type = 'number';
-          def = null;
-          break;
-
-        case 'boolean':
-          role = 'indicator';
-          type = 'boolean';
-          def = null;
-          break;
-
-        default:
-          role = 'text';
-          type = 'string';
-          def = '';
-      }
-
-      proms.push(this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.option-${cmdCfgOpt.name}.value`, {
-        type: 'state',
-        common: {
-          name: i18n.getStringOrTranslated('Option %s value', cmdCfgOpt.description),
-          role,
-          type,
-          read: true,
-          write: false,
-          def,
-        },
-        native: {},
-      }));
-
-      // for string options add a choices state
-      if (cmdCfgOpt.type === 'string') {
-        proms.push(this.adapter.extendObjectAsyncCached(`slashCommands.${cmdName}.option-${cmdCfgOpt.name}.choices`, {
-          type: 'state',
-          common: {
-            name: i18n.getStringOrTranslated('Option %s choices', cmdCfgOpt.description),
-            role: 'json',
-            type: 'string',
-            read: true,
-            write: true,
-            def: '[]',
-          },
-          native: {},
-        }));
-      } else {
-        // remove the state for non-string options
-        proms.push(this.adapter.delObjectAsyncCached(`slashCommands.${cmdName}.option-${cmdCfgOpt.name}.choices`));
-      }
-    }
-
-    // check for unused (old) custom command option objects and remove them
-    const objListOptions = await this.adapter.getObjectListAsync({
-      startkey: `${this.adapter.namespace}.slashCommands.${cmdName}.option-`,
-      endkey: `${this.adapter.namespace}.slashCommands.${cmdName}.option-\u9999`,
-    });
-    const reOptionsName = new RegExp(`^${this.adapter.name}\\.${this.adapter.instance}\\.slashCommands\\.${cmdName}\\.option-([^.]+)$`);
-    for (const item of objListOptions.rows) {
-      const m = item.id.match(reOptionsName);
-      if (m) {
-        const oldoptName = m[1];
-        if (!cmdCfg.options.find((o) => o.name === oldoptName)) {
-          // option does not exist... delete the object and custom command option choices cache
-          proms.push(this.adapter.delObjectAsyncCached(`slashCommands.${cmdName}.option-${oldoptName}`, { recursive: true }));
-          this.customCommands.get(cmdName)?.delete(oldoptName);
-        }
-      }
-    }
-
-    // wait for object create/delete
-    await Promise.all(proms);
   }
 
   /**
@@ -807,8 +543,335 @@ export class DiscordAdapterSlashCommands {
     this.adapter.setTimeout(() => {
       this.triggerDelayedRegisterSlashCommandsTimeout = null;
       this.adapter.log.debug('Starting delayed slash commands registration...');
-      this.registerSlashCommands();
+      void this.registerSlashCommands();
     }, 5000);
+  }
+
+  /**
+   * Send a reply to a custom slash command.
+   * @param interactionId The ID of the interaction to reply to. The interactions needs to be cached in this instance.
+   * @param msg The message to reply with. May be a simple string, a MessageOptions object or a stringified JSON MessageOptions object.
+   * @returns Promise which resolves withe the ID of the reply message if the reply is sent.
+   * @throws Error if the reply could not be sent for some reason (i.e. some check failed).
+   */
+  public async sendCmdCustomReply (interactionId: Snowflake, msg: string | MessageCreateOptions): Promise<Snowflake> {
+    // get the interaction
+    const interaction = this.lastInteractions.get(interactionId);
+
+    if (!interaction) {
+      throw new Error(`No current interaction with ID ${interactionId} found for reply!`);
+    }
+
+    let cscTxt: string = '';
+
+    if (interaction.isCommand()) {
+      // command interaction
+      const { commandName } = interaction;
+
+      const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
+      if (!cmdCfg) {
+        throw new Error(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
+      }
+
+      cscTxt = ` of custom slash command ${commandName}`;
+    }
+
+    if (!interaction.isRepliable()) {
+      throw new Error(`Interaction ${interactionId}${cscTxt} is not repliable!`);
+    }
+
+    // if a string is given try to parse it and prepare it as MessageOptions object
+    if (typeof msg === 'string') {
+      try {
+        msg = this.adapter.parseStringifiedMessageOptions(msg);
+      } catch (err) {
+        throw new Error(`Reply to interaction ${interactionId}${cscTxt} is invalid: ${err}`);
+      }
+    }
+
+    // send the reply
+    const replyMsg = await interaction.editReply(msg);
+    return replyMsg.id;
+  }
+
+  /**
+   * Write a summay of all currently for commands configured objects to the log.
+   */
+  public logConfiguredCommandObjects (): void {
+    this.adapter.log.info('Configured state objects for discord slash commands:');
+    for (const [ , cmdObjCfg ] of this.commandObjectConfig) {
+      this.adapter.log.info(` |- ${cmdObjCfg.id} - alias:${cmdObjCfg.alias}, name:${cmdObjCfg.name}, get:${cmdObjCfg.get}, set:${cmdObjCfg.set}`);
+    }
+    this.adapter.log.info('---');
+  }
+
+  /**
+   * Remove registered global commands if any.
+   */
+  private async removeGlobalCommands (): Promise<void> {
+    if (!this.adapter.client?.user) {
+      throw new Error('Discord client not available');
+    }
+
+    try {
+      const globalCommands = await this.adapter.client.application?.commands.fetch();
+      if (this.adapter.unloaded) return;
+
+      if (globalCommands && globalCommands.size > 0) {
+        this.adapter.log.debug(`Currently ${globalCommands.size} global commands registered. Removing them...`);
+        await this.rest.put(Routes.applicationCommands(this.adapter.client.user.id), { body: [] });
+        this.adapter.log.info(`Removed global commands cause commands they are not used anymore.`);
+      }
+    } catch (err) {
+      if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        this.adapter.log.warn(`Error while removing registered global commands. Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
+      } else {
+        this.adapter.log.warn(`Error while removing registered global commands: ${err}`);
+      }
+    }
+  }
+
+  /**
+   * Remove registered guild commands if any.
+   * @param guild The guild.
+   */
+  private async removeGuildCommands (guild: Guild): Promise<void> {
+    if (!this.adapter.client?.user) {
+      throw new Error('Discord client not available');
+    }
+
+    try {
+      const guildCommands = await guild.commands.fetch();
+      if (this.adapter.unloaded) return;
+
+      if (guildCommands.size > 0) {
+        this.adapter.log.debug(`Currently ${guildCommands.size} commands registered for server ${guild.name}. Removing them...`);
+        await this.rest.put(Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: [] });
+        this.adapter.log.info(`Removed commands for server ${guild.name} cause commands they are not used anymore.`);
+      }
+    } catch (err) {
+      if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
+        // eslint-disable-next-line @typescript-eslint/no-base-to-string
+        this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}). Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
+      } else {
+        this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}): ${err}`);
+      }
+    }
+  }
+
+  /**
+   * Setup the ioBroker object tree for the configured custom commands.
+   */
+  private async setupCustomCommandIobObjects (cmdCfg: ioBroker.AdapterConfigCustomCommand): Promise<void> {
+    const cmdName = cmdCfg.name;
+
+    await this.adapter.extendObjectCached(`slashCommands.${cmdName}`, {
+      type: 'channel',
+      common: {
+        name: cmdCfg.description,
+      },
+      native: {},
+    });
+
+    // generic custom command objects
+    await Promise.all([
+      this.adapter.extendObjectCached(`slashCommands.${cmdName}.json`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('JSON data'),
+          role: 'json',
+          type: 'string',
+          read: true,
+          write: false,
+          def: '',
+        },
+        native: {},
+      }),
+      this.adapter.extendObjectCached(`slashCommands.${cmdName}.timestamp`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('Last use timestamp'),
+          role: 'date',
+          type: 'number',
+          read: true,
+          write: false,
+          def: 0,
+        },
+        native: {},
+      }),
+      this.adapter.extendObjectCached(`slashCommands.${cmdName}.sendReply`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('Send reply'),
+          role: 'text',
+          type: 'string',
+          read: false,
+          write: true,
+          def: '',
+        },
+        native: {},
+      }),
+      this.adapter.extendObjectCached(`slashCommands.${cmdName}.interactionId`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('Interaction ID'),
+          role: 'text',
+          type: 'string',
+          read: true,
+          write: false,
+          def: '',
+        },
+        native: {},
+      }),
+      this.adapter.extendObjectCached(`slashCommands.${cmdName}.userId`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('User ID'),
+          role: 'text',
+          type: 'string',
+          read: true,
+          write: false,
+          def: '',
+        },
+        native: {},
+      }),
+      this.adapter.extendObjectCached(`slashCommands.${cmdName}.userTag`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('User tag'),
+          role: 'text',
+          type: 'string',
+          read: true,
+          write: false,
+          def: '',
+        },
+        native: {},
+      }),
+      this.adapter.extendObjectCached(`slashCommands.${cmdName}.userName`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('User name'),
+          role: 'text',
+          type: 'string',
+          read: true,
+          write: false,
+          def: '',
+        },
+        native: {},
+      }),
+      this.adapter.extendObjectCached(`slashCommands.${cmdName}.serverId`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('Server ID'),
+          role: 'text',
+          type: 'string',
+          read: true,
+          write: false,
+          def: '',
+        },
+        native: {},
+      }),
+      this.adapter.extendObjectCached(`slashCommands.${cmdName}.channelId`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('Channel ID'),
+          role: 'text',
+          type: 'string',
+          read: true,
+          write: false,
+          def: '',
+        },
+        native: {},
+      }),
+    ]);
+
+    // custom command option objects
+    const proms: Promise<unknown>[] = [];
+    for (const cmdCfgOpt of cmdCfg.options) {
+      await this.adapter.extendObjectCached(`slashCommands.${cmdName}.option-${cmdCfgOpt.name}`, {
+        type: 'channel',
+        common: {
+          name: i18n.getStringOrTranslated('Option %s', cmdCfgOpt.description),
+        },
+        native: {},
+      });
+
+      let role: string;
+      let type: ioBroker.CommonType;
+      let def: unknown;
+      switch (cmdCfgOpt.type) {
+        case 'number':
+          role = 'value';
+          type = 'number';
+          def = null;
+          break;
+
+        case 'boolean':
+          role = 'indicator';
+          type = 'boolean';
+          def = null;
+          break;
+
+        default:
+          role = 'text';
+          type = 'string';
+          def = '';
+      }
+
+      proms.push(this.adapter.extendObjectCached(`slashCommands.${cmdName}.option-${cmdCfgOpt.name}.value`, {
+        type: 'state',
+        common: {
+          name: i18n.getStringOrTranslated('Option %s value', cmdCfgOpt.description),
+          role,
+          type,
+          read: true,
+          write: false,
+          def,
+        },
+        native: {},
+      }));
+
+      // for string options add a choices state
+      if (cmdCfgOpt.type === 'string') {
+        proms.push(this.adapter.extendObjectCached(`slashCommands.${cmdName}.option-${cmdCfgOpt.name}.choices`, {
+          type: 'state',
+          common: {
+            name: i18n.getStringOrTranslated('Option %s choices', cmdCfgOpt.description),
+            role: 'json',
+            type: 'string',
+            read: true,
+            write: true,
+            def: '[]',
+          },
+          native: {},
+        }));
+      } else {
+        // remove the state for non-string options
+        proms.push(this.adapter.delObjectAsyncCached(`slashCommands.${cmdName}.option-${cmdCfgOpt.name}.choices`));
+      }
+    }
+
+    // check for unused (old) custom command option objects and remove them
+    const objListOptions = await this.adapter.getObjectListAsync({
+      startkey: `${this.adapter.namespace}.slashCommands.${cmdName}.option-`,
+      endkey: `${this.adapter.namespace}.slashCommands.${cmdName}.option-\u9999`,
+    });
+    const reOptionsName = new RegExp(`^${this.adapter.name}\\.${this.adapter.instance}\\.slashCommands\\.${cmdName}\\.option-([^.]+)$`);
+    for (const item of objListOptions.rows) {
+      const m = item.id.match(reOptionsName);
+      if (m) {
+        const oldoptName = m[1];
+        if (!cmdCfg.options.find((o) => o.name === oldoptName)) {
+          // option does not exist... delete the object and custom command option choices cache
+          proms.push(this.adapter.delObjectAsyncCached(`slashCommands.${cmdName}.option-${oldoptName}`, { recursive: true }));
+          this.customCommands.get(cmdName)?.delete(oldoptName);
+        }
+      }
+    }
+
+    // wait for object create/delete
+    await Promise.all(proms);
   }
 
   /**
@@ -818,11 +881,11 @@ export class DiscordAdapterSlashCommands {
   private async onInteractionCreate (interaction: Interaction<CacheType>): Promise<void> {
     if (interaction.isCommand()) {
       // handle command interaction for build in commands and custom commands
-      this.handleCommandInteraction(interaction);
+      void this.handleCommandInteraction(interaction);
 
     } else if (interaction.isAutocomplete()) {
       // handle auto complete interaction
-      this.handleAutocompleteInteraction(interaction);
+      void this.handleAutocompleteInteraction(interaction);
 
     } else {
       // handle other interaction types to allow the usage of them in scripts
@@ -843,7 +906,7 @@ export class DiscordAdapterSlashCommands {
       if (interaction.isCommand()) {
         interactionJson.options = interaction.options.data;
       }
-      this.adapter.setState('raw.interactionJson', JSON.stringify(interactionJson, (_key, value) => typeof value === 'bigint' ? value.toString() : value), true);
+      void this.adapter.setState('raw.interactionJson', JSON.stringify(interactionJson, (_key, value: unknown) => typeof value === 'bigint' ? value.toString() : value), true);
     }
 
     // remove outdated interactions
@@ -926,7 +989,7 @@ export class DiscordAdapterSlashCommands {
     const focused = interaction.options.getFocused(true);
     let focusedValue: string;
     if (typeof focused.value !== 'string') {
-      return interaction.respond([]);
+      return await interaction.respond([]);
     } else {
       focusedValue = focused.value.toLowerCase();
     }
@@ -939,7 +1002,7 @@ export class DiscordAdapterSlashCommands {
     if (commandName === this.cmdGetStateName) {
       // get state command
       if (!this.adapter.checkUserAuthorization(authCheckTarget, { getStates: true })) {
-        return interaction.respond([]);
+        return await interaction.respond([]);
       }
 
       choices = this.cmdGetStateChoices;
@@ -947,7 +1010,7 @@ export class DiscordAdapterSlashCommands {
     } else if (commandName === this.cmdSetStateName) {
       // set state command
       if (!this.adapter.checkUserAuthorization(authCheckTarget, { setStates: true })) {
-        return interaction.respond([]);
+        return await interaction.respond([]);
       }
 
       choices = this.cmdSetStateChoices;
@@ -955,14 +1018,14 @@ export class DiscordAdapterSlashCommands {
     } else if (this.customCommands.has(commandName)) {
       // custom command
       if (!this.adapter.checkUserAuthorization(authCheckTarget, { useCustomCommands: true })) {
-        return interaction.respond([]);
+        return await interaction.respond([]);
       }
 
       choices = this.customCommands.get(commandName)?.get(focused.name) ?? [];
 
     } else {
       // unknown command
-      return interaction.respond([]);
+      return await interaction.respond([]);
     }
 
     // filter for given input
@@ -974,7 +1037,7 @@ export class DiscordAdapterSlashCommands {
     // max. 25 choices are allowed
     matchedChoices.splice(25);
 
-    return interaction.respond(matchedChoices);
+    return await interaction.respond(matchedChoices);
   }
 
   /**
@@ -1000,7 +1063,7 @@ export class DiscordAdapterSlashCommands {
           ephemeral: true,
         });
       }
-      return [null, null];
+      return [ null, null ];
     }
 
     // get the object
@@ -1016,7 +1079,7 @@ export class DiscordAdapterSlashCommands {
           ephemeral: true,
         });
       }
-      return [null, null];
+      return [ null, null ];
     }
     if (obj.type !== 'state') {
       if (interaction.replied) {
@@ -1029,10 +1092,10 @@ export class DiscordAdapterSlashCommands {
           ephemeral: true,
         });
       }
-      return [null, null];
+      return [ null, null ];
     }
 
-    return [obj, cfg];
+    return [ obj, cfg ];
   }
 
   /**
@@ -1042,12 +1105,12 @@ export class DiscordAdapterSlashCommands {
   private async handleCmdGetState (interaction: CommandInteraction<CacheType>): Promise<void> {
     const objAlias = interaction.options.get('state', true).value as string;
 
-    const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
+    const [ obj, cfg ] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
     if (!obj || !cfg) {
       return;
     }
 
-    const objCustom: ioBroker.CustomConfig | undefined = obj.common.custom?.[this.adapter.namespace];
+    const objCustom: ioBroker.CustomConfig | undefined = obj.common.custom?.[this.adapter.namespace] as ioBroker.CustomConfig | undefined;
 
     // check if get allowed
     if (!objCustom?.commandsAllowGet) {
@@ -1077,7 +1140,7 @@ export class DiscordAdapterSlashCommands {
     let val: string = '';
 
     // an optional MessageOptions object for special cases (like sending files)
-    let msgOpts: MessageCreateOptions | undefined = undefined;
+    let msgOpts: MessageCreateOptions | undefined;
 
     // add unit if defined in the object
     const unit = obj.common.unit ? ` ${obj.common.unit}` : '';
@@ -1098,10 +1161,10 @@ export class DiscordAdapterSlashCommands {
 
         msgOpts = {
           content: `${cfg.name}${ack}:`,
-          files: [{
+          files: [ {
             attachment: b64data.buffer,
             name: b64data.name,
-          }],
+          } ],
         };
         val = 'file:base64';
 
@@ -1115,10 +1178,10 @@ export class DiscordAdapterSlashCommands {
 
         msgOpts = {
           content: `${cfg.name}${ack}:`,
-          files: [{
+          files: [ {
             attachment: state.val,
             name: getBasenameFromFilePathOrUrl(state.val),
-          }],
+          } ],
         };
         val = `file:${state.val}`;
       }
@@ -1134,7 +1197,7 @@ export class DiscordAdapterSlashCommands {
           }
           break;
 
-        case 'number':
+        case 'number': {
           // number values
           const decimals = objCustom.commandsNumberDecimals ?? 0;
           if (typeof state.val === 'number') {
@@ -1148,6 +1211,7 @@ export class DiscordAdapterSlashCommands {
             val = val.replace('.', ',');
           }
           break;
+        }
 
         default:
           if (typeof state.val === 'string') {
@@ -1183,12 +1247,12 @@ export class DiscordAdapterSlashCommands {
   private async handleCmdSetState (interaction: CommandInteraction<CacheType>): Promise<void> {
     const objAlias = interaction.options.get('state', true).value as string;
 
-    const [obj, cfg] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
+    const [ obj, cfg ] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
     if (!obj || !cfg) {
       return;
     }
 
-    const objCustom: ioBroker.CustomConfig | undefined = obj.common.custom?.[this.adapter.namespace];
+    const objCustom: ioBroker.CustomConfig | undefined = obj.common.custom?.[this.adapter.namespace] as ioBroker.CustomConfig | undefined;
 
     // check if set allowed
     if (!objCustom?.commandsAllowSet) {
@@ -1320,7 +1384,7 @@ export class DiscordAdapterSlashCommands {
     this.lastInteractions.set(interaction.id, interaction);
 
     // promises for all set state actions
-    const proms: Promise<any>[] = [];
+    const proms: Promise<unknown>[] = [];
 
     // prepare json data
     const json: JsonSlashCommandObj = {
@@ -1375,7 +1439,7 @@ export class DiscordAdapterSlashCommands {
             id: opt.channel.id,
             name: opt.channel.name,
             type: ChannelType[opt.channel.type] as ChannelTypeNames,
-            lastMessageId: (opt.channel.type === ChannelType.GuildText || opt.channel.type == ChannelType.GuildVoice) ? opt.channel.lastMessageId : null,
+            lastMessageId: (opt.channel.type === ChannelType.GuildText || opt.channel.type === ChannelType.GuildVoice) ? opt.channel.lastMessageId : null,
           };
         }
       } else {
@@ -1384,19 +1448,19 @@ export class DiscordAdapterSlashCommands {
           type: null,
         };
       }
-      proms.push(this.adapter.setStateAsync(`slashCommands.${commandName}.option-${optCfg.name}.value`, json.options[optCfg.name].value, true));
+      proms.push(this.adapter.setState(`slashCommands.${commandName}.option-${optCfg.name}.value`, json.options[optCfg.name].value, true));
     }
 
     // set the states
     await Promise.all([
-      this.adapter.setStateAsync(`slashCommands.${commandName}.interactionId`, interaction.id, true),
-      this.adapter.setStateAsync(`slashCommands.${commandName}.channelId`, channelId, true),
-      this.adapter.setStateAsync(`slashCommands.${commandName}.serverId`, guildId ?? null, true),
-      this.adapter.setStateAsync(`slashCommands.${commandName}.userId`, user.id, true),
-      this.adapter.setStateAsync(`slashCommands.${commandName}.userTag`, user.tag, true),
-      this.adapter.setStateAsync(`slashCommands.${commandName}.userName`, user.username, true),
-      this.adapter.setStateAsync(`slashCommands.${commandName}.timestamp`, interaction.createdTimestamp, true),
-      this.adapter.setStateAsync(`slashCommands.${commandName}.json`, JSON.stringify(json), true),
+      this.adapter.setState(`slashCommands.${commandName}.interactionId`, interaction.id, true),
+      this.adapter.setState(`slashCommands.${commandName}.channelId`, channelId, true),
+      this.adapter.setState(`slashCommands.${commandName}.serverId`, guildId ?? null, true),
+      this.adapter.setState(`slashCommands.${commandName}.userId`, user.id, true),
+      this.adapter.setState(`slashCommands.${commandName}.userTag`, user.tag, true),
+      this.adapter.setState(`slashCommands.${commandName}.userName`, user.username, true),
+      this.adapter.setState(`slashCommands.${commandName}.timestamp`, interaction.createdTimestamp, true),
+      this.adapter.setState(`slashCommands.${commandName}.json`, JSON.stringify(json), true),
       ...proms,
     ]);
 
@@ -1404,63 +1468,5 @@ export class DiscordAdapterSlashCommands {
      * Hint: Interaction reply is deferred, but no reply will be send here.
      *       The reply must be triggered by the user using the .sendReply state or a `sendTo(...)` action.
      *****/
-  }
-
-  /**
-   * Send a reply to a custom slash command.
-   * @param interactionId The ID of the interaction to reply to. The interactions needs to be cached in this instance.
-   * @param msg The message to reply with. May be a simple string, a MessageOptions object or a stringified JSON MessageOptions object.
-   * @returns Promise which resolves withe the ID of the reply message if the reply is sent.
-   * @throws Error if the reply could not be sent for some reason (i.e. some check failed).
-   */
-  public async sendCmdCustomReply (interactionId: Snowflake, msg: string | MessageCreateOptions): Promise<Snowflake> {
-    // get the interaction
-    const interaction = this.lastInteractions.get(interactionId);
-
-    if (!interaction) {
-      throw new Error(`No current interaction with ID ${interactionId} found for reply!`);
-    }
-
-    let cscTxt: string = '';
-
-    if (interaction.isCommand()) {
-      // command interaction
-      const { commandName } = interaction;
-
-      const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
-      if (!cmdCfg) {
-        throw new Error(`No configuration for custom slash command ${commandName} of interaction ${interactionId} found for reply!`);
-      }
-
-      cscTxt = ` of custom slash command ${commandName}`;
-    }
-
-    if (!interaction.isRepliable()) {
-      throw new Error(`Interaction ${interactionId}${cscTxt} is not repliable!`);
-    }
-
-    // if a string is given try to parse it and prepare it as MessageOptions object
-    if (typeof msg === 'string') {
-      try {
-        msg = this.adapter.parseStringifiedMessageOptions(msg);
-      } catch (err) {
-        throw new Error(`Reply to interaction ${interactionId}${cscTxt} is invalid: ${err}`);
-      }
-    }
-
-    // send the reply
-    const replyMsg = await interaction.editReply(msg);
-    return replyMsg.id;
-  }
-
-  /**
-   * Write a summay of all currently for commands configured objects to the log.
-   */
-  public logConfiguredCommandObjects (): void {
-    this.adapter.log.info('Configured state objects for discord slash commands:');
-    for (const [, cmdObjCfg] of this.commandObjectConfig) {
-      this.adapter.log.info(` |- ${cmdObjCfg.id} - alias:${cmdObjCfg.alias}, name:${cmdObjCfg.name}, get:${cmdObjCfg.get}, set:${cmdObjCfg.set}`);
-    }
-    this.adapter.log.info('---');
   }
 }

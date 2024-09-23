@@ -36,9 +36,8 @@
     // "useUnknownInCatchVariables": false,
     "forceConsistentCasingInFileNames": true,
 
-    // Node 16
-    "target": "es2021",
-    "lib": ["es2021"],
+    "target": "es2022",
+    "lib": ["es2022"],
 
     "sourceMap": true,
     "inlineSourceMap": false
@@ -46,7 +45,9 @@
   "include": [
     "src/**/*.ts",
     "admin/**/*.ts",
-    "admin/**/*.tsx"
+    "admin/**/*.tsx",
+    "admin/blockly.js",
+    "eslint.config.mjs"
   ],
   "exclude": [
     "build/**",

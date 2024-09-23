@@ -1,11 +1,12 @@
+// @ts-nocheck
 'use strict';
 
 if (typeof goog !== 'undefined') {
   goog.provide('Blockly.JavaScript.Discord');
-
   goog.require('Blockly.JavaScript');
 }
 
+/* eslint-disable @stylistic/quote-props */
 Blockly.Words['Discord'] = { 'en': 'Discord', 'de': 'Discord', 'ru': 'Discord', 'pt': 'Discord', 'nl': 'Discord', 'fr': 'Discord', 'it': 'Discord', 'es': 'Discord', 'pl': 'Discord', 'uk': 'Discord', 'zh-cn': 'Discord' };
 Blockly.Words['discord_send_message'] = { 'en': 'Send Discord message', 'de': 'Discord-Nachricht senden', 'ru': 'Отправить сообщение в дискорде', 'pt': 'Enviar mensagem do Discord', 'nl': 'Discord-bericht verzenden', 'fr': 'Envoyer un message Discord', 'it': 'Invia messaggio Discordia', 'es': 'Enviar mensaje de discordia', 'pl': 'Wyślij wiadomość na Discordzie', 'uk': 'Надіслати повідомлення Discord', 'zh-cn': '发送不和谐消息' };
 Blockly.Words['discord_send_message_tooltip'] = { 'en': 'Send a message via Discord', 'de': 'Eine Nachricht über Discord senden', 'ru': 'Отправить сообщение через Discord', 'pt': 'Envie uma mensagem pelo Discord', 'nl': 'Stuur een bericht via Discord', 'fr': 'Envoyer un message via Discord', 'it': 'Invia un messaggio tramite Discord', 'es': 'Enviar un mensaje a través de Discord', 'pl': 'Wyślij wiadomość przez Discord', 'uk': 'Надішліть повідомлення через Discord', 'zh-cn': '通过 Discord 发送消息' };
@@ -62,6 +63,7 @@ Blockly.Words['discord_send_custom_command_reply'] = { 'en': 'Send reply to a cu
 Blockly.Words['discord_send_custom_command_reply_tooltip'] = { 'en': 'Send a reply to a custom Discord slash command.', 'de': 'Senden einer Antwort auf einen benutzerdefinierten Discord-Slash-Befehl.', 'ru': 'Отправьте ответ на пользовательскую косую черту Discord.', 'pt': 'Envie uma resposta a um comando de barra personalizado do Discord.', 'nl': 'Stuur een antwoord op een aangepast Discord-slash-commando.', 'fr': 'Envoyez une réponse à une commande slash Discord personnalisée.', 'it': 'Invia una risposta a un comando slash Discord personalizzato.', 'es': 'Envíe una respuesta a un comando de barra inclinada de Discord personalizado.', 'pl': 'Wyślij odpowiedź na niestandardowe polecenie ukośnika Discorda.', 'uk': 'Надішліть відповідь на спеціальну команду Discord зі слешем.', 'zh-cn': '发送对自定义 Discord 斜杠命令的回复。' };
 Blockly.Words['discord_interaction_id'] = { 'en': 'Interaction ID', 'de': 'Interaktions-ID', 'ru': 'Идентификатор взаимодействия', 'pt': 'Código de interação', 'nl': 'Interactie-ID', 'fr': 'ID d\'interaction', 'it': 'ID interazione', 'es': 'ID de interacción', 'pl': 'Identyfikator interakcji', 'uk': 'ID взаємодії', 'zh-cn': '交互 ID' };
 Blockly.Words['discord_help_url'] = { 'en': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'de': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/de/README.md#blockly', 'ru': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'pt': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'nl': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'fr': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'it': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'es': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'pl': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'uk': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'zh-cn': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly' };
+/* eslint-enable @stylistic/quote-props */
 
 Blockly.CustomBlocks = Blockly.CustomBlocks || [];
 Blockly.CustomBlocks.push('Discord');
@@ -81,17 +83,17 @@ const DiscordHelpers = {
         const m = instance.match(/^system.adapter.discord.(\d+)$/);
         if (m) {
           const k = parseInt(m[1], 10);
-          options.push(['discord.' + k, '.' + k]);
+          options.push([ 'discord.' + k, '.' + k ]);
         }
       }
       if (options.length === 0) {
         for (let u = 0; u <= 4; u++) {
-          options.push(['discord.' + u, '.' + u]);
+          options.push([ 'discord.' + u, '.' + u ]);
         }
       }
     } else {
       for (let n = 0; n <= 4; n++) {
-        options.push(['discord.' + n, '.' + n]);
+        options.push([ 'discord.' + n, '.' + n ]);
       }
     }
 
@@ -256,14 +258,14 @@ const DiscordHelpers = {
     }
 
     return `await new Promise((resolve) => {
-      ${contentCode || ''}
+      ${contentCode ?? ''}
       const data =  {
         ${opts.target ? `${opts.target},` : ''}
         ${opts.messageId ? `messageId: ${opts.messageId},` : ''}
         ${contentCode ? `content: content,` : ''}
         ${opts.emoji ? `emoji: ${opts.emoji},` : ''}
       };
-      ${userCode || ''}
+      ${userCode ?? ''}
       sendTo('discord${opts.instance}', '${opts.action}', data, (result) => {
         if (result.error) {
           log(\`[discord${opts.instance}] sendTo error: \${result.error}\\n\${JSON.stringify(result)}\`, 'warn');
@@ -316,7 +318,7 @@ const DiscordHelpers = {
 
     if (opts.inputContent) {
       block.appendValueInput('content')
-        .setCheck(['String', 'DiscordMessageContent'])
+        .setCheck([ 'String', 'DiscordMessageContent' ])
         .appendField(Blockly.Translate('discord_message'));
     }
 
@@ -644,11 +646,11 @@ Blockly.Blocks['discord_create_content'] = {
       .appendField(Blockly.Translate('discord_content'));
 
     this.appendValueInput('embeds')
-      .setCheck(['String', 'Array', 'DiscordEmbed']) // may be a single sting, embed or array of both
+      .setCheck([ 'String', 'Array', 'DiscordEmbed' ]) // may be a single sting, embed or array of both
       .appendField(Blockly.Translate('discord_embeds'));
 
     this.appendValueInput('files')
-      .setCheck(['String', 'Array', 'DiscordFile']) // may be a single filename, attachment or array of both
+      .setCheck([ 'String', 'Array', 'DiscordFile' ]) // may be a single filename, attachment or array of both
       .appendField(Blockly.Translate('discord_attachments'));
 
     this.appendValueInput('replyToId')
@@ -678,7 +680,7 @@ Blockly.JavaScript['discord_create_content'] = function (block) {
   const ret = `{
     content: ${content},${propEmbeds}${propFiles}${propReply}
   }`;
-  return [ret, Blockly.JavaScript.ORDER_ATOMIC];
+  return [ ret, Blockly.JavaScript.ORDER_ATOMIC ];
 };
 
 // --- Block create embed -------------------------------------------------------
@@ -782,7 +784,7 @@ Blockly.JavaScript['discord_create_embed'] = function (block) {
   }
   ret += '\n  }';
 
-  return [ret, Blockly.JavaScript.ORDER_ATOMIC];
+  return [ ret, Blockly.JavaScript.ORDER_ATOMIC ];
 };
 
 // --- Block create file -------------------------------------------------------
@@ -849,7 +851,7 @@ Blockly.JavaScript['discord_create_file'] = function (block) {
   }
   ret += '\n  }';
 
-  return [ret, Blockly.JavaScript.ORDER_ATOMIC];
+  return [ ret, Blockly.JavaScript.ORDER_ATOMIC ];
 };
 
 // --- Block on custom slash command -------------------------------------------
@@ -894,7 +896,7 @@ Blockly.Blocks['discord_on_custom_cmd_container'] = {
     this.appendStatementInput('STACK');
     this.setTooltip(Blockly.Translate('discord_custom_cmd_option_tooltip'));
     this.contextMenu = false;
-  }
+  },
 };
 
 Blockly.Blocks['discord_on_custom_cmd_item'] = {
@@ -912,14 +914,13 @@ Blockly.Blocks['discord_on_custom_cmd_item'] = {
     this.setNextStatement(true);
     this.setTooltip(Blockly.Translate('discord_custom_cmd_option_tooltip'));
     this.contextMenu = false;
-  }
+  },
 };
 
 Blockly.Blocks['discord_on_custom_cmd'] = {
   init: function () {
     this.appendDummyInput('_label')
       .appendField(Blockly.Translate('discord_on_custom_cmd'));
-
 
     this.appendDummyInput('instance')
       .appendField(Blockly.Translate('discord_instance'))
@@ -961,10 +962,10 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
     this.setNextStatement(true, null);
     if (typeof Blockly.icons === 'object') {
       // Blockly >= 10
-      this.setMutator(new Blockly.icons.MutatorIcon(['discord_on_custom_cmd_item'], this));
+      this.setMutator(new Blockly.icons.MutatorIcon([ 'discord_on_custom_cmd_item' ], this));
     } else {
       // Blockly 9.x
-      this.setMutator(new Blockly.Mutator(['discord_on_custom_cmd_item']));
+      this.setMutator(new Blockly.Mutator([ 'discord_on_custom_cmd_item' ]));
     }
     this.setTooltip(Blockly.Translate('discord_on_custom_cmd_tooltip'));
     this.setHelpUrl(DiscordHelpers.helpUrl);
@@ -1029,15 +1030,14 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
     const names = [];
     while (itemBlock) {
       connections.push(itemBlock.valueConnection_);
-      itemBlock = itemBlock.nextConnection &&
-        itemBlock.nextConnection.targetBlock();
+      itemBlock = itemBlock.nextConnection?.targetBlock();
     }
     // Disconnect any children that don't belong.
     for (let i = 0; i < this.itemCount_; i++) {
       const input = this.getInput('option' + i);
       const connection = input.connection.targetConnection;
       names[i] = input.fieldRow[0].getValue();
-      if (connection && connections.indexOf(connection) === -1) {
+      if (connection && !connections.includes(connection)) {
         connection.disconnect();
       }
     }
@@ -1060,8 +1060,8 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
     let i = 0;
     while (itemBlock) {
       const input = this.getInput('option' + i);
-      itemBlock.valueConnection_ = input && input.connection.targetConnection;
-      itemBlock = itemBlock.nextConnection && itemBlock.nextConnection.targetBlock();
+      itemBlock.valueConnection_ = input?.connection.targetConnection;
+      itemBlock = itemBlock.nextConnection?.targetBlock();
       i++;
     }
   },
@@ -1076,6 +1076,7 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
     let _input;
     const wp = this.workspace;
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions
     this.getInput('STATEMENT') && this.removeInput('STATEMENT');
 
     // Add new inputs.
@@ -1091,27 +1092,25 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
         _input.appendField(new Blockly.FieldTextInput(names[i]));
         _input.setAlign(Blockly.ALIGN_RIGHT);
         _input.setCheck('Variable');
-        setTimeout(function (_input) {
-          if (!_input.connection.isConnected()) {
+        setTimeout(function (_input2) {
+          if (!_input2.connection.isConnected()) {
             const _shadow = wp.newBlock('logic_null');
             _shadow.setShadow(true);
             _shadow.initSvg();
             _shadow.render();
-            _shadow.outputConnection.connect(_input.connection);
-            //console.log('New ' + names[i]);
+            _shadow.outputConnection.connect(_input2.connection);
           }
         }, 100, _input);
       } else {
         _input.fieldRow[0].setValue(names[i]);
-        //console.log('Exist ' + names[i]);
-        setTimeout(function (_input, name) {
-          if (!_input.connection.isConnected()) {
+        setTimeout(function (_input2, name) {
+          if (!_input2.connection.isConnected()) {
             console.log('Create ' + name);
             const shadow = wp.newBlock('logic_null');
             shadow.setShadow(true);
             shadow.initSvg();
             shadow.render();
-            shadow.outputConnection.connect(_input.connection);
+            shadow.outputConnection.connect(_input2.connection);
           }
         }, 100, _input, names[i]);
       }
@@ -1119,9 +1118,10 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
 
     // Remove deleted inputs.
     const blocks = [];
+    // eslint-disable-next-line no-cond-assign
     while (_input = this.getInput('option' + i)) {
       const b = _input.connection.targetBlock();
-      if (b && b.isShadow()) {
+      if (b?.isShadow()) {
         blocks.push(b);
       }
       this.removeInput('option' + i);
@@ -1131,14 +1131,15 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
     if (blocks.length) {
       const ws = this.workspace;
       setTimeout(function () {
-        for (var b = 0; b < blocks.length; b++) {
+        // eslint-disable-next-line @typescript-eslint/prefer-for-of
+        for (let b = 0; b < blocks.length; b++) {
           ws.removeTopBlock(blocks[b]);
         }
       }, 100);
     }
 
     this.appendStatementInput('STATEMENT');
-  }
+  },
 };
 
 Blockly.JavaScript['discord_on_custom_cmd'] = function (block) {
@@ -1146,7 +1147,7 @@ Blockly.JavaScript['discord_on_custom_cmd'] = function (block) {
   const varUserId = Blockly.JavaScript.valueToCode(block, 'varUserId', Blockly.JavaScript.ORDER_ATOMIC);
   const varUserTag = Blockly.JavaScript.valueToCode(block, 'varUserTag', Blockly.JavaScript.ORDER_ATOMIC);
   const log = block.getFieldValue('log');
-  let commandName = block.getFieldValue('commandName').replace(/[^0-9a-z-_]/g, '');
+  const commandName = block.getFieldValue('commandName').replace(/[^0-9a-z-_]/g, '');
   const statement = Blockly.JavaScript.statementToCode(block, 'STATEMENT');
 
   let varAssigns = '';
@@ -1160,7 +1161,7 @@ Blockly.JavaScript['discord_on_custom_cmd'] = function (block) {
 
   for (let n = 0; n < block.itemCount_; n++) {
     const input = this.getInput('option' + n);
-    let val = Blockly.JavaScript.valueToCode(block, 'option' + n, Blockly.JavaScript.ORDER_COMMA);
+    const val = Blockly.JavaScript.valueToCode(block, 'option' + n, Blockly.JavaScript.ORDER_COMMA);
     if (val && val !== 'null') {
       varAssigns += `\n      ${val} = (data.options && data.options['${input.fieldRow[0].getValue()}']) ? data.options['${input.fieldRow[0].getValue()}'].value : null;`;
     }
@@ -1170,7 +1171,7 @@ Blockly.JavaScript['discord_on_custom_cmd'] = function (block) {
     const id = 'discord${instance}.slashCommands.${commandName}.json';
     on({ id: id, change: 'any', ack: true }, async (obj) => {
       if (typeof obj.state.val !== 'string' || obj.state.val.length === 0) return;
-      ${log === true || log === 'true' || log === 'TRUE' ? `log(\`[discord${instance}] Custom slash command ${commandName}: \${obj.state.val}\`);` : '' }
+      ${log === true || log === 'true' || log === 'TRUE' ? `log(\`[discord${instance}] Custom slash command ${commandName}: \${obj.state.val}\`);` : ''}
       let data;
       try {
         data = JSON.parse(obj.state.val);

@@ -42,16 +42,14 @@ var import_pt = __toESM(require("../../admin/i18n/pt.json"));
 var import_ru = __toESM(require("../../admin/i18n/ru.json"));
 var import_zh_cn = __toESM(require("../../admin/i18n/zh-cn.json"));
 class I18n {
-  constructor() {
-    /**
-     * Language configured in `system.config` object.
-     */
-    this.language = "en";
-    /**
-     * If float numbers should be displayed using a comma instead of a dot.
-     */
-    this.isFloatComma = false;
-  }
+  /**
+   * Language configured in `system.config` object.
+   */
+  language = "en";
+  /**
+   * If float numbers should be displayed using a comma instead of a dot.
+   */
+  isFloatComma = false;
   /**
    * Get a translation object or a single string for a given translation key.
    * Uses the i18n files in `admin/i18n`.

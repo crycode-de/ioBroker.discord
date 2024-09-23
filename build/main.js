@@ -58,58 +58,62 @@ const LOGIN_WAIT_TIMES = [
   // 10 min
 ];
 class DiscordAdapter extends import_adapter_core.Adapter {
+  /**
+   * Instance of the discord client.
+   */
+  client = null;
+  /**
+   * Flag if the adapter is unloaded or is unloading.
+   * Used to check this in some async operations.
+   */
+  unloaded = false;
+  /**
+   * Flag if the initial setup of the custom object configurations is done or not.
+   * While not done, custom object configuration changes will not trigger a
+   * slash commands registration automatically.
+   */
+  initialCustomObjectSetupDone = false;
+  /**
+   * Local cache for `info.connection` state.
+   */
+  infoConnected = false;
+  /**
+   * Set of state IDs where received discord messages will be stored to.
+   * Used to identify target states for received discord messages.
+   */
+  messageReceiveStates = /* @__PURE__ */ new Set();
+  /**
+   * Set user IDs known to set up.
+   * Used to check if the user objects are created on some events.
+   */
+  knownUsers = /* @__PURE__ */ new Set();
+  /**
+   * Set of objects from this instance with text2command enabled.
+   */
+  text2commandObjects = /* @__PURE__ */ new Set();
+  /**
+   * Cache for `extendObjectCache(...)` calls to extend objects only when changed.
+   */
+  extendObjectCache = new import_discord.Collection();
+  /**
+   * Cache for `.json` states.
+   */
+  jsonStateCache = new import_discord.Collection();
+  /**
+   * Instance of the slash commands handler class.
+   */
+  discordSlashCommands;
+  /**
+   * Flag if we are currently in shard error state from discord.js.
+   * `false` currently not on error state, A `string` containing the error name in
+   * case of en error.
+   */
+  isShardError = false;
   constructor(options = {}) {
     super({
       ...options,
       name: "discord"
     });
-    /**
-     * Local cache for `info.connection` state.
-     */
-    this.infoConnected = false;
-    /**
-     * Instance of the discord client.
-     */
-    this.client = null;
-    /**
-     * Set of state IDs where received discord messages will be stored to.
-     * Used to identify target states for received discord messages.
-     */
-    this.messageReceiveStates = /* @__PURE__ */ new Set();
-    /**
-     * Set user IDs known to set up.
-     * Used to check if the user objects are created on some events.
-     */
-    this.knownUsers = /* @__PURE__ */ new Set();
-    /**
-     * Set of objects from this instance with text2command enabled.
-     */
-    this.text2commandObjects = /* @__PURE__ */ new Set();
-    /**
-     * Cache for `extendObjectCache(...)` calls to extend objects only when changed.
-     */
-    this.extendObjectCache = new import_discord.Collection();
-    /**
-     * Cache for `.json` states.
-     */
-    this.jsonStateCache = new import_discord.Collection();
-    /**
-     * Flag if the initial setup of the custom object configurations is done or not.
-     * While not done, custom object configuration changes will not trigger a
-     * slash commands registration automatically.
-     */
-    this.initialCustomObjectSetupDone = false;
-    /**
-     * Flag if we are currently in shard error state from discord.js.
-     * `false` currently not on error state, A `string` containing the error name in
-     * case of en error.
-     */
-    this.isShardError = false;
-    /**
-     * Flag if the adapter is unloaded or is unloading.
-     * Used to check this in some async operations.
-     */
-    this.unloaded = false;
     this.discordSlashCommands = new import_commands.DiscordAdapterSlashCommands(this);
     this.on("ready", this.onReady);
     this.on("stateChange", this.onStateChange);
@@ -117,14 +121,128 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.on("message", this.onMessage);
     this.on("unload", this.onUnload);
   }
+  /**
+   * Try to detect and parse stringified JSON MessageOptions.
+   *
+   * If the `content` starts/ends with curly braces if will be treated as
+   * stringified JSON. Then the JSON will be parsed and some basic checks will
+   * be run against the parsed object.
+   *
+   * Otherwise the content will be treated as a simple string and wrapped into
+   * a `MessageOptions` object.
+   * @param content The stringified content to be parsed.
+   * @returns A `MessageOptions` object.
+   * @throws An error if parsing JSON or a check failed.
+   */
+  parseStringifiedMessageOptions(content) {
+    let mo;
+    if (content.startsWith("{") && content.endsWith("}")) {
+      this.log.debug(`Content seems to be json`);
+      try {
+        mo = JSON.parse(content);
+      } catch (_err) {
+        throw new Error(`Content seems to be json but cannot be parsed!`);
+      }
+      if (!mo?.files && !mo.content || mo.files && !Array.isArray(mo.files) || mo.embeds && !Array.isArray(mo.embeds)) {
+        throw new Error(`Content is json but seems to be invalid!`);
+      }
+    } else {
+      mo = {
+        content
+      };
+    }
+    return mo;
+  }
+  /**
+   * Check if a user or guild member is authorized to do something.
+   * For guild members their roles will also be checked.
+   * @param user The User or GuildMember to check.
+   * @param required Object containing the required flags. If not provided the check returns if the user in the list of authorized users.
+   * @returns `true` if the user is authorized or authorization is not enabled, `false` otherwise
+   */
+  checkUserAuthorization(user, required) {
+    if (!this.config.enableAuthorization) {
+      return true;
+    }
+    let given = this.config.authorizedUsers.find((au) => au.userId === user.id);
+    if (this.config.authorizedServerRoles.length > 0 && user instanceof import_discord.GuildMember) {
+      for (const [, role] of user.roles.cache) {
+        const roleGiven = this.config.authorizedServerRoles.find((ar) => ar.serverAndRoleId === `${user.guild.id}|${role.id}`);
+        if (roleGiven) {
+          if (!given) {
+            given = roleGiven;
+          } else {
+            given = {
+              getStates: given.getStates || roleGiven.getStates,
+              setStates: given.setStates || roleGiven.setStates,
+              useCustomCommands: given.useCustomCommands || roleGiven.useCustomCommands,
+              useText2command: given.useText2command || roleGiven.useText2command
+            };
+          }
+        }
+      }
+    }
+    if (!given) {
+      return false;
+    }
+    if (!required) {
+      return true;
+    }
+    if (required.getStates && !given.getStates || required.setStates && !given.setStates || required.useCustomCommands && !given.useCustomCommands || required.useText2command && !given.useText2command) {
+      return false;
+    }
+    return true;
+  }
+  /**
+   * Awaitable function to just wait some time.
+   *
+   * Uses `Adapter.setTimeout(...)` internally to make sure the timeout is cleared on adapter unload.
+   * @param time Time to wait in ms.
+   */
+  async wait(time) {
+    return await new Promise((resolve) => this.setTimeout(resolve, time));
+  }
+  /**
+   * Internal replacemend for `extendObject(...)` which compares the given
+   * object for each `id` against a cached version and only calls na original
+   * `extendObject(...)` if the object changed.
+   * Using this, the object gets only updated if
+   *  a) it's the first call for this `id` or
+   *  b) the object needs to be changed.
+   */
+  async extendObjectCached(id, objPart, options) {
+    const cachedObj = this.extendObjectCache.get(id);
+    if ((0, import_node_util.isDeepStrictEqual)(cachedObj, objPart)) {
+      return { id };
+    }
+    let ret;
+    if (options) {
+      ret = await this.extendObject(id, objPart, options);
+    } else {
+      ret = await this.extendObject(id, objPart);
+    }
+    this.extendObjectCache.set(id, objPart);
+    return ret;
+  }
+  /**
+   * Internal replacement for `delObjectAsync(...)` which also removes the local
+   * cache entry for the given `id`.
+   */
+  async delObjectAsyncCached(id, options) {
+    if (options?.recursive) {
+      this.extendObjectCache.filter((_obj, id2) => id2.startsWith(id)).each((_obj, id2) => this.extendObjectCache.delete(id2));
+    } else {
+      this.extendObjectCache.delete(id);
+    }
+    return await this.delObjectAsync(id, options);
+  }
   async onReady() {
-    var _a, _b, _c, _d;
     await this.setInfoConnectionState(false, true);
     this.log.debug(`Version of discord.js: ${import_discord.version}`);
     const systemConfig = await this.getForeignObjectAsync("system.config");
-    import_i18n.i18n.language = (systemConfig == null ? void 0 : systemConfig.common.language) || "en";
-    import_i18n.i18n.isFloatComma = (systemConfig == null ? void 0 : systemConfig.common.isFloatComma) || false;
-    if (typeof this.config.token !== "string" || !this.config.token.match(/^[0-9a-zA-Z-_]{24,}\.[0-9a-zA-Z-_]{6}\.[0-9a-zA-Z-_]{27,}$/)) {
+    import_i18n.i18n.language = systemConfig?.common.language ?? "en";
+    import_i18n.i18n.isFloatComma = systemConfig?.common.isFloatComma ?? false;
+    if (typeof this.config.token !== "string" || !/^[0-9a-zA-Z-_]{24,}\.[0-9a-zA-Z-_]{6}\.[0-9a-zA-Z-_]{27,}$/.exec(this.config.token)) {
       this.log.error(`No or invalid token!`);
       return;
     }
@@ -143,9 +261,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     if (this.config.enableCustomCommands && !Array.isArray(this.config.customCommands)) {
       this.config.customCommands = [];
     }
-    this.config.reactOnMentionsEmoji = ((_a = this.config.reactOnMentionsEmoji) == null ? void 0 : _a.trim()) || "\u{1F44D}";
+    this.config.reactOnMentionsEmoji = this.config.reactOnMentionsEmoji?.trim() || "\u{1F44D}";
     const botActivityTypeObj = await this.getObjectAsync("bot.activityType");
-    if ((_c = (_b = botActivityTypeObj == null ? void 0 : botActivityTypeObj.common) == null ? void 0 : _b.states) == null ? void 0 : _c.hasOwnProperty("PLAYING")) {
+    if (botActivityTypeObj?.common?.states?.PLAYING) {
       delete botActivityTypeObj.common.states.PLAYING;
       delete botActivityTypeObj.common.states.STREAMING;
       delete botActivityTypeObj.common.states.LISTENING;
@@ -154,7 +272,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.setObjectAsync("bot.activityType", botActivityTypeObj);
     }
     if (this.config.enableRawStates) {
-      await this.extendObjectAsync("raw", {
+      await this.extendObject("raw", {
         type: "channel",
         common: {
           name: import_i18n.i18n.getStringOrTranslated("Raw data")
@@ -162,7 +280,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         native: {}
       });
       await Promise.all([
-        this.extendObjectAsync("raw.interactionJson", {
+        this.extendObject("raw.interactionJson", {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Last interaction JSON data"),
@@ -174,7 +292,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsync("raw.messageJson", {
+        this.extendObject("raw.messageJson", {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Last message JSON data"),
@@ -191,7 +309,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       await this.delObjectAsync("raw", { recursive: true });
     }
     if (this.config.enableCustomCommands) {
-      await this.extendObjectAsync("slashCommands", {
+      await this.extendObject("slashCommands", {
         type: "channel",
         common: {
           name: import_i18n.i18n.getStringOrTranslated("Custom Discord slash commands")
@@ -229,7 +347,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.client.on("invalidRequestWarning", (invalidRequestWarningData) => this.log.warn(`Discord client invalid request warning: ${JSON.stringify(invalidRequestWarningData)}`));
     this.client.on("invalidated", () => {
       this.log.warn("Discord client session invalidated");
-      this.setInfoConnectionState(false);
+      void this.setInfoConnectionState(false);
     });
     this.client.on("shardError", (err, shardId) => {
       let errorMsg;
@@ -238,10 +356,10 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       } else {
         errorMsg = err.toString();
       }
-      if (this.isShardError != errorMsg) {
+      if (this.isShardError !== errorMsg) {
         this.isShardError = errorMsg;
         this.log.warn(`Discord client websocket error (shardId:${shardId}): ${errorMsg}`);
-        this.setInfoConnectionState(false);
+        void this.setInfoConnectionState(false);
       } else {
         this.log.debug(`Discord client websocket error (shardId:${shardId}): ${errorMsg}`);
       }
@@ -249,8 +367,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.client.on("shardReady", (shardId) => {
       this.isShardError = false;
       this.log.info(`Discord client websocket connected (shardId:${shardId})`);
-      this.setInfoConnectionState(true);
-      this.setBotPresence();
+      void this.setInfoConnectionState(true);
+      void this.setBotPresence();
     });
     this.client.on("shardResume", (shardId, replayedEvents) => this.log.debug(`Discord client websocket resume (shardId:${shardId} replayedEvents:${replayedEvents})`));
     this.client.on("shardDisconnect", (event, shardId) => this.log.debug(`Discord client websocket disconnect (shardId:${shardId} code:${event.code})`));
@@ -271,14 +389,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       this.client.on("userUpdate", () => this.updateGuilds());
     }
     if (this.config.observeUserPresence) {
-      this.client.on("presenceUpdate", (_oldPresence, newPresence) => {
-        this.updateUserPresence(newPresence.userId, newPresence);
-      });
+      this.client.on("presenceUpdate", (_oldPresence, newPresence) => this.updateUserPresence(newPresence.userId, newPresence));
     }
     if (this.config.observeUserVoiceState) {
       this.client.on("voiceStateUpdate", this.onClientVoiceStateUpdate);
     }
-    this.discordSlashCommands.onReady();
+    await this.discordSlashCommands.onReady();
     this.subscribeStates("servers.*.channels.*.send");
     this.subscribeStates("servers.*.channels.*.sendFile");
     this.subscribeStates("servers.*.channels.*.sendReply");
@@ -296,9 +412,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.subscribeForeignObjects("*");
     this.log.debug("Get all objects with custom config ...");
     const view = await this.getObjectViewAsync("system", "custom", {});
-    if (view == null ? void 0 : view.rows) {
+    if (view?.rows) {
       for (const item of view.rows) {
-        await this.setupObjCustom(item.id, (_d = item.value) == null ? void 0 : _d[this.namespace]);
+        await this.setupObjCustom(item.id, item.value?.[this.namespace]);
       }
     }
     this.log.debug("Getting all objects with custom config done");
@@ -351,7 +467,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           }
           this.log.info(`Wait ${LOGIN_WAIT_TIMES[tryNr] / 1e3} seconds before next login try (#${tryNr + 1}) ...`);
           await this.wait(LOGIN_WAIT_TIMES[tryNr]);
-          return this.loginClient(tryNr);
+          return await this.loginClient(tryNr);
         }
         return err.name;
       } else {
@@ -361,8 +477,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onClientReady() {
-    var _a;
-    if (!((_a = this.client) == null ? void 0 : _a.user)) {
+    if (!this.client?.user) {
       this.log.error("Discord client has no user!");
       return;
     }
@@ -400,8 +515,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
    * This will create/update all dynamic objects for all servers and users if needed.
    */
   async updateGuilds() {
-    var _a, _b, _c, _d;
-    if (!((_a = this.client) == null ? void 0 : _a.user)) {
+    if (!this.client?.user) {
       throw new Error("Client not loaded");
     }
     const allServersUsers = new import_discord.Collection();
@@ -425,7 +539,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       if (this.unloaded)
         return;
       knownServersAndChannelsIds.add(`${this.namespace}.servers.${guild.id}`);
-      await this.extendObjectAsyncCached(`servers.${guild.id}`, {
+      await this.extendObjectCached(`servers.${guild.id}`, {
         type: "channel",
         common: {
           name: guild.name
@@ -433,14 +547,14 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         native: {}
       });
       await Promise.all([
-        this.extendObjectAsyncCached(`servers.${guild.id}.members`, {
+        this.extendObjectCached(`servers.${guild.id}.members`, {
           type: "channel",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Members")
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`servers.${guild.id}.channels`, {
+        this.extendObjectCached(`servers.${guild.id}.channels`, {
           type: "channel",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Channels")
@@ -455,7 +569,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         if (member.user.id !== this.client.user.id) {
           allServersUsers.set(member.user.id, { user: member.user, presence: member.presence });
         }
-        await this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}`, {
+        await this.extendObjectCached(`servers.${guild.id}.members.${member.id}`, {
           type: "channel",
           common: {
             name: `${member.displayName} (${(0, import_utils.userNameOrTag)(member.user)})`
@@ -463,7 +577,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           native: {}
         });
         await Promise.all([
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.tag`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.tag`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("User tag"),
@@ -475,7 +589,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.name`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.name`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("User name"),
@@ -487,7 +601,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.displayName`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.displayName`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("Display name"),
@@ -499,7 +613,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.roles`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.roles`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("Roles"),
@@ -511,7 +625,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.joinedAt`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.joinedAt`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("Joined at"),
@@ -523,7 +637,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceChannel`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.voiceChannel`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("Voice channel"),
@@ -535,7 +649,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceDisconnect`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.voiceDisconnect`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("Voice disconnect"),
@@ -547,7 +661,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("Voice self deafen"),
@@ -559,7 +673,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("Voice server deafen"),
@@ -571,7 +685,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("Voice self mute"),
@@ -583,7 +697,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.voiceServerMute`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.voiceServerMute`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("Voice server mute"),
@@ -595,7 +709,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             },
             native: {}
           }),
-          this.extendObjectAsyncCached(`servers.${guild.id}.members.${member.id}.json`, {
+          this.extendObjectCached(`servers.${guild.id}.members.${member.id}.json`, {
             type: "state",
             common: {
               name: import_i18n.i18n.getStringOrTranslated("JSON data"),
@@ -610,16 +724,16 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         ]);
         const memberRoles = member.roles.cache.map((role) => role.name);
         await Promise.all([
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.tag`, member.user.tag, true),
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.name`, member.user.username, true),
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.displayName`, member.displayName, true),
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.roles`, memberRoles.join(", "), true),
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.joinedAt`, member.joinedTimestamp, true),
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceChannel`, ((_b = member.voice.channel) == null ? void 0 : _b.name) ?? "", true),
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, !!member.voice.selfDeaf, true),
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, !!member.voice.serverDeaf, true),
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, !!member.voice.selfMute, true),
-          this.setStateAsync(`servers.${guild.id}.members.${member.id}.voiceServerMute`, !!member.voice.serverMute, true)
+          this.setState(`servers.${guild.id}.members.${member.id}.tag`, member.user.tag, true),
+          this.setState(`servers.${guild.id}.members.${member.id}.name`, member.user.username, true),
+          this.setState(`servers.${guild.id}.members.${member.id}.displayName`, member.displayName, true),
+          this.setState(`servers.${guild.id}.members.${member.id}.roles`, memberRoles.join(", "), true),
+          this.setState(`servers.${guild.id}.members.${member.id}.joinedAt`, member.joinedTimestamp, true),
+          this.setState(`servers.${guild.id}.members.${member.id}.voiceChannel`, member.voice.channel?.name ?? "", true),
+          this.setState(`servers.${guild.id}.members.${member.id}.voiceSelfDeaf`, !!member.voice.selfDeaf, true),
+          this.setState(`servers.${guild.id}.members.${member.id}.voiceServerDeaf`, !!member.voice.serverDeaf, true),
+          this.setState(`servers.${guild.id}.members.${member.id}.voiceSelfMute`, !!member.voice.selfMute, true),
+          this.setState(`servers.${guild.id}.members.${member.id}.voiceServerMute`, !!member.voice.serverMute, true)
         ]);
         const json = {
           tag: member.user.tag,
@@ -628,15 +742,15 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           displayName: member.displayName,
           roles: memberRoles,
           joined: member.joinedTimestamp,
-          voiceChannel: ((_c = member.voice.channel) == null ? void 0 : _c.name) ?? "",
-          voiceChannelId: ((_d = member.voice.channel) == null ? void 0 : _d.id) ?? "",
+          voiceChannel: member.voice.channel?.name ?? "",
+          voiceChannelId: member.voice.channel?.id ?? "",
           voiceSelfDeaf: !!member.voice.selfDeaf,
           voiceServerDeaf: !!member.voice.serverDeaf,
           voiceSelfMute: !!member.voice.selfMute,
           voiceServerMute: !!member.voice.serverMute
         };
         if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.servers.${guild.id}.members.${member.id}.json`))) {
-          await this.setStateAsync(`servers.${guild.id}.members.${member.id}.json`, JSON.stringify(json), true);
+          await this.setState(`servers.${guild.id}.members.${member.id}.json`, JSON.stringify(json), true);
           this.jsonStateCache.set(`${this.namespace}.servers.${guild.id}.members.${member.id}.json`, json);
         }
       }
@@ -652,14 +766,14 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           }
           const channelIdPrefix = parents ? `servers.${guild.id}.channels.${channel.id}` : `servers.${guild.id}.channels.${channel.parentId}.channels.${channel.id}`;
           knownServersAndChannelsIds.add(`${this.namespace}.${channelIdPrefix}`);
-          let icon = void 0;
+          let icon;
           if (channel.type === import_discord.ChannelType.GuildText) {
             icon = "channel-text.svg";
           }
           if (channel.type === import_discord.ChannelType.GuildVoice) {
             icon = "channel-voice.svg";
           }
-          await this.extendObjectAsyncCached(channelIdPrefix, {
+          await this.extendObjectCached(channelIdPrefix, {
             type: "channel",
             common: {
               name: channel.parent ? `${channel.parent.name} / ${channel.name}` : channel.name,
@@ -670,7 +784,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             }
           });
           if (channel.type === import_discord.ChannelType.GuildCategory) {
-            await this.extendObjectAsyncCached(`${channelIdPrefix}.channels`, {
+            await this.extendObjectCached(`${channelIdPrefix}.channels`, {
               type: "channel",
               common: {
                 name: import_i18n.i18n.getStringOrTranslated("Channels")
@@ -679,7 +793,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             });
           }
           await Promise.all([
-            this.extendObjectAsyncCached(`${channelIdPrefix}.json`, {
+            this.extendObjectCached(`${channelIdPrefix}.json`, {
               type: "state",
               common: {
                 name: import_i18n.i18n.getStringOrTranslated("JSON data"),
@@ -691,7 +805,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
               },
               native: {}
             }),
-            this.extendObjectAsyncCached(`${channelIdPrefix}.memberCount`, {
+            this.extendObjectCached(`${channelIdPrefix}.memberCount`, {
               type: "state",
               common: {
                 name: import_i18n.i18n.getStringOrTranslated("Member count"),
@@ -703,7 +817,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
               },
               native: {}
             }),
-            this.extendObjectAsyncCached(`${channelIdPrefix}.members`, {
+            this.extendObjectCached(`${channelIdPrefix}.members`, {
               type: "state",
               common: {
                 name: import_i18n.i18n.getStringOrTranslated("Members"),
@@ -718,7 +832,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           ]);
           if (channel.type === import_discord.ChannelType.GuildText || channel.type === import_discord.ChannelType.GuildVoice) {
             await Promise.all([
-              this.extendObjectAsyncCached(`${channelIdPrefix}.message`, {
+              this.extendObjectCached(`${channelIdPrefix}.message`, {
                 type: "state",
                 common: {
                   name: import_i18n.i18n.getStringOrTranslated("Last message"),
@@ -730,7 +844,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
                 },
                 native: {}
               }),
-              this.extendObjectAsyncCached(`${channelIdPrefix}.messageId`, {
+              this.extendObjectCached(`${channelIdPrefix}.messageId`, {
                 type: "state",
                 common: {
                   name: import_i18n.i18n.getStringOrTranslated("Last message ID"),
@@ -742,7 +856,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
                 },
                 native: {}
               }),
-              this.extendObjectAsyncCached(`${channelIdPrefix}.messageAuthor`, {
+              this.extendObjectCached(`${channelIdPrefix}.messageAuthor`, {
                 type: "state",
                 common: {
                   name: import_i18n.i18n.getStringOrTranslated("Last message author"),
@@ -754,7 +868,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
                 },
                 native: {}
               }),
-              this.extendObjectAsyncCached(`${channelIdPrefix}.messageTimestamp`, {
+              this.extendObjectCached(`${channelIdPrefix}.messageTimestamp`, {
                 type: "state",
                 common: {
                   name: import_i18n.i18n.getStringOrTranslated("Last message timestamp"),
@@ -766,7 +880,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
                 },
                 native: {}
               }),
-              this.extendObjectAsyncCached(`${channelIdPrefix}.messageJson`, {
+              this.extendObjectCached(`${channelIdPrefix}.messageJson`, {
                 type: "state",
                 common: {
                   name: import_i18n.i18n.getStringOrTranslated("Last message JSON data"),
@@ -778,7 +892,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
                 },
                 native: {}
               }),
-              this.extendObjectAsyncCached(`${channelIdPrefix}.send`, {
+              this.extendObjectCached(`${channelIdPrefix}.send`, {
                 type: "state",
                 common: {
                   name: import_i18n.i18n.getStringOrTranslated("Send message"),
@@ -790,7 +904,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
                 },
                 native: {}
               }),
-              this.extendObjectAsyncCached(`${channelIdPrefix}.sendFile`, {
+              this.extendObjectCached(`${channelIdPrefix}.sendFile`, {
                 type: "state",
                 common: {
                   name: import_i18n.i18n.getStringOrTranslated("Send file"),
@@ -802,7 +916,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
                 },
                 native: {}
               }),
-              this.extendObjectAsyncCached(`${channelIdPrefix}.sendReply`, {
+              this.extendObjectCached(`${channelIdPrefix}.sendReply`, {
                 type: "state",
                 common: {
                   name: import_i18n.i18n.getStringOrTranslated("Send reply"),
@@ -814,7 +928,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
                 },
                 native: {}
               }),
-              this.extendObjectAsyncCached(`${channelIdPrefix}.sendReaction`, {
+              this.extendObjectCached(`${channelIdPrefix}.sendReaction`, {
                 type: "state",
                 common: {
                   name: import_i18n.i18n.getStringOrTranslated("Send reaction"),
@@ -851,7 +965,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     for (const [, { user, presence }] of allServersUsers) {
       this.log.debug(`Known user: ${user.tag} id:${user.id}`);
-      await this.extendObjectAsyncCached(`users.${user.id}`, {
+      await this.extendObjectCached(`users.${user.id}`, {
         type: "channel",
         common: {
           name: (0, import_utils.userNameOrTag)(user)
@@ -861,7 +975,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
       });
       await Promise.all([
-        this.extendObjectAsyncCached(`users.${user.id}.json`, {
+        this.extendObjectCached(`users.${user.id}.json`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("JSON data"),
@@ -873,7 +987,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.tag`, {
+        this.extendObjectCached(`users.${user.id}.tag`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("User tag"),
@@ -885,7 +999,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.name`, {
+        this.extendObjectCached(`users.${user.id}.name`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("User name"),
@@ -897,7 +1011,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.message`, {
+        this.extendObjectCached(`users.${user.id}.message`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Last message"),
@@ -909,7 +1023,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.messageId`, {
+        this.extendObjectCached(`users.${user.id}.messageId`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Last message ID"),
@@ -921,7 +1035,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.messageTimestamp`, {
+        this.extendObjectCached(`users.${user.id}.messageTimestamp`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Last message timestamp"),
@@ -933,7 +1047,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.messageJson`, {
+        this.extendObjectCached(`users.${user.id}.messageJson`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Last message JSON data"),
@@ -945,7 +1059,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.send`, {
+        this.extendObjectCached(`users.${user.id}.send`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Send message"),
@@ -957,7 +1071,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.sendFile`, {
+        this.extendObjectCached(`users.${user.id}.sendFile`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Send file"),
@@ -969,7 +1083,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.sendReply`, {
+        this.extendObjectCached(`users.${user.id}.sendReply`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Send reply"),
@@ -981,7 +1095,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.sendReaction`, {
+        this.extendObjectCached(`users.${user.id}.sendReaction`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Send reaction"),
@@ -993,7 +1107,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.avatarUrl`, {
+        this.extendObjectCached(`users.${user.id}.avatarUrl`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Avatar"),
@@ -1005,7 +1119,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.bot`, {
+        this.extendObjectCached(`users.${user.id}.bot`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Bot"),
@@ -1017,7 +1131,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.status`, {
+        this.extendObjectCached(`users.${user.id}.status`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Status"),
@@ -1029,7 +1143,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.activityType`, {
+        this.extendObjectCached(`users.${user.id}.activityType`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Activity type"),
@@ -1041,7 +1155,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           },
           native: {}
         }),
-        this.extendObjectAsyncCached(`users.${user.id}.activityName`, {
+        this.extendObjectCached(`users.${user.id}.activityName`, {
           type: "state",
           common: {
             name: import_i18n.i18n.getStringOrTranslated("Activity name"),
@@ -1069,14 +1183,14 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         status: ps.status
       };
       if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.users.${user.id}.json`))) {
-        proms.push(this.setStateAsync(`users.${user.id}.json`, JSON.stringify(json), true));
+        proms.push(this.setState(`users.${user.id}.json`, JSON.stringify(json), true));
         this.jsonStateCache.set(`${this.namespace}.users.${user.id}.json`, json);
       }
       await Promise.all([
-        this.setStateAsync(`users.${user.id}.tag`, user.tag, true),
-        this.setStateAsync(`users.${user.id}.name`, user.username, true),
-        this.setStateAsync(`users.${user.id}.avatarUrl`, json.avatarUrl, true),
-        this.setStateAsync(`users.${user.id}.bot`, user.bot, true),
+        this.setState(`users.${user.id}.tag`, user.tag, true),
+        this.setState(`users.${user.id}.name`, user.username, true),
+        this.setState(`users.${user.id}.avatarUrl`, json.avatarUrl, true),
+        this.setState(`users.${user.id}.bot`, user.bot, true),
         ...proms,
         this.updateUserPresence(user.id, presence)
       ]);
@@ -1140,12 +1254,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     };
     const proms = [];
     if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.${channelIdPrefix}.json`))) {
-      proms.push(this.setStateAsync(`${channelIdPrefix}.json`, JSON.stringify(json), true));
+      proms.push(this.setState(`${channelIdPrefix}.json`, JSON.stringify(json), true));
       this.jsonStateCache.set(`${this.namespace}.${channelIdPrefix}.json`, json);
     }
     await Promise.all([
-      this.setStateAsync(`${channelIdPrefix}.memberCount`, members.length, true),
-      this.setStateAsync(`${channelIdPrefix}.members`, members.map((m) => m.displayName).join(", "), true),
+      this.setState(`${channelIdPrefix}.memberCount`, members.length, true),
+      this.setState(`${channelIdPrefix}.members`, members.map((m) => m.displayName).join(", "), true),
       ...proms
     ]);
   }
@@ -1156,7 +1270,6 @@ class DiscordAdapter extends import_adapter_core.Adapter {
    * @param skipJsonStateUpdate If the json state of the user should not be updated.
    */
   async updateUserPresence(userId, presence, skipJsonStateUpdate = false) {
-    var _a, _b, _c, _d;
     if (!this.config.observeUserPresence) {
       return { activityName: "", activityType: "", status: "" };
     }
@@ -1166,9 +1279,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     try {
       const p = {
-        status: (presence == null ? void 0 : presence.status) ?? "",
-        activityName: (((_a = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _a.type) === import_discord.ActivityType.Custom ? (_b = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _b.state : (_c = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _c.name) ?? "",
-        activityType: (((_d = presence == null ? void 0 : presence.activities[0]) == null ? void 0 : _d.type) !== void 0 ? import_discord.ActivityType[presence.activities[0].type] : "") ?? ""
+        status: presence?.status ?? "",
+        activityName: (presence?.activities[0]?.type === import_discord.ActivityType.Custom ? presence?.activities[0]?.state : presence?.activities[0]?.name) ?? "",
+        activityType: (presence?.activities[0]?.type !== void 0 ? import_discord.ActivityType[presence.activities[0].type] : "") ?? ""
       };
       const proms = [];
       if (!skipJsonStateUpdate) {
@@ -1178,13 +1291,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           json.activityName = p.activityName;
           json.activityType = p.activityType;
           this.jsonStateCache.set(`${this.namespace}.users.${userId}.json`, json);
-          proms.push(this.setStateAsync(`users.${userId}.json`, JSON.stringify(json), true));
+          proms.push(this.setState(`users.${userId}.json`, JSON.stringify(json), true));
         }
       }
       await Promise.all([
-        this.setStateAsync(`users.${userId}.status`, p.status, true),
-        this.setStateAsync(`users.${userId}.activityName`, p.activityName, true),
-        this.setStateAsync(`users.${userId}.activityType`, p.activityType, true),
+        this.setState(`users.${userId}.status`, p.status, true),
+        this.setState(`users.${userId}.activityName`, p.activityName, true),
+        this.setState(`users.${userId}.activityType`, p.activityType, true),
         ...proms
       ]);
       return p;
@@ -1197,14 +1310,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
    * Set the presence status of the discord bot.
    */
   async setBotPresence(opts) {
-    var _a, _b, _c, _d;
-    if (!((_a = this.client) == null ? void 0 : _a.user))
+    if (!this.client?.user)
       return;
     if (!opts) {
       opts = {};
     }
     if (!opts.status) {
-      opts.status = ((_b = await this.getStateAsync("bot.status")) == null ? void 0 : _b.val) ?? "online";
+      opts.status = (await this.getStateAsync("bot.status"))?.val ?? "online";
     }
     if (!import_definitions.VALID_PRESENCE_STATUS_DATA.includes(opts.status)) {
       opts.status = "online";
@@ -1214,14 +1326,14 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       activities: []
     };
     if (opts.activityType === void 0) {
-      opts.activityType = ((_c = await this.getStateAsync("bot.activityType")) == null ? void 0 : _c.val) ?? "";
+      opts.activityType = (await this.getStateAsync("bot.activityType"))?.val ?? "";
     }
     if (!import_definitions.ACTIVITY_TYPES.includes(opts.activityType)) {
       this.log.warn(`Invalid activityType! ${opts.activityType}`);
       opts.activityType = "";
     }
     if (opts.activityName === void 0) {
-      opts.activityName = ((_d = await this.getStateAsync("bot.activityName")) == null ? void 0 : _d.val) ?? "";
+      opts.activityName = (await this.getStateAsync("bot.activityName"))?.val ?? "";
     }
     if (opts.activityType && opts.activityName) {
       presenceData.activities = [{
@@ -1233,14 +1345,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     this.client.user.setPresence(presenceData);
   }
   async onClientMessageCreate(message) {
-    var _a, _b, _c, _d, _e;
     this.log.debug(`Discord message: mId:${message.id} cId:${message.channelId} uId: ${message.author.id} - ${message.content}`);
     if (this.config.enableRawStates) {
-      this.setState("raw.messageJson", JSON.stringify(message.toJSON(), (_key, value) => typeof value === "bigint" ? value.toString() : value), true);
+      void this.setState("raw.messageJson", JSON.stringify(message.toJSON(), (_key, value) => typeof value === "bigint" ? value.toString() : value), true);
     }
-    if (!((_b = (_a = this.client) == null ? void 0 : _a.user) == null ? void 0 : _b.id))
+    if (!this.client?.user?.id)
       return;
-    if (message.interaction) {
+    if (message.interactionMetadata) {
       return;
     }
     const { author, channel, content } = message;
@@ -1285,7 +1396,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       content,
       attachments: message.attachments.map((att) => ({ attachment: att.url, name: att.name, description: att.description ?? "", size: att.size, contentType: att.contentType ?? "", id: att.id })),
       id: message.id,
-      mentions: ((_c = message.mentions.members) == null ? void 0 : _c.map((m) => ({ id: m.id, tag: m.user.tag, name: m.user.username, displayName: m.displayName }))) ?? [],
+      mentions: message.mentions.members?.map((m) => ({ id: m.id, tag: m.user.tag, name: m.user.username, displayName: m.displayName })) ?? [],
       mentioned,
       timestamp: message.createdTimestamp,
       authorized: isAuthorAuthorized
@@ -1296,18 +1407,18 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         id: author.id,
         tag: author.tag,
         name: author.username,
-        displayName: ((_e = (_d = this.client.guilds.cache.get(message.guildId)) == null ? void 0 : _d.members.cache.get(author.id)) == null ? void 0 : _e.displayName) ?? author.username
+        displayName: this.client.guilds.cache.get(message.guildId)?.members.cache.get(author.id)?.displayName ?? author.username
       };
-      proms.push(this.setStateAsync(`${msgStateIdPrefix}.messageAuthor`, (0, import_utils.userNameOrTag)(author), true));
+      proms.push(this.setState(`${msgStateIdPrefix}.messageAuthor`, (0, import_utils.userNameOrTag)(author), true));
     }
     if (!(0, import_node_util.isDeepStrictEqual)(json, this.jsonStateCache.get(`${this.namespace}.${msgStateIdPrefix}.messageJson`))) {
-      proms.push(this.setStateAsync(`${msgStateIdPrefix}.messageJson`, JSON.stringify(json), true));
+      proms.push(this.setState(`${msgStateIdPrefix}.messageJson`, JSON.stringify(json), true));
       this.jsonStateCache.set(`${this.namespace}.${msgStateIdPrefix}.messageJson`, json);
     }
     await Promise.all([
-      this.setStateAsync(`${msgStateIdPrefix}.message`, content, true),
-      this.setStateAsync(`${msgStateIdPrefix}.messageId`, message.id, true),
-      this.setStateAsync(`${msgStateIdPrefix}.messageTimestamp`, message.createdTimestamp, true),
+      this.setState(`${msgStateIdPrefix}.message`, content, true),
+      this.setState(`${msgStateIdPrefix}.messageId`, message.id, true),
+      this.setState(`${msgStateIdPrefix}.messageTimestamp`, message.createdTimestamp, true),
       ...proms
     ]);
     if (content && this.config.text2commandInstance && this.text2commandObjects.has(`${msgStateIdPrefix}.message`)) {
@@ -1317,7 +1428,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           text: content
         };
         this.sendTo(this.config.text2commandInstance, "send", payload, async (responseObj) => {
-          const response = responseObj == null ? void 0 : responseObj.response;
+          const response = responseObj?.response;
           try {
             if (!response) {
               this.log.debug(`Empty response from ${this.config.text2commandInstance}`);
@@ -1329,7 +1440,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
                 await message.reply(response);
                 break;
               case "message":
-                await message.channel.send(response);
+                if (message.channel.isTextBased()) {
+                  await message.channel.send(response);
+                }
                 break;
               default:
             }
@@ -1343,8 +1456,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onClientVoiceStateUpdate(oldState, newState) {
-    var _a, _b, _c, _d;
-    if (!((_a = newState.member) == null ? void 0 : _a.id)) {
+    if (!newState.member?.id) {
       return;
     }
     const proms = [];
@@ -1362,33 +1474,33 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       };
       let update = false;
       if (oldState.channelId !== newState.channelId) {
-        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, ((_b = newState.channel) == null ? void 0 : _b.name) ?? "", true));
-        json.voiceChannel = ((_c = newState.channel) == null ? void 0 : _c.name) ?? "";
-        json.voiceChannelId = ((_d = newState.channel) == null ? void 0 : _d.id) ?? "";
+        proms.push(this.setState(`servers.${newState.guild.id}.members.${newState.member.id}.voiceChannel`, newState.channel?.name ?? "", true));
+        json.voiceChannel = newState.channel?.name ?? "";
+        json.voiceChannelId = newState.channel?.id ?? "";
         update = true;
       }
       if (oldState.serverDeaf !== newState.serverDeaf) {
-        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerDeaf`, !!newState.serverDeaf, true));
+        proms.push(this.setState(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerDeaf`, !!newState.serverDeaf, true));
         json.voiceSelfDeaf = !!newState.selfDeaf;
         update = true;
       }
       if (oldState.selfDeaf !== newState.selfDeaf) {
-        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfDeaf`, !!newState.selfDeaf, true));
+        proms.push(this.setState(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfDeaf`, !!newState.selfDeaf, true));
         json.voiceServerDeaf = !!newState.serverDeaf;
         update = true;
       }
       if (oldState.serverMute !== newState.serverMute) {
-        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerMute`, !!newState.serverMute, true));
+        proms.push(this.setState(`servers.${newState.guild.id}.members.${newState.member.id}.voiceServerMute`, !!newState.serverMute, true));
         json.voiceSelfMute = !!newState.selfMute;
         update = true;
       }
       if (oldState.selfMute !== newState.selfMute) {
-        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfMute`, !!newState.selfMute, true));
+        proms.push(this.setState(`servers.${newState.guild.id}.members.${newState.member.id}.voiceSelfMute`, !!newState.selfMute, true));
         json.voiceServerMute = !!newState.serverMute;
         update = true;
       }
       if (update) {
-        proms.push(this.setStateAsync(`servers.${newState.guild.id}.members.${newState.member.id}.json`, JSON.stringify(json), true));
+        proms.push(this.setState(`servers.${newState.guild.id}.members.${newState.member.id}.json`, JSON.stringify(json), true));
         this.jsonStateCache.set(`${this.namespace}.servers.${newState.guild.id}.members.${newState.member.id}.json`, json);
       }
     } else {
@@ -1404,7 +1516,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
    */
   async setupObjCustom(objId, customCfg, objCommon) {
     if (objId.startsWith(`${this.namespace}.`) && objId.endsWith(".message")) {
-      if ((customCfg == null ? void 0 : customCfg.enabled) && customCfg.enableText2command) {
+      if (customCfg?.enabled && customCfg.enableText2command) {
         this.log.debug(`Custom option text2command enabled for ${objId}`);
         this.text2commandObjects.add(objId);
       } else if (this.text2commandObjects.has(objId)) {
@@ -1412,10 +1524,10 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.text2commandObjects.delete(objId);
       }
     }
-    if (customCfg == null ? void 0 : customCfg.enableCommands) {
+    if (customCfg?.enableCommands) {
       if (!objCommon) {
         const obj = await this.getForeignObjectAsync(objId);
-        if ((obj == null ? void 0 : obj.type) === "state") {
+        if (obj?.type === "state") {
           objCommon = obj.common;
         } else {
           this.log.warn(`Object ${objId} has commands enabled but this seems to be an error because it is not a state object!`);
@@ -1441,7 +1553,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.log.warn(`Command name for ${objId} exceeds the limit of 100 chars! This object will be ignored.`);
         cfgOk = false;
       }
-      if (!cfg.alias.match(/^[0-9a-zA-Z._-]{0,100}$/)) {
+      if (!/^[0-9a-zA-Z._-]{0,100}$/.exec(cfg.alias)) {
         this.log.warn(`Command alias for ${objId} includes invalid chars or exceeds the limit of 100 chars! This object will be ignored.`);
         cfgOk = false;
       }
@@ -1451,19 +1563,18 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   onObjectChange(objId, obj) {
-    var _a, _b;
     if (obj) {
       if (obj.type === "state") {
         this.log.silly(`Object ${objId} changed: ${JSON.stringify(obj)}`);
-        this.setupObjCustom(objId, (_b = (_a = obj.common) == null ? void 0 : _a.custom) == null ? void 0 : _b[this.namespace], obj.common);
+        void this.setupObjCustom(objId, obj.common?.custom?.[this.namespace], obj.common);
       }
     } else {
       this.log.silly(`Object ${objId} deleted`);
-      this.setupObjCustom(objId, null);
+      void this.setupObjCustom(objId, null);
     }
   }
   async onStateChange(stateId, state) {
-    this.log.silly(`State changed: ${stateId} ${state == null ? void 0 : state.val} (ack=${state == null ? void 0 : state.ack})`);
+    this.log.silly(`State changed: ${stateId} ${state?.val} (ack=${state?.ack})`);
     if (!state || state.ack)
       return;
     let setAck = false;
@@ -1482,9 +1593,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           setAck = true;
           break;
         default:
-          if (stateId.match(/^discord\.\d+\.slashCommands\..*\.sendReply/)) {
+          if (/^discord\.\d+\.slashCommands\..*\.sendReply/.exec(stateId)) {
             setAck = await this.onCustomCommandSendReplyStateChange(stateId, state);
-          } else if (stateId.match(/^discord\.\d+\.slashCommands\..*\.option-[^.]+\.choices/)) {
+          } else if (/^discord\.\d+\.slashCommands\..*\.option-[^.]+\.choices/.exec(stateId)) {
             this.discordSlashCommands.triggerDelayedRegisterSlashCommands();
             setAck = true;
           } else if (stateId.endsWith(".send") || stateId.endsWith(".sendFile") || stateId.endsWith(".sendReply") || stateId.endsWith(".sendReaction")) {
@@ -1495,7 +1606,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       }
     }
     if (setAck) {
-      await this.setStateAsync(stateId, {
+      await this.setState(stateId, {
         ...state,
         ack: true
       });
@@ -1507,8 +1618,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
    * @returns `true` if the message is send.
    */
   async onSendStateChange(stateId, state) {
-    var _a, _b, _c;
-    if (!((_a = this.client) == null ? void 0 : _a.isReady())) {
+    if (!this.client?.isReady()) {
       this.log.warn(`State ${stateId} changed but client is not ready!`);
       return false;
     }
@@ -1524,13 +1634,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     let target;
     let targetName = "";
     let targetStateIdBase;
-    let m = stateId.match(/^(discord\.\d+\.servers\.(\d+)\.channels\.(\d+)(\.channels\.(\d+))?)\.(send|sendFile|sendReaction|sendReply)$/);
+    let m = /^(discord\.\d+\.servers\.(\d+)\.channels\.(\d+)(\.channels\.(\d+))?)\.(send|sendFile|sendReaction|sendReply)$/.exec(stateId);
     if (m) {
       const guildId = m[2];
       const channelId = m[5] || m[3];
       targetStateIdBase = m[1];
       action = m[6];
-      const channel = (_b = this.client.guilds.cache.get(guildId)) == null ? void 0 : _b.channels.cache.get(channelId);
+      const channel = this.client.guilds.cache.get(guildId)?.channels.cache.get(channelId);
       if (!channel || channel.type !== import_discord.ChannelType.GuildText && channel.type !== import_discord.ChannelType.GuildVoice || channel.isThread()) {
         this.log.warn(`State ${stateId} changed but target is not a valid text channel!`);
         return false;
@@ -1538,7 +1648,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       target = channel;
       targetName = channel.parent ? `${channel.guild.name}/${channel.parent.name}/${channel.name}` : `${channel.guild.name}/${channel.name}`;
     } else {
-      m = stateId.match(/^(discord\.\d+\.users\.(\d+))\.(send|sendFile|sendReaction|sendReply)$/);
+      m = /^(discord\.\d+\.users\.(\d+))\.(send|sendFile|sendReaction|sendReply)$/.exec(stateId);
       if (!m) {
         this.log.warn(`State ${stateId} changed but could not determine target to send message to!`);
         return false;
@@ -1558,7 +1668,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     if (action === "sendFile") {
       const idx = state.val.indexOf("|");
       let file;
-      let content = void 0;
+      let content;
       if (idx > 0) {
         file = state.val.slice(0, idx);
         content = state.val.slice(idx + 1);
@@ -1596,7 +1706,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         content = state.val.slice(idx + 1);
       } else {
         this.log.debug(`Get reply message reference from last received message for ${targetStateIdBase}`);
-        messageReference = (_c = await this.getForeignStateAsync(`${targetStateIdBase}.messageId`)) == null ? void 0 : _c.val;
+        messageReference = (await this.getForeignStateAsync(`${targetStateIdBase}.messageId`))?.val;
         content = state.val;
       }
       if (action === "sendReply") {
@@ -1664,8 +1774,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
    * @returns `true` if the reply is send.
    */
   async onCustomCommandSendReplyStateChange(stateId, state) {
-    var _a, _b;
-    if (!((_a = this.client) == null ? void 0 : _a.isReady())) {
+    if (!this.client?.isReady()) {
       this.log.warn(`State ${stateId} changed but client is not ready!`);
       return false;
     }
@@ -1686,7 +1795,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       content = state.val.slice(idx + 1);
     } else {
       this.log.debug(`Get reply interaction reference from last received interaction for ${targetStateIdBase}`);
-      interactionId = (_b = await this.getForeignStateAsync(`${targetStateIdBase}.interactionId`)) == null ? void 0 : _b.val;
+      interactionId = (await this.getForeignStateAsync(`${targetStateIdBase}.interactionId`))?.val;
       content = state.val;
     }
     if (!interactionId || !content) {
@@ -1706,15 +1815,14 @@ class DiscordAdapter extends import_adapter_core.Adapter {
    * @returns `true` if successfull.
    */
   async onVoiceStateChange(stateId, state) {
-    var _a;
-    const m = stateId.match(/^discord\.\d+\.servers\.(\d+)\.members\.(\d+)\.voice(Disconnect|ServerMute|ServerDeaf)$/);
+    const m = /^discord\.\d+\.servers\.(\d+)\.members\.(\d+)\.voice(Disconnect|ServerMute|ServerDeaf)$/.exec(stateId);
     if (!m) {
       this.log.debug(`Voice state ${stateId} changed but could not get serverID and memberID!`);
       return false;
     }
     const [, guildId, memberId, action] = m;
-    const guild = (_a = this.client) == null ? void 0 : _a.guilds.cache.get(guildId);
-    const member = guild == null ? void 0 : guild.members.cache.get(memberId);
+    const guild = this.client?.guilds.cache.get(guildId);
+    const member = guild?.members.cache.get(memberId);
     if (!guild || !member) {
       this.log.warn(`Voice state ${stateId} changed but could not get the server member!`);
       return false;
@@ -1746,7 +1854,6 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onMessage(obj) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _i, _j, _k, _l, _m, _n, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _A, _B;
     if (typeof obj !== "object")
       return;
     this.log.debug(`Got message: ${JSON.stringify(obj)}`);
@@ -1754,7 +1861,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     let msg;
     let user;
     switch (obj.command) {
-      case "getText2commandInstances":
+      case "getText2commandInstances": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
@@ -1773,16 +1880,17 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.log.debug(`Found text2command instances: ${text2commandInstances.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, [{ value: "", label: "---" }, ...text2commandInstances], obj.callback);
         break;
-      case "getNotificationTargets":
+      }
+      case "getNotificationTargets": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
         const targets = [{ value: "", label: "---" }];
-        (_a = this.client) == null ? void 0 : _a.users.cache.forEach((u) => {
+        this.client?.users.cache.forEach((u) => {
           targets.push({ label: (0, import_utils.userNameOrTag)(u), value: u.id });
         });
-        (_b = this.client) == null ? void 0 : _b.guilds.cache.forEach((g) => {
+        this.client?.guilds.cache.forEach((g) => {
           g.channels.cache.forEach((c) => {
             if (c.type === import_discord.ChannelType.GuildText) {
               if (c.parent) {
@@ -1796,25 +1904,28 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.log.debug(`Notification targets: ${targets.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, targets, obj.callback);
         break;
-      case "getUsers":
+      }
+      case "getUsers": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
-        const users = ((_c = this.client) == null ? void 0 : _c.users.cache.map((u) => ({ label: (0, import_utils.userNameOrTag)(u), value: u.id }))) ?? [];
+        const users = this.client?.users.cache.map((u) => ({ label: (0, import_utils.userNameOrTag)(u), value: u.id })) ?? [];
         this.log.debug(`Users: ${users.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, users, obj.callback);
         break;
-      case "getServers":
+      }
+      case "getServers": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
-        const servers = ((_d = this.client) == null ? void 0 : _d.guilds.cache.map((g) => ({ label: g.name, value: g.id }))) ?? [];
+        const servers = this.client?.guilds.cache.map((g) => ({ label: g.name, value: g.id })) ?? [];
         this.log.debug(`Servers: ${servers.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, servers, obj.callback);
         break;
-      case "getServerRoles":
+      }
+      case "getServerRoles": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
@@ -1835,12 +1946,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.log.debug(`Server roles: ${guildRolesWithLabel.map((i) => i.value)}`);
         this.sendTo(obj.from, obj.command, guildRolesWithLabel, obj.callback);
         break;
-      case "getAddToServerLink":
+      }
+      case "getAddToServerLink": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
         }
-        if ((_f = (_e = this.client) == null ? void 0 : _e.user) == null ? void 0 : _f.id) {
+        if (this.client?.user?.id) {
           const perms = new import_discord.PermissionsBitField([
             import_discord.PermissionsBitField.Flags.ChangeNickname,
             import_discord.PermissionsBitField.Flags.ViewChannel,
@@ -1860,12 +1972,14 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendTo(obj.from, obj.command, `- ${import_i18n.i18n.getString("Error: The Bot is not connected to Discord!")} -`, obj.callback);
         }
         break;
-      case "logConfiguredCommandObjects":
+      }
+      case "logConfiguredCommandObjects": {
         this.discordSlashCommands.logConfiguredCommandObjects();
         this.sendToIfCb(obj.from, obj.command, { result: "ok" }, obj.callback);
         break;
+      }
       case "send":
-      case "sendMessage":
+      case "sendMessage": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
           return;
@@ -1877,19 +1991,19 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         if (sendPayload.userId || sendPayload.userTag || sendPayload.userName) {
           if (sendPayload.userId) {
-            user = (_g = this.client) == null ? void 0 : _g.users.cache.get(sendPayload.userId);
+            user = this.client?.users.cache.get(sendPayload.userId);
             if (!user) {
               this.sendToIfCb(obj.from, obj.command, { error: `No user with userId ${sendPayload.userId} found`, ...sendPayload }, obj.callback);
               return;
             }
           } else if (sendPayload.userTag) {
-            user = (_h = this.client) == null ? void 0 : _h.users.cache.find((u) => u.tag === sendPayload.userTag);
+            user = this.client?.users.cache.find((u) => u.tag === sendPayload.userTag);
             if (!user) {
               this.sendToIfCb(obj.from, obj.command, { error: `No user with userTag ${sendPayload.userTag} found`, ...sendPayload }, obj.callback);
               return;
             }
           } else {
-            user = (_i = this.client) == null ? void 0 : _i.users.cache.find((u) => u.discriminator === "0" && u.username === sendPayload.userName);
+            user = this.client?.users.cache.find((u) => u.discriminator === "0" && u.username === sendPayload.userName);
             if (!user) {
               this.sendToIfCb(obj.from, obj.command, { error: `No user with unique userName ${sendPayload.userName} found`, ...sendPayload }, obj.callback);
               return;
@@ -1902,8 +2016,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             this.sendToIfCb(obj.from, obj.command, { error: `Error sending message to user ${(0, import_utils.userNameOrTag)(user)}: ${err}`, ...sendPayload }, obj.callback);
           }
         } else if (sendPayload.serverId && sendPayload.channelId) {
-          channel = (_k = (_j = this.client) == null ? void 0 : _j.guilds.cache.get(sendPayload.serverId)) == null ? void 0 : _k.channels.cache.get(sendPayload.channelId);
-          if ((channel == null ? void 0 : channel.type) !== import_discord.ChannelType.GuildText && (channel == null ? void 0 : channel.type) !== import_discord.ChannelType.GuildVoice) {
+          channel = this.client?.guilds.cache.get(sendPayload.serverId)?.channels.cache.get(sendPayload.channelId);
+          if (channel?.type !== import_discord.ChannelType.GuildText && channel?.type !== import_discord.ChannelType.GuildVoice) {
             this.sendToIfCb(obj.from, obj.command, { error: `No text channel with channelId ${sendPayload.channelId} on server ${sendPayload.serverId} found`, ...sendPayload }, obj.callback);
             return;
           }
@@ -1917,7 +2031,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendToIfCb(obj.from, obj.command, { error: "userId, userTag, userName or serverId and channelId needs to be set", ...sendPayload }, obj.callback);
         }
         break;
-      case "editMessage":
+      }
+      case "editMessage": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
           return;
@@ -1948,7 +2063,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendToIfCb(obj.from, obj.command, { error: `Error editing message: ${err}`, ...editMessagePayload }, obj.callback);
         }
         break;
-      case "deleteMessage":
+      }
+      case "deleteMessage": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
           return;
@@ -1975,7 +2091,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendToIfCb(obj.from, obj.command, { error: `Error deleting message: ${err}`, ...deleteMessagePayload }, obj.callback);
         }
         break;
-      case "addReaction":
+      }
+      case "addReaction": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
           return;
@@ -2002,7 +2119,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendToIfCb(obj.from, obj.command, { error: `Error adding reaction to message: ${err}`, ...addReactionPayload }, obj.callback);
         }
         break;
-      case "awaitMessageReaction":
+      }
+      case "awaitMessageReaction": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
@@ -2030,10 +2148,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         const reactionCollector = msg.createReactionCollector({
-          filter: (_r2, u) => {
-            var _a2, _b2;
-            return u.id !== ((_b2 = (_a2 = this.client) == null ? void 0 : _a2.user) == null ? void 0 : _b2.id);
-          },
+          filter: (_r, u) => u.id !== this.client?.user?.id,
           max: awaitMessageReactionPayload.max,
           time: awaitMessageReactionPayload.timeout
         });
@@ -2042,7 +2157,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendTo(obj.from, obj.command, { reactions, ...awaitMessageReactionPayload }, obj.callback);
         });
         break;
-      case "sendCustomCommandReply":
+      }
+      case "sendCustomCommandReply": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
           return;
@@ -2063,7 +2179,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendToIfCb(obj.from, obj.command, { error: `Error sending reply: ${err}`, ...sendCustomCommandReplyPayload }, obj.callback);
         }
         break;
-      case "leaveServer":
+      }
+      case "leaveServer": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
           return;
@@ -2073,7 +2190,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendToIfCb(obj.from, obj.command, { error: "serverId needs to be set", ...leaveServerPayload }, obj.callback);
           return;
         }
-        const guildToLeave = (_l = this.client) == null ? void 0 : _l.guilds.cache.get(leaveServerPayload.serverId);
+        const guildToLeave = this.client?.guilds.cache.get(leaveServerPayload.serverId);
         if (!guildToLeave) {
           this.sendToIfCb(obj.from, obj.command, { error: `No server with ID ${leaveServerPayload.serverId} found` }, obj.callback);
           return;
@@ -2086,7 +2203,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendToIfCb(obj.from, obj.command, { error: `Error leaving server ${leaveServerPayload.serverId}: ${err}`, ...leaveServerPayload }, obj.callback);
         }
         break;
-      case "getServerInfo":
+      }
+      case "getServerInfo": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
@@ -2100,7 +2218,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendTo(obj.from, obj.command, { error: "serverId needs to be set", ...getServerInfoPayload }, obj.callback);
           return;
         }
-        const server = (_m = this.client) == null ? void 0 : _m.guilds.cache.get(getServerInfoPayload.serverId);
+        const server = this.client?.guilds.cache.get(getServerInfoPayload.serverId);
         if (!server) {
           this.sendTo(obj.from, obj.command, { error: `No server with ID ${getServerInfoPayload.serverId} found`, ...getServerInfoPayload }, obj.callback);
           return;
@@ -2128,7 +2246,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           }))
         }, obj.callback);
         break;
-      case "getChannelInfo":
+      }
+      case "getChannelInfo": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
@@ -2142,7 +2261,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.sendTo(obj.from, obj.command, { error: "serverId and channelId need to be set", ...getChannelInfoPayload }, obj.callback);
           return;
         }
-        channel = (_o = (_n = this.client) == null ? void 0 : _n.guilds.cache.get(getChannelInfoPayload.serverId)) == null ? void 0 : _o.channels.cache.get(getChannelInfoPayload.channelId);
+        channel = this.client?.guilds.cache.get(getChannelInfoPayload.serverId)?.channels.cache.get(getChannelInfoPayload.channelId);
         if (!channel) {
           this.sendTo(obj.from, obj.command, { error: `No channel with ID ${getChannelInfoPayload.channelId} for server with ID ${getChannelInfoPayload.serverId} found`, ...getChannelInfoPayload }, obj.callback);
           return;
@@ -2160,7 +2279,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           }))
         }, obj.callback);
         break;
-      case "getServerMemberInfo":
+      }
+      case "getServerMemberInfo": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
@@ -2176,19 +2296,19 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         let member;
         if (getServerMemberInfoPayload.userId) {
-          member = (_q = (_p = this.client) == null ? void 0 : _p.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _q.members.cache.get(getServerMemberInfoPayload.userId);
+          member = this.client?.guilds.cache.get(getServerMemberInfoPayload.serverId)?.members.cache.get(getServerMemberInfoPayload.userId);
           if (!member) {
             this.sendTo(obj.from, obj.command, { error: `No member with ID ${getServerMemberInfoPayload.userId} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
             return;
           }
         } else if (getServerMemberInfoPayload.userTag) {
-          member = (_s = (_r = this.client) == null ? void 0 : _r.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _s.members.cache.find((m) => m.user.tag === getServerMemberInfoPayload.userTag);
+          member = this.client?.guilds.cache.get(getServerMemberInfoPayload.serverId)?.members.cache.find((m) => m.user.tag === getServerMemberInfoPayload.userTag);
           if (!member) {
             this.sendTo(obj.from, obj.command, { error: `No member with tag ${getServerMemberInfoPayload.userTag} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
             return;
           }
         } else {
-          member = (_u = (_t = this.client) == null ? void 0 : _t.guilds.cache.get(getServerMemberInfoPayload.serverId)) == null ? void 0 : _u.members.cache.find((m) => m.user.discriminator === "0" && m.user.username === getServerMemberInfoPayload.userName);
+          member = this.client?.guilds.cache.get(getServerMemberInfoPayload.serverId)?.members.cache.find((m) => m.user.discriminator === "0" && m.user.username === getServerMemberInfoPayload.userName);
           if (!member) {
             this.sendTo(obj.from, obj.command, { error: `No member with unique name ${getServerMemberInfoPayload.userName} for server with ID ${getServerMemberInfoPayload.serverId} found`, ...getServerMemberInfoPayload }, obj.callback);
             return;
@@ -2212,7 +2332,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           voiceDeaf: member.voice.deaf
         }, obj.callback);
         break;
-      case "getUserInfo":
+      }
+      case "getUserInfo": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
@@ -2227,19 +2348,19 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         if (getUserInfoPayload.userId) {
-          user = (_v = this.client) == null ? void 0 : _v.users.cache.get(getUserInfoPayload.userId);
+          user = this.client?.users.cache.get(getUserInfoPayload.userId);
           if (!user) {
             this.sendTo(obj.from, obj.command, { error: `No user with ID ${getUserInfoPayload.userId} found`, ...getUserInfoPayload }, obj.callback);
             return;
           }
         } else if (getUserInfoPayload.userTag) {
-          user = (_w = this.client) == null ? void 0 : _w.users.cache.find((u) => u.tag === getUserInfoPayload.userTag);
+          user = this.client?.users.cache.find((u) => u.tag === getUserInfoPayload.userTag);
           if (!user) {
             this.sendTo(obj.from, obj.command, { error: `No user with tag ${getUserInfoPayload.userTag} found`, ...getUserInfoPayload }, obj.callback);
             return;
           }
         } else {
-          user = (_x = this.client) == null ? void 0 : _x.users.cache.find((u) => u.discriminator === "0" && u.username === getUserInfoPayload.userName);
+          user = this.client?.users.cache.find((u) => u.discriminator === "0" && u.username === getUserInfoPayload.userName);
           if (!user) {
             this.sendTo(obj.from, obj.command, { error: `No user with unique name ${getUserInfoPayload.userName} found`, ...getUserInfoPayload }, obj.callback);
             return;
@@ -2254,7 +2375,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           accentColor: user.hexAccentColor
         }, obj.callback);
         break;
-      case "getMessageInfo":
+      }
+      case "getMessageInfo": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
@@ -2290,7 +2412,8 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           reference: msg.reference
         }, obj.callback);
         break;
-      case "sendNotification":
+      }
+      case "sendNotification": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
           return;
@@ -2301,15 +2424,15 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         this.log.info(`New notification received from ${obj.from.replace(/^system\.adapter\./, "")}`);
-        let target = void 0;
+        let target;
         if (this.config.sendNotificationsTo.indexOf("/") > 0) {
           const [serverId, channelId] = this.config.sendNotificationsTo.split("/");
-          const channel2 = (_z = (_y = this.client) == null ? void 0 : _y.guilds.cache.get(serverId)) == null ? void 0 : _z.channels.cache.get(channelId);
-          if ((channel2 == null ? void 0 : channel2.type) === import_discord.ChannelType.GuildText) {
+          const channel2 = this.client?.guilds.cache.get(serverId)?.channels.cache.get(channelId);
+          if (channel2?.type === import_discord.ChannelType.GuildText) {
             target = channel2;
           }
         } else {
-          target = (_A = this.client) == null ? void 0 : _A.users.cache.get(this.config.sendNotificationsTo);
+          target = this.client?.users.cache.get(this.config.sendNotificationsTo);
         }
         if (!target) {
           this.log.error(`Cannot send notification because the configured target is invalid!`);
@@ -2317,7 +2440,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           return;
         }
         const message = obj.message;
-        if (!((_B = message == null ? void 0 : message.category) == null ? void 0 : _B.instances) || !message.category.name) {
+        if (!message?.category?.instances || !message.category.name) {
           this.log.warn(`Cannot send notification because the received message object is invalid`);
           this.sendTo(obj.from, obj.command, { sent: false }, obj.callback);
           return;
@@ -2351,6 +2474,7 @@ ${readableInstances.join("\n")}`;
           this.sendTo(obj.from, obj.command, { sent: false }, obj.callback);
         }
         break;
+      }
       default:
         this.log.warn(`Got message with unknown command: ${obj.command}`);
         if (obj.callback) {
@@ -2373,38 +2497,6 @@ ${readableInstances.join("\n")}`;
     }
   }
   /**
-   * Try to detect and parse stringified JSON MessageOptions.
-   *
-   * If the `content` starts/ends with curly braces if will be treated as
-   * stringified JSON. Then the JSON will be parsed and some basic checks will
-   * be run against the parsed object.
-   *
-   * Otherwise the content will be treated as a simple string and wrapped into
-   * a `MessageOptions` object.
-   * @param content The stringified content to be parsed.
-   * @returns A `MessageOptions` object.
-   * @throws An error if parsing JSON or a check failed.
-   */
-  parseStringifiedMessageOptions(content) {
-    let mo;
-    if (content.startsWith("{") && content.endsWith("}")) {
-      this.log.debug(`Content seems to be json`);
-      try {
-        mo = JSON.parse(content);
-      } catch (err) {
-        throw new Error(`Content seems to be json but cannot be parsed!`);
-      }
-      if (!(mo == null ? void 0 : mo.files) && !mo.content || mo.files && !Array.isArray(mo.files) || mo.embeds && !Array.isArray(mo.embeds)) {
-        throw new Error(`Content is json but seems to be invalid!`);
-      }
-    } else {
-      mo = {
-        content
-      };
-    }
-    return mo;
-  }
-  /**
    * Prepare a message for sending.
    *
    * This some message parts to be valid discord message data.
@@ -2419,7 +2511,7 @@ ${readableInstances.join("\n")}`;
       for (const embed of msg.embeds) {
         if (typeof embed.color === "string") {
           const colorStr = embed.color;
-          if (colorStr.match(/^\d+$/)) {
+          if (/^\d+$/.exec(colorStr)) {
             embed.color = parseInt(colorStr, 10);
           } else {
             try {
@@ -2440,24 +2532,23 @@ ${readableInstances.join("\n")}`;
    * @throws An error if some parameters are missing or the message could not be found.
    */
   async getPreviousMessage(identifier) {
-    var _a, _b, _c, _d, _e, _f, _g;
     if (!identifier.messageId) {
       throw new Error("messageId needs to be set");
     }
     if (identifier.userId || identifier.userTag || identifier.userName) {
       let user;
       if (identifier.userId) {
-        user = (_a = this.client) == null ? void 0 : _a.users.cache.get(identifier.userId);
+        user = this.client?.users.cache.get(identifier.userId);
         if (!user) {
           throw new Error(`No user with userId ${identifier.userId} found`);
         }
       } else if (identifier.userTag) {
-        user = (_b = this.client) == null ? void 0 : _b.users.cache.find((u) => u.tag === identifier.userTag);
+        user = this.client?.users.cache.find((u) => u.tag === identifier.userTag);
         if (!user) {
           throw new Error(`No user with userTag ${identifier.userTag} found`);
         }
       } else {
-        user = (_c = this.client) == null ? void 0 : _c.users.cache.find((u) => u.discriminator === "0" && u.username === identifier.userName);
+        user = this.client?.users.cache.find((u) => u.discriminator === "0" && u.username === identifier.userName);
         if (!user) {
           throw new Error(`No user with unique userName ${identifier.userName} found`);
         }
@@ -2466,7 +2557,7 @@ ${readableInstances.join("\n")}`;
         if (!user.dmChannel) {
           await user.createDM();
         }
-        const msg = ((_d = user.dmChannel) == null ? void 0 : _d.messages.cache.get(identifier.messageId)) ?? await ((_e = user.dmChannel) == null ? void 0 : _e.messages.fetch(identifier.messageId));
+        const msg = user.dmChannel?.messages.cache.get(identifier.messageId) ?? await user.dmChannel?.messages.fetch(identifier.messageId);
         if (!msg) {
           throw new Error(`No message with messageId ${identifier.messageId} for user ${(0, import_utils.userNameOrTag)(user)} found`);
         }
@@ -2475,8 +2566,8 @@ ${readableInstances.join("\n")}`;
         throw new Error(`Error finding message for user ${(0, import_utils.userNameOrTag)(user)}: ${err}`);
       }
     } else if (identifier.serverId && identifier.channelId) {
-      const channel = (_g = (_f = this.client) == null ? void 0 : _f.guilds.cache.get(identifier.serverId)) == null ? void 0 : _g.channels.cache.get(identifier.channelId);
-      if ((channel == null ? void 0 : channel.type) !== import_discord.ChannelType.GuildText && (channel == null ? void 0 : channel.type) !== import_discord.ChannelType.GuildVoice) {
+      const channel = this.client?.guilds.cache.get(identifier.serverId)?.channels.cache.get(identifier.channelId);
+      if (channel?.type !== import_discord.ChannelType.GuildText && channel?.type !== import_discord.ChannelType.GuildVoice) {
         throw new Error(`No text channel with channelId ${identifier.channelId} on server ${identifier.serverId} found`);
       }
       try {
@@ -2493,103 +2584,25 @@ ${readableInstances.join("\n")}`;
     }
   }
   /**
-   * Check if a user or guild member is authorized to do something.
-   * For guild members their roles will also be checked.
-   * @param user The User or GuildMember to check.
-   * @param required Object containing the required flags. If not provided the check returns if the user in the list of authorized users.
-   * @returns `true` if the user is authorized or authorization is not enabled, `false` otherwise
-   */
-  checkUserAuthorization(user, required) {
-    if (!this.config.enableAuthorization) {
-      return true;
-    }
-    let given = this.config.authorizedUsers.find((au) => au.userId === user.id);
-    if (this.config.authorizedServerRoles.length > 0 && user instanceof import_discord.GuildMember) {
-      for (const [, role] of user.roles.cache) {
-        const roleGiven = this.config.authorizedServerRoles.find((ar) => ar.serverAndRoleId === `${user.guild.id}|${role.id}`);
-        if (roleGiven) {
-          if (!given) {
-            given = roleGiven;
-          } else {
-            given = {
-              getStates: given.getStates || roleGiven.getStates,
-              setStates: given.setStates || roleGiven.setStates,
-              useCustomCommands: given.useCustomCommands || roleGiven.useCustomCommands,
-              useText2command: given.useText2command || roleGiven.useText2command
-            };
-          }
-        }
-      }
-    }
-    if (!given) {
-      return false;
-    }
-    if (!required) {
-      return true;
-    }
-    if (required.getStates && !given.getStates || required.setStates && !given.setStates || required.useCustomCommands && !given.useCustomCommands || required.useText2command && !given.useText2command) {
-      return false;
-    }
-    return true;
-  }
-  /**
-   * Awaitable function to just wait some time.
-   *
-   * Uses `Adapter.setTimeout(...)` internally to make sure the timeout is cleared on adapter unload.
-   * @param time Time to wait in ms.
-   */
-  wait(time) {
-    return new Promise((resolve) => this.setTimeout(resolve, time));
-  }
-  /**
    * Set the `info.connection` state if changed.
    * @param connected If connected.
    * @param force `true` to skip local cache check and always set the state.
    */
   async setInfoConnectionState(connected, force = false) {
     if (force || connected !== this.infoConnected) {
-      await this.setStateAsync("info.connection", connected, true);
+      await this.setState("info.connection", connected, true);
       this.infoConnected = connected;
     }
-  }
-  /**
-   * Internal replacemend for `extendObjectAsync(...)` which compares the given
-   * object for each `id` against a cached version and only calls na original
-   * `extendObjectAsync(...)` if the object changed.
-   * Using this, the object gets only updated if
-   *  a) it's the first call for this `id` or
-   *  b) the object needs to be changed.
-   */
-  async extendObjectAsyncCached(id, objPart, options) {
-    const cachedObj = this.extendObjectCache.get(id);
-    if ((0, import_node_util.isDeepStrictEqual)(cachedObj, objPart)) {
-      return { id };
-    }
-    const ret = await this.extendObjectAsync(id, objPart, options);
-    this.extendObjectCache.set(id, objPart);
-    return ret;
-  }
-  /**
-   * Internal replacement for `delObjectAsync(...)` which also removes the local
-   * cache entry for the given `id`.
-   */
-  async delObjectAsyncCached(id, options) {
-    if (options == null ? void 0 : options.recursive) {
-      this.extendObjectCache.filter((_obj, id2) => id2.startsWith(id)).each((_obj, id2) => this.extendObjectCache.delete(id2));
-    } else {
-      this.extendObjectCache.delete(id);
-    }
-    return this.delObjectAsync(id, options);
   }
   async onUnload(callback) {
     try {
       this.unloaded = true;
       await this.setInfoConnectionState(false, true);
       if (this.client) {
-        this.client.destroy();
+        await this.client.destroy();
       }
       callback();
-    } catch (e) {
+    } catch (_e) {
       callback();
     }
   }

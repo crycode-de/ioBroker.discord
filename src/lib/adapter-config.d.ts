@@ -10,6 +10,7 @@ declare global {
       botName: string;
       processAllMessagesInServerChannel: boolean;
       reactOnMentions: boolean;
+      // eslint-disable-next-line @typescript-eslint/no-duplicate-type-constituents
       reactOnMentionsEmoji: string | Snowflake;
       text2commandInstance: string;
       text2commandRespondWith: 'message' | 'reply' | 'none';

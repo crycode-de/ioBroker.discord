@@ -1,10 +1,10 @@
-export const VALID_PRESENCE_STATUS_DATA = <const>['online', 'idle', 'dnd', 'invisible'];
+export const VALID_PRESENCE_STATUS_DATA = [ 'online', 'idle', 'dnd', 'invisible' ] as const;
 
-export const ACTIVITY_TYPES = <const>['', 'Playing', 'Streaming', 'Listening', 'Watching', 'Custom', 'Competing'];
+export const ACTIVITY_TYPES = [ '', 'Playing', 'Streaming', 'Listening', 'Watching', 'Custom', 'Competing' ] as const;
 export type ActivityTypeNames = typeof ACTIVITY_TYPES[number];
 
-//export const VALID_ACTIVITY_TYPES = <const>['', 'Playing', 'Streaming', 'Listening', 'Watching', 'Competing'];
-//export type ValidActivityTypeNames = typeof VALID_ACTIVITY_TYPES[number];
+// export const VALID_ACTIVITY_TYPES = <const>['', 'Playing', 'Streaming', 'Listening', 'Watching', 'Competing'];
+// export type ValidActivityTypeNames = typeof VALID_ACTIVITY_TYPES[number];
 
 /**
  * Valid channel types.
@@ -13,8 +13,8 @@ export type ActivityTypeNames = typeof ACTIVITY_TYPES[number];
 export type ChannelTypeNames = 'GuildText' | 'DM' | 'GuildVoice' | 'GroupDM' | 'GuildCategory' | 'GuildAnnouncement' | 'AnnouncementThread' | 'PublicThread' | 'PrivateThread' | 'GuildStageVoice' | 'GuildDirectory' | 'GuildForum' | 'GuildNews' | 'GuildNewsThread' | 'GuildPublicThread' | 'GuildPrivateThread';
 
 import {
-  MessageEditOptions,
   MessageCreateOptions,
+  MessageEditOptions,
   PresenceStatus,
   PresenceStatusData,
   Snowflake,

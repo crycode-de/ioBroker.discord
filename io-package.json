@@ -136,7 +136,6 @@
     },
     "tier": 2,
     "platform": "Javascript/Node.js",
-    "main": "build/main.js",
     "icon": "discord.png",
     "enabled": true,
     "extIcon": "https://raw.githubusercontent.com/crycode-de/ioBroker.discord/main/admin/discord.png",
@@ -169,12 +168,12 @@
     },
     "dependencies": [
       {
-        "js-controller": ">=4.0.0"
+        "js-controller": ">=5.0.19"
       }
     ],
     "globalDependencies": [
       {
-        "admin": ">=5.3.0"
+        "admin": ">=6.17.0"
       }
     ],
     "messages": [

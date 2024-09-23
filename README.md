@@ -28,8 +28,8 @@ A detailed documentation is available in the `docs` directory of the repository:
 ## Requirements
 
 * Node.js >= 18
-* js-controller >= 4.0
-* admin >= 5.3
+* js-controller >= 5.0.19
+* admin >= 6.17
 
 ## Features
 
@@ -60,6 +60,11 @@ A detailed documentation is available in the `docs` directory of the repository:
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+* (crycode-de) Node.js >= 18, Admin >= 6.17, js-contoller >= 5.0.19 are required
+* (crycode-de) Updated dependencies
+
 ### 2.4.0 (2024-07-10)
 
 * (crycode-de) Added basic support for interactions unknown to the adapter (custom scripts required for handling)
