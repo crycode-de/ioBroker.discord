@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "discord",
-    "version": "2.4.0",
+    "version": "2.5.0",
     "news": {
+      "2.5.0": {
+        "en": "Node.js >= 18, Admin >= 6.17, js-contoller >= 5.0.19 are required\nUpdated dependencies",
+        "de": "Node.js >= 18, Admin >= 6.17, js-contoller >= 5.0.19 sind erforderlich\nAbhängigkeiten aktualisiert",
+        "ru": "Node.js >= 18, Админ >= 6.17, js-contoller >= 5.0.19 требуется\nОбновленные зависимости",
+        "pt": "Node.js >= 18, Admin >= 6.17, js-contoller >= 5.0.19 são necessários\nDependências atualizadas",
+        "nl": "Voor de toepassing van deze onderverdeling wordt verstaan onder: 5.0.19 zijn vereist\nBijgewerkte afhankelijkheden",
+        "fr": "Node.js >= 18, Admin >= 6,17, js-contoller >= 5.0.19 sont nécessaires\nDépendances actualisées",
+        "it": "Node.js >= 18, Admin >= 6.17, js-contoller >= 5.0.19 sono necessari\nDipendenze aggiornate",
+        "es": "Node.js \"= 18, Admin \"= 6.17, js-contoller \"= 5.0.19 Se requieren\nDependencias actualizadas",
+        "pl": "Node.js > = 18, Admin > = 6,17, js- contoller > = 5.0.19 są wymagane\nAktualizacja zależności",
+        "uk": "Node.js >= 18, Адміністратор >= 6.17, js-contoller >= 5.0.19 потрібно\nОновлені залежності",
+        "zh-cn": "节点.js QQ 18,行政 QQ 6.17,js-contoller QQ 所需经费5.0.19美元\n更新的依赖关系"
+      },
       "2.4.0": {
         "en": "Added basic support for interactions unknown to the adapter (custom scripts required for handling)\nRaw interaction JSON is now written to the state after the interaction is initially handled to prevent some race conditions\nUpdated dependencies",
         "de": "Grundlegende Unterstützung für Interaktionen, die dem Adapter unbekannt sind, hinzugefügt (eigene Skripte für die Nutzung erforderlich)\nDas JSON einer Interaktion wird nun in den Zustand geschrieben, nachdem die Interaktion vom Adapter bearbeitet wurde, um einige Race Conditions zu verhindern\nAbhängigkeiten aktualisiert",
@@ -80,19 +93,6 @@
         "pl": "Fixed response to powiadomienia-managera",
         "uk": "Виправлено відповідь на повідомлення-менеджер адаптера",
         "zh-cn": "对通知-manager的适应反应"
-      },
-      "2.1.1": {
-        "en": "Updated dependencies\nUpdated translations",
-        "de": "Abhängigkeiten aktualisiert\nÜbersetzungen aktualisiert",
-        "ru": "Обновленные зависимости\nОбновленные переводы",
-        "pt": "Dependências atualizadas\nTraduções atualizadas",
-        "nl": "Verouderde afhankelijkheid\nVertaling:",
-        "fr": "Mise à jour des dépendances\nTraductions actualisées",
-        "it": "Dipendenze aggiornate\nTraduzioni aggiornate",
-        "es": "Dependencias actualizadas\nTraducciones actualizadas",
-        "pl": "Zależność od upoważnienia\nTłumaczenia poprawione",
-        "uk": "Оновлені залежності\nОновлені переклади",
-        "zh-cn": "A. 最新依赖情况\n最新翻译"
       }
     },
     "titleLang": {
