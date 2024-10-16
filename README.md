@@ -63,6 +63,7 @@ A detailed documentation is available in the `docs` directory of the repository:
 ### **WORK IN PROGRESS**
 
 * (crycode-de) Small style fixes for jsonConfig
+* (crycode-de) Optimized timeout behavior
 
 ### 2.5.0 (2024-09-23)
 

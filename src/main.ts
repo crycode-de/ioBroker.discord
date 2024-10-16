@@ -1,5 +1,6 @@
 import 'source-map-support/register';
 
+import { setTimeout } from 'node:timers/promises';
 import { isDeepStrictEqual } from 'node:util';
 
 import { boundMethod } from 'autobind-decorator';
@@ -265,16 +266,6 @@ class DiscordAdapter extends Adapter {
     }
 
     return true;
-  }
-
-  /**
-   * Awaitable function to just wait some time.
-   *
-   * Uses `Adapter.setTimeout(...)` internally to make sure the timeout is cleared on adapter unload.
-   * @param time Time to wait in ms.
-   */
-  public async wait (time: number): Promise<void> {
-    return await new Promise((resolve: () => void) => this.setTimeout(resolve, time));
   }
 
   /**
@@ -606,7 +597,7 @@ class DiscordAdapter extends Adapter {
           }
 
           this.log.info(`Wait ${LOGIN_WAIT_TIMES[tryNr] / 1000} seconds before next login try (#${tryNr + 1}) ...`);
-          await this.wait(LOGIN_WAIT_TIMES[tryNr]);
+          await setTimeout(LOGIN_WAIT_TIMES[tryNr], undefined, { ref: false });
 
           return await this.loginClient(tryNr);
         }
