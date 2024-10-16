@@ -60,6 +60,10 @@ A detailed documentation is available in the `docs` directory of the repository:
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+* (crycode-de) Small style fixes for jsonConfig
+
 ### 2.5.0 (2024-09-23)
 
 * (crycode-de) Node.js >= 18, Admin >= 6.17, js-contoller >= 5.0.19 are required
