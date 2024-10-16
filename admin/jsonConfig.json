@@ -12,6 +12,7 @@
         "token":{
           "type": "text",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "lg": 8,
           "label": "Token",
@@ -22,6 +23,7 @@
         },
         "_devPortalLink": {
           "type": "staticLink",
+          "xs": 12,
           "sm": 12,
           "lg": 4,
           "href": "https://discord.com/developers/applications",
@@ -35,6 +37,7 @@
         "botName": {
           "type": "text",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "lg": 6,
           "label": "Name of the bot",
@@ -44,6 +47,7 @@
         "dynamicServerUpdates": {
           "type": "checkbox",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -52,6 +56,7 @@
         },
         "observeUserPresence": {
           "type": "checkbox",
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -60,6 +65,7 @@
         },
         "observeUserVoiceState": {
           "type": "checkbox",
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -70,6 +76,7 @@
         "enableRawStates": {
           "type": "checkbox",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -86,6 +93,7 @@
         "processAllMessagesInServerChannel": {
           "type": "checkbox",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -96,6 +104,7 @@
         "reactOnMentions": {
           "type": "checkbox",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -104,6 +113,7 @@
         },
         "reactOnMentionsEmoji": {
           "type": "text",
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -116,6 +126,7 @@
         "text2commandInstance": {
           "type": "selectSendTo",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "lg": 6,
           "label": "text2command instance",
@@ -125,6 +136,7 @@
         },
         "_text2commandInstanceHelp": {
           "type": "staticText",
+          "xs": 12,
           "sm": 12,
           "lg": 6,
           "hidden": "_alive",
@@ -138,6 +150,7 @@
           "type": "select",
           "label": "Response of text2command",
           "help": "How the response of text2command is send.",
+          "xs": 12,
           "sm": 12,
           "lg": 6,
           "hidden": "!data.text2commandInstance",
@@ -151,6 +164,7 @@
         "sendNotificationsTo": {
           "type": "selectSendTo",
           "label": "Send ioBroker notifications to",
+          "xs": 12,
           "sm": 12,
           "lg": 6,
           "newLine": true,
@@ -160,6 +174,7 @@
         },
         "_sendNotificationsToHelp": {
           "type": "staticText",
+          "xs": 12,
           "sm": 12,
           "lg": 6,
           "hidden": "_alive",
@@ -179,6 +194,7 @@
         "enableAuthorization": {
           "type": "checkbox",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -197,6 +213,7 @@
         "_authorizedUsersInstanceHelp": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "_alive || !data.enableAuthorization",
           "text": "Adapter instance needs to be running to be able to select allowed users from a drop down list! Otherwise you need to enter the user IDs manually.",
@@ -207,6 +224,7 @@
         "authorizedUsers": {
           "type": "table",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!data.enableAuthorization",
           "label": "Allowed users",
@@ -265,6 +283,7 @@
         "authorizedServerRoles": {
           "type": "table",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!data.enableAuthorization",
           "label": "Allowed server roles",
@@ -324,6 +343,7 @@
         "processMessagesFromUnauthorizedUsers": {
           "type": "checkbox",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -341,6 +361,7 @@
         "enableCommands": {
           "type": "checkbox",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -351,6 +372,7 @@
 
         "commandsGlobal": {
           "type": "checkbox",
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -362,6 +384,7 @@
 
         "commandRepliesEphemeral": {
           "type": "checkbox",
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -374,6 +397,7 @@
         "cmdGetStateName": {
           "type": "text",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -390,6 +414,7 @@
         },
         "cmdSetStateName": {
           "type": "text",
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -408,6 +433,7 @@
         "_cmdObjectsConfigHint": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!data.enableCommands",
           "text": "Hint: Discord commands needs to enabled per state in the custom settings of the state objects.",
@@ -420,6 +446,7 @@
         "_logConfiguredCommandObjectsInfo": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!data.enableCommands",
           "text": "To get an overview about all state objects where you have commands enabled, just click the button below and see the log output."
@@ -427,6 +454,7 @@
         "_logConfiguredCommandObjects": {
           "type": "sendTo",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -441,6 +469,7 @@
         "_logConfiguredCommandObjectsAliveHint": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!data.enableCommands || _alive",
           "text": "The adapter instance needs to be running to use this feature!",
@@ -452,6 +481,7 @@
         "enableCustomCommands": {
           "type": "checkbox",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 4,
@@ -464,6 +494,7 @@
         "customCommands": {
           "type": "table",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!data.enableCommands || !data.enableCustomCommands",
           "label": "Custom commands",
@@ -564,6 +595,7 @@
         "_customCommandsHint": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!data.enableCommands || !data.enableCustomCommands",
           "text": "Hint: For string options, you may set predefined options in the corresponding 'option-*.choices' state."
@@ -578,18 +610,21 @@
         "_addToServerInfo1a": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "text": "Here you are able to get a link to add your bot to a discord server."
         },
         "_addToServerInfo1b": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "text": "To get the link, you need to insert your bot token in the main settings tab, save the configurations and start/restart the adapter instance."
         },
         "_addToServerInfo1c": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "_alive",
           "text": "The adapter instance needs to be running to get the link!",
@@ -601,6 +636,7 @@
           "type": "textSendTo",
           "container": "text",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "command": "getAddToServerLink",
@@ -611,6 +647,7 @@
         "_addToServerInfo2a": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "The following bot permissions are required by the adapter and embedded into the link above:"
@@ -618,6 +655,7 @@
         "_addToServerInfo2ChangeNickname": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Change Nickname",
@@ -631,6 +669,7 @@
         "_addToServerInfo2ViewChannels": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Read Messages/View Channels",
@@ -644,6 +683,7 @@
         "_addToServerInfo2ModerateMembers": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Moderate Members",
@@ -657,6 +697,7 @@
         "_addToServerInfo2SendMessages": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Send Messages",
@@ -670,6 +711,7 @@
         "_addToServerInfo2EmbedLinks": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Embed Links",
@@ -683,6 +725,7 @@
         "_addToServerInfo2AttachFiles": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Attach Files",
@@ -696,6 +739,7 @@
         "_addToServerInfo2ReadMessageHistory": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Read Message History",
@@ -709,6 +753,7 @@
         "_addToServerInfo2MentionEveryone": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Mention Everyone",
@@ -722,6 +767,7 @@
         "_addToServerInfo2AddReactions": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Add Reactions",
@@ -735,6 +781,7 @@
         "_addToServerInfo2MuteMembers": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Mute Members",
@@ -748,6 +795,7 @@
         "_addToServerInfo2DeafenMembers": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Deafen Members",
@@ -761,6 +809,7 @@
         "_addToServerInfo2MoveMembers": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "!_alive",
           "text": "Move Members",
@@ -777,12 +826,14 @@
         "_serverLeaveInfo1": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "text": "Here you are able to let the bot leave a discord server."
         },
         "_serverLeaveInfo2": {
           "type": "staticText",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "hidden": "_alive",
           "text": "The adapter instance needs to be running to let the bot leave a server!",
@@ -793,6 +844,7 @@
         "serverLeaveSelect": {
           "type": "selectSendTo",
           "newLine": true,
+          "xs": 12,
           "sm": 12,
           "lg": 6,
           "label": "Select server to leave",
@@ -804,6 +856,7 @@
 
         "_serverLeaveButton": {
           "type": "sendTo",
+          "xs": 12,
           "sm": 12,
           "md": 6,
           "lg": 2,

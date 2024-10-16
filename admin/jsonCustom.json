@@ -10,6 +10,7 @@
 
     "enableText2command": {
       "type": "checkbox",
+      "xs": 12,
       "sm": 12,
       "label": "Enable text2command for this state",
       "help": "When enabled, the received message is send to the configured text2command instance.",
@@ -24,6 +25,7 @@
     "enableCommands": {
       "type": "checkbox",
       "newLine": true,
+      "xs": 12,
       "sm": 12,
       "label": "Enable discord commands for this state",
       "help": "Make this state available for discord commands.",
@@ -32,6 +34,7 @@
 
     "commandsName": {
       "type": "text",
+      "xs": 12,
       "sm": 12,
       "md": 6,
       "label": "Name",
@@ -42,6 +45,7 @@
     },
     "commandsAlias": {
       "type": "text",
+      "xs": 12,
       "sm": 12,
       "md": 6,
       "label": "Alias",
@@ -53,6 +57,7 @@
     "commandsAllowGet": {
       "type": "checkbox",
       "newLine": true,
+      "xs": 12,
       "sm": 12,
       "md": 6,
       "label": "Allow get",
@@ -63,6 +68,7 @@
     },
     "commandsAllowSet": {
       "type": "checkbox",
+      "xs": 12,
       "sm": 12,
       "md": 6,
       "label": "Allow set",
@@ -75,6 +81,7 @@
     "commandsShowAckFalse": {
       "type": "checkbox",
       "newLine": true,
+      "xs": 12,
       "sm": 12,
       "md": 6,
       "label": "Show ack=false",
@@ -84,6 +91,7 @@
     },
     "commandsSetWithAck": {
       "type": "checkbox",
+      "xs": 12,
       "sm": 12,
       "md": 6,
       "label": "Set with ack",
@@ -95,6 +103,7 @@
     "commandsBooleanValueTrue": {
       "type": "text",
       "newLine": true,
+      "xs": 12,
       "sm": 12,
       "md": 6,
       "label": "True value",
@@ -104,6 +113,7 @@
     },
     "commandsBooleanValueFalse": {
       "type": "text",
+      "xs": 12,
       "sm": 12,
       "md": 6,
       "label": "False value",
@@ -114,6 +124,7 @@
     "commandsNumberDecimals": {
       "type": "number",
       "newLine": true,
+      "xs": 12,
       "sm": 12,
       "md": 6,
       "label": "Decimals",
@@ -124,6 +135,7 @@
     "commandsStringSendAsFile": {
       "type": "checkbox",
       "newLine": true,
+      "xs": 12,
       "sm": 12,
       "label": "Send as file",
       "help": "Value should be treated as path or url to a file or base64 encoded file content. The file will be send as an attachment.",
