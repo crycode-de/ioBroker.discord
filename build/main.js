@@ -24,6 +24,7 @@ var __decorateClass = (decorators, target, key, kind) => {
 var main_exports = {};
 module.exports = __toCommonJS(main_exports);
 var import_register = require("source-map-support/register");
+var import_promises = require("node:timers/promises");
 var import_node_util = require("node:util");
 var import_autobind_decorator = require("autobind-decorator");
 var import_adapter_core = require("@iobroker/adapter-core");
@@ -192,15 +193,6 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       return false;
     }
     return true;
-  }
-  /**
-   * Awaitable function to just wait some time.
-   *
-   * Uses `Adapter.setTimeout(...)` internally to make sure the timeout is cleared on adapter unload.
-   * @param time Time to wait in ms.
-   */
-  async wait(time) {
-    return await new Promise((resolve) => this.setTimeout(resolve, time));
   }
   /**
    * Internal replacemend for `extendObject(...)` which compares the given
@@ -466,7 +458,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
             tryNr = LOGIN_WAIT_TIMES.length - 1;
           }
           this.log.info(`Wait ${LOGIN_WAIT_TIMES[tryNr] / 1e3} seconds before next login try (#${tryNr + 1}) ...`);
-          await this.wait(LOGIN_WAIT_TIMES[tryNr]);
+          await (0, import_promises.setTimeout)(LOGIN_WAIT_TIMES[tryNr], void 0, { ref: false });
           return await this.loginClient(tryNr);
         }
         return err.name;
