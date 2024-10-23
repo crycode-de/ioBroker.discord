@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "discord",
-    "version": "2.5.0",
+    "version": "2.5.1",
     "news": {
+      "2.5.1": {
+        "en": "Small style fixes for jsonConfig\nOptimized timeout behavior\nUpdated dependencies",
+        "de": "Kleine Stil-Fixes für jsonConfig\nOptimiertes Timeout-Verhalten\nAbhängigkeiten aktualisiert",
+        "ru": "Небольшой стиль для jsonConfig\nОптимизированное поведение времени\nОбновленные зависимости",
+        "pt": "Pequenas correções de estilo para jsonConfig\nComportamento de timeout otimizado\nDependências atualizadas",
+        "nl": "Kleine stijlfixes voor jsonConfig\nGeoptimaliseerd timeout gedrag\nBijgewerkte afhankelijkheden",
+        "fr": "Corrections de style pour jsonConfig\nComportement d'arrêt de temps optimisé\nDépendances actualisées",
+        "it": "Piccolo stile correzioni per jsonConfig\nComportamento di timeout ottimizzato\nDipendenze aggiornate",
+        "es": "Pequeños arreglos de estilo para jsonConfig\nComportamiento de tiempo optimizado\nDependencias actualizadas",
+        "pl": "Małe poprawki stylu dla jsonConfig\nZoptymalizowane zachowanie timeout\nAktualizacja zależności",
+        "uk": "Маленькі фіксатори стилю для jsonConfig\nОптимізована поведінка часу\nОновлені залежності",
+        "zh-cn": "JsonConfig 的小样式修正\n优化超时行为\n更新的依赖关系"
+      },
       "2.5.0": {
         "en": "Node.js >= 18, Admin >= 6.17, js-contoller >= 5.0.19 are required\nUpdated dependencies",
         "de": "Node.js >= 18, Admin >= 6.17, js-contoller >= 5.0.19 sind erforderlich\nAbhängigkeiten aktualisiert",
@@ -80,19 +93,6 @@
         "pl": "Optymizowana obsługa błędów (ang. Optimized error handling) – błędy związane z siecią powinny być obecnie przejmowane bez ponownego uruchomienia i lepszego logowania\nDrobne problemy w konfiguście\nZależność od upoważnienia",
         "uk": "Оптимізоване поводження з похибками - Пов'язані помилки мережі повинні бути повністю оброблятися без перезавантаження адаптера і краще завантажувати\nВиправлено маленькі питання в конфігурації UI\nОновлені залежності",
         "zh-cn": "减少错误处理——网络相关的错误现在应该完全处理,而不适应其他艺术和更好的伐木。\n混凝土的小问题\nA. 最新依赖情况"
-      },
-      "2.1.2": {
-        "en": "Fixed response to notification-manager adapter",
-        "de": "Antwort auf Benachrichtigungen vom notification-manager Adapter korrigiert",
-        "ru": "Исправлена реакция на адаптер для уведомлений-менеджера",
-        "pt": "Resposta fixa ao adaptador do gerenciador de notificações",
-        "nl": "Reactie van de manager",
-        "fr": "Réponse fixe à l'adaptateur notification-manager",
-        "it": "Risposta fissa all'adattatore di notifica-manager",
-        "es": "Respuesta fija al adaptador de gestión de notificaciones",
-        "pl": "Fixed response to powiadomienia-managera",
-        "uk": "Виправлено відповідь на повідомлення-менеджер адаптера",
-        "zh-cn": "对通知-manager的适应反应"
       }
     },
     "titleLang": {
