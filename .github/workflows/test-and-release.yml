@@ -87,4 +87,4 @@ jobs:
           sentry-version-prefix: "iobroker.discord"
           sentry-sourcemap-paths: "build/"
           # If your sentry project is linked to a GitHub repository, you can enable the following option
-          sentry-github-integration: true
+          # sentry-github-integration: true
