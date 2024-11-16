@@ -60,6 +60,10 @@ A detailed documentation is available in the `docs` directory of the repository:
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+* (crycode-de) Added missing sizes to jsonConfig
+
 ### 2.5.1 (2024-10-23)
 
 * (crycode-de) Small style fixes for jsonConfig
