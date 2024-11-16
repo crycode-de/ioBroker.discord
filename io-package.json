@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "discord",
-    "version": "2.5.1",
+    "version": "2.5.2",
     "news": {
+      "2.5.2": {
+        "en": "Added missing sizes to jsonConfig",
+        "de": "Fehlender Größen zu jsonConfig hinzugefügt",
+        "ru": "Добавить недостающие размеры для jsonConfig",
+        "pt": "Adicionado tamanhos falta para jsonConfig",
+        "nl": "Ontbrekende maten toegevoegd aan jsonConfig",
+        "fr": "Ajout de tailles manquantes à jsonConfig",
+        "it": "Aggiunti taglie mancanti a jsonConfig",
+        "es": "Añadido tamaños perdidos a jsonConfig",
+        "pl": "Dodano brakujące rozmiary do jsonConfig",
+        "uk": "Додано відсутні розміри в jsonConfig",
+        "zh-cn": "添加到 JsonConfig 的缺失大小"
+      },
       "2.5.1": {
         "en": "Small style fixes for jsonConfig\nOptimized timeout behavior\nUpdated dependencies",
         "de": "Kleine Stil-Fixes für jsonConfig\nOptimiertes Timeout-Verhalten\nAbhängigkeiten aktualisiert",
@@ -80,19 +93,6 @@
         "pl": "Naprawiono blokowane wykrywanie celów, jeśli użytkownik jest dostarczany przez zmienną (Być może trzeba przenieść blok, aby zaktualizować wygenerowany kod)\nAktualizacja zależności",
         "uk": "Виправлено помилку, якщо користувач надана змінною (Ви можете перемістити блок для оновлення генерованого коду)\nОновлені залежності",
         "zh-cn": "如果用户由变量提供, 则固定块目标检测( 您可能需要移动一个块来更新生成的代码)\n更新的依赖关系"
-      },
-      "2.2.0": {
-        "en": "Optimized error handling - Network related errors should now be handled completely without adapter restarts and better logging\nFixed small issues in config UI\nUpdated dependencies",
-        "de": "Optimierte Fehlerbehandlung - Netzwerkfehler sollten jetzt vollständig ohne Adapter-Neustart behandelt und besser protokolliert werden\nKleine Probleme in der Config-UI behoben\nAbhängigkeiten aktualisiert",
-        "ru": "Оптимизированная обработка ошибок - Сетевые связанные ошибки теперь должны быть обработаны полностью без перезагрузок адаптеров и лучшего входа\nИсправлены небольшие проблемы в config UI\nОбновленные зависимости",
-        "pt": "Manuseio de erro otimizado - Os erros relacionados à rede agora devem ser tratados completamente sem reinicializações do adaptador e melhor registro\nCorrigido pequenos problemas em UI de configuração\nDependências atualizadas",
-        "nl": "Geoptimiseerde fouten, netwerk gerelateerde fouten, moeten nu volledig afgehandeld worden zonder adapterresten en beter vegen\nKleine kwesties opgelost in UI\nVerouderde afhankelijkheid",
-        "fr": "Manipulation optimisée des erreurs - Les erreurs liées au réseau devraient maintenant être gérées complètement sans redémarrage d'adaptateur et une meilleure connexion\nCorrection de petits problèmes dans config UI\nMise à jour des dépendances",
-        "it": "Gestione degli errori ottimizzata - Gli errori relativi alla rete dovrebbero essere gestiti completamente senza riavviamento dell'adattatore e migliore registrazione\nRisolto piccoli problemi in configurazione UI\nDipendenze aggiornate",
-        "es": "Tratamiento optimizado de errores - Los errores relacionados con la red ahora deben manejarse completamente sin reiniciar el adaptador y mejor registro\nProblemas fijos pequeños en config UI\nDependencias actualizadas",
-        "pl": "Optymizowana obsługa błędów (ang. Optimized error handling) – błędy związane z siecią powinny być obecnie przejmowane bez ponownego uruchomienia i lepszego logowania\nDrobne problemy w konfiguście\nZależność od upoważnienia",
-        "uk": "Оптимізоване поводження з похибками - Пов'язані помилки мережі повинні бути повністю оброблятися без перезавантаження адаптера і краще завантажувати\nВиправлено маленькі питання в конфігурації UI\nОновлені залежності",
-        "zh-cn": "减少错误处理——网络相关的错误现在应该完全处理,而不适应其他艺术和更好的伐木。\n混凝土的小问题\nA. 最新依赖情况"
       }
     },
     "titleLang": {
