@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "discord",
-    "version": "2.5.2",
+    "version": "2.6.0",
     "news": {
+      "2.6.0": {
+        "en": "Node.js >= 20, js-controller >= 6.0.11, Admin >= 7.6.17 required\nUpdated dependencies",
+        "de": "Node.js >= 20, js-controller >= 6.0.11, Admin >= 7.6.17 erforderlich\nAbhängigkeiten aktualisiert",
+        "ru": "Node.js >= 20, js-контроллер >= 6.0.11, администратор >= 7.6.17 требуется\nОбновленные зависимости",
+        "pt": "Node.js >= 20, js-controlador >= 6.0,11, Admin >= 7.6.17 necessário\nDependências atualizadas",
+        "nl": "Voor de toepassing van deze onderverdeling wordt verstaan onder:\nBijgewerkte afhankelijkheden",
+        "fr": "Node.js >= 20, js-controller >= 6.0.11, Admin >= 7.6.17 requis\nDépendances actualisées",
+        "it": "Node.js >= 20, js-controller >= 6.0.11, Admin >= 7.6.17 richiesto\nDipendenze aggiornate",
+        "es": "Node.js \"= 20, js-controller \"= 6.0.11, Admin \"= 7.6.17 requerido\nDependencias actualizadas",
+        "pl": "Node.js > = 20, js- controller > = 6.0.11, Admin > = 7.6.17 wymagane\nAktualizacja zależności",
+        "uk": "JavaScript licenses API Веб-сайт Go1.13.8\nОновлені залежності",
+        "zh-cn": "节点.js >= 20,js控制器 >= 6.0.11, 管理员 >= 7.6.17 需要\n更新的依赖关系"
+      },
       "2.5.2": {
         "en": "Added missing sizes to jsonConfig",
         "de": "Fehlender Größen zu jsonConfig hinzugefügt",
@@ -80,19 +93,6 @@
         "pl": "XionNode.js 18 + jest teraz wymagane!\nDodano wsparcie dla niestandardowych działań bot\nNaprawiono wydanie z osadzonymi kolorami, które nie akceptują kodów kolorów szesnastkowych\nDziałalność użytkowników stałych dla użytkowników prowadzących działalność na własny rachunek (zob. [# 60] (https: / / github.com / crycode- de / ioBroker.discord / issues / 60))\nAktualizacja zależności",
         "uk": "浜у 涓 蹇!\nДодано підтримку користувацьких ботів\nВиправлено проблему з рельєфними кольорами, не приймається кольорові коди шестигранного кольору\nВиправлено роботу користувача для користувачів з індивідуальною діяльністю (див. [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nОновлені залежності",
         "zh-cn": "现在需要18+节点!\n为自定义机器人活动添加支持\n嵌入颜色的固定问题, 不接受十六进制颜色代码\n有自定义活动的用户的固定用户活动(见[#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\n更新的依赖关系"
-      },
-      "2.2.1": {
-        "en": "Fixed blockly target detection if user is provided by a variable (You may need to move a block to update the generated code)\nUpdated dependencies",
-        "de": "Fehler in Blockly bei der Erkennung des Ziel behoben, wenn der Benutzer durch eine Variable definiert wird. Es muss ein Block bewegt werden, um den generierten Code zu aktualisieren)\nAbhängigkeiten Aktualisiert",
-        "ru": "Исправленное блокирование обнаружения цели, если пользователь предоставляется переменной (может потребоваться переместить блок для обновления сгенерированного кода)\nОбновленные зависимости",
-        "pt": "Detecção de alvo bloqueada fixa se o usuário for fornecido por uma variável (Você pode precisar mover um bloco para atualizar o código gerado)\nDependências atualizadas",
-        "nl": "Fixed blockly doel detectie als de gebruiker wordt geleverd door een variabele (U moet mogelijk een blok verplaatsen om de gegenereerde code te updaten)\nBijgewerkte afhankelijkheden",
-        "fr": "Correction de la détection de cibles de blocage si l'utilisateur est fourni par une variable (Vous pourriez avoir besoin de déplacer un bloc pour mettre à jour le code généré)\nDépendances actualisées",
-        "it": "Risolto rilevamento di destinazione bloccata se l'utente è fornito da una variabile (potrebbe essere necessario spostare un blocco per aggiornare il codice generato)\nDipendenze aggiornate",
-        "es": "Detección de objetivos fijos si el usuario es proporcionado por una variable (Es posible que necesite mover un bloque para actualizar el código generado)\nDependencias actualizadas",
-        "pl": "Naprawiono blokowane wykrywanie celów, jeśli użytkownik jest dostarczany przez zmienną (Być może trzeba przenieść blok, aby zaktualizować wygenerowany kod)\nAktualizacja zależności",
-        "uk": "Виправлено помилку, якщо користувач надана змінною (Ви можете перемістити блок для оновлення генерованого коду)\nОновлені залежності",
-        "zh-cn": "如果用户由变量提供, 则固定块目标检测( 您可能需要移动一个块来更新生成的代码)\n更新的依赖关系"
       }
     },
     "titleLang": {
