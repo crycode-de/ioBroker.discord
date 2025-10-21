@@ -21,8 +21,7 @@ var __decorateClass = (decorators, target, key, kind) => {
   for (var i = decorators.length - 1, decorator; i >= 0; i--)
     if (decorator = decorators[i])
       result = (kind ? decorator(target, key, result) : decorator(result)) || result;
-  if (kind && result)
-    __defProp(target, key, result);
+  if (kind && result) __defProp(target, key, result);
   return result;
 };
 var commands_exports = {};
@@ -140,8 +139,7 @@ class DiscordAdapterSlashCommands {
     if (!this.adapter.client?.user) {
       throw new Error("Discord client not available");
     }
-    if (this.adapter.unloaded)
-      return;
+    if (this.adapter.unloaded) return;
     if (!this.adapter.config.enableCommands) {
       this.adapter.log.debug("Commands not enabled");
       for (const [, guild] of this.adapter.client.guilds.cache) {
@@ -183,10 +181,8 @@ class DiscordAdapterSlashCommands {
       }
     }
     const sortFn = (a, b) => {
-      if (a.name > b.name)
-        return 1;
-      if (a.name < b.name)
-        return -1;
+      if (a.name > b.name) return 1;
+      if (a.name < b.name) return -1;
       return 0;
     };
     this.cmdGetStateChoices.sort(sortFn);
@@ -392,8 +388,7 @@ class DiscordAdapterSlashCommands {
    * does nothing since the command registration is called during this explicit.
    */
   triggerDelayedRegisterSlashCommands() {
-    if (!this.adapter.initialCustomObjectSetupDone)
-      return;
+    if (!this.adapter.initialCustomObjectSetupDone) return;
     if (this.triggerDelayedRegisterSlashCommandsTimeout) {
       this.adapter.clearTimeout(this.triggerDelayedRegisterSlashCommandsTimeout);
     }
@@ -407,7 +402,7 @@ class DiscordAdapterSlashCommands {
    * Send a reply to a custom slash command.
    * @param interactionId The ID of the interaction to reply to. The interactions needs to be cached in this instance.
    * @param msg The message to reply with. May be a simple string, a MessageOptions object or a stringified JSON MessageOptions object.
-   * @returns Promise which resolves withe the ID of the reply message if the reply is sent.
+   * @returns Promise which resolves with the the ID of the reply message if the reply is sent.
    * @throws Error if the reply could not be sent for some reason (i.e. some check failed).
    */
   async sendCmdCustomReply(interactionId, msg) {
@@ -456,8 +451,7 @@ class DiscordAdapterSlashCommands {
     }
     try {
       const globalCommands = await this.adapter.client.application?.commands.fetch();
-      if (this.adapter.unloaded)
-        return;
+      if (this.adapter.unloaded) return;
       if (globalCommands && globalCommands.size > 0) {
         this.adapter.log.debug(`Currently ${globalCommands.size} global commands registered. Removing them...`);
         await this.rest.put(import_v10.Routes.applicationCommands(this.adapter.client.user.id), { body: [] });
@@ -481,8 +475,7 @@ class DiscordAdapterSlashCommands {
     }
     try {
       const guildCommands = await guild.commands.fetch();
-      if (this.adapter.unloaded)
-        return;
+      if (this.adapter.unloaded) return;
       if (guildCommands.size > 0) {
         this.adapter.log.debug(`Currently ${guildCommands.size} commands registered for server ${guild.name}. Removing them...`);
         await this.rest.put(import_v10.Routes.applicationGuildCommands(this.adapter.client.user.id, guild.id), { body: [] });
@@ -693,7 +686,7 @@ class DiscordAdapterSlashCommands {
     await Promise.all(proms);
   }
   async onInteractionCreate(interaction) {
-    if (interaction.isCommand()) {
+    if (interaction.isChatInputCommand()) {
       void this.handleCommandInteraction(interaction);
     } else if (interaction.isAutocomplete()) {
       void this.handleAutocompleteInteraction(interaction);
@@ -705,7 +698,7 @@ class DiscordAdapterSlashCommands {
     }
     if (this.adapter.config.enableRawStates) {
       const interactionJson = interaction.toJSON();
-      if (interaction.isCommand()) {
+      if (interaction.isChatInputCommand()) {
         interactionJson.options = interaction.options.data;
       }
       void this.adapter.setState("raw.interactionJson", JSON.stringify(interactionJson, (_key, value) => typeof value === "bigint" ? value.toString() : value), true);
@@ -1058,8 +1051,7 @@ class DiscordAdapterSlashCommands {
       options
     } = interaction;
     const cmdCfg = this.adapter.config.customCommands.find((c) => c.name === commandName);
-    if (!cmdCfg)
-      return;
+    if (!cmdCfg) return;
     if (!interaction.deferred) {
       await interaction.deferReply({ ephemeral: this.adapter.config.commandRepliesEphemeral });
     }

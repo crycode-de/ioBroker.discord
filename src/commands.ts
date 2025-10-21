@@ -7,6 +7,7 @@ import {
   AutocompleteInteraction,
   CacheType,
   ChannelType,
+  ChatInputCommandInteraction,
   Collection,
   CommandInteraction,
   DiscordAPIError,
@@ -14,7 +15,7 @@ import {
   GuildChannel,
   GuildMember,
   Interaction,
-  MessageCreateOptions,
+  MessageEditOptions,
   Role,
   Snowflake,
   User,
@@ -449,7 +450,6 @@ export class DiscordAdapterSlashCommands {
 
         } catch (err) {
           if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
-            // eslint-disable-next-line @typescript-eslint/no-base-to-string
             this.adapter.log.warn(`Error registering commands for server ${guild.name} (id:${guild.id}). Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
           } else {
             this.adapter.log.warn(`Error registering commands for server ${guild.name} (id:${guild.id}): ${err}`);
@@ -471,7 +471,6 @@ export class DiscordAdapterSlashCommands {
 
       } catch (err) {
         if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
-          // eslint-disable-next-line @typescript-eslint/no-base-to-string
           this.adapter.log.warn(`Error registering global commands. Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
         } else {
           this.adapter.log.warn(`Error registering global commands: ${err}`);
@@ -551,10 +550,10 @@ export class DiscordAdapterSlashCommands {
    * Send a reply to a custom slash command.
    * @param interactionId The ID of the interaction to reply to. The interactions needs to be cached in this instance.
    * @param msg The message to reply with. May be a simple string, a MessageOptions object or a stringified JSON MessageOptions object.
-   * @returns Promise which resolves withe the ID of the reply message if the reply is sent.
+   * @returns Promise which resolves with the the ID of the reply message if the reply is sent.
    * @throws Error if the reply could not be sent for some reason (i.e. some check failed).
    */
-  public async sendCmdCustomReply (interactionId: Snowflake, msg: string | MessageCreateOptions): Promise<Snowflake> {
+  public async sendCmdCustomReply (interactionId: Snowflake, msg: string | MessageEditOptions): Promise<Snowflake> {
     // get the interaction
     const interaction = this.lastInteractions.get(interactionId);
 
@@ -583,7 +582,7 @@ export class DiscordAdapterSlashCommands {
     // if a string is given try to parse it and prepare it as MessageOptions object
     if (typeof msg === 'string') {
       try {
-        msg = this.adapter.parseStringifiedMessageOptions(msg);
+        msg = this.adapter.parseStringifiedMessageOptions<MessageEditOptions>(msg);
       } catch (err) {
         throw new Error(`Reply to interaction ${interactionId}${cscTxt} is invalid: ${err}`);
       }
@@ -624,7 +623,6 @@ export class DiscordAdapterSlashCommands {
       }
     } catch (err) {
       if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         this.adapter.log.warn(`Error while removing registered global commands. Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
       } else {
         this.adapter.log.warn(`Error while removing registered global commands: ${err}`);
@@ -652,7 +650,6 @@ export class DiscordAdapterSlashCommands {
       }
     } catch (err) {
       if (err instanceof DiscordAPIError && err.message === 'Missing Access') {
-        // eslint-disable-next-line @typescript-eslint/no-base-to-string
         this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}). Seams like the bot is missing the 'applications.commands' scope on the server. ${err}`);
       } else {
         this.adapter.log.warn(`Error while removing registered commands for server ${guild.name} (id:${guild.id}): ${err}`);
@@ -879,7 +876,7 @@ export class DiscordAdapterSlashCommands {
    */
   @boundMethod
   private async onInteractionCreate (interaction: Interaction<CacheType>): Promise<void> {
-    if (interaction.isCommand()) {
+    if (interaction.isChatInputCommand()) {
       // handle command interaction for build in commands and custom commands
       void this.handleCommandInteraction(interaction);
 
@@ -903,7 +900,7 @@ export class DiscordAdapterSlashCommands {
     if (this.adapter.config.enableRawStates) {
       // set raw state... not async here since it should not block!
       const interactionJson = interaction.toJSON() as Record<string, unknown>;
-      if (interaction.isCommand()) {
+      if (interaction.isChatInputCommand()) {
         interactionJson.options = interaction.options.data;
       }
       void this.adapter.setState('raw.interactionJson', JSON.stringify(interactionJson, (_key, value: unknown) => typeof value === 'bigint' ? value.toString() : value), true);
@@ -920,7 +917,7 @@ export class DiscordAdapterSlashCommands {
   /**
    * Handle command interactions.
    */
-  private async handleCommandInteraction (interaction: CommandInteraction<CacheType>): Promise<void> {
+  private async handleCommandInteraction (interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const { commandName, user } = interaction;
 
     if (!this.registerCommandsDone) {
@@ -1102,7 +1099,7 @@ export class DiscordAdapterSlashCommands {
    * Handler for "get state" slash commands.
    * @param interaction The interaction which triggered this.
    */
-  private async handleCmdGetState (interaction: CommandInteraction<CacheType>): Promise<void> {
+  private async handleCmdGetState (interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const objAlias = interaction.options.get('state', true).value as string;
 
     const [ obj, cfg ] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
@@ -1140,7 +1137,7 @@ export class DiscordAdapterSlashCommands {
     let val: string = '';
 
     // an optional MessageOptions object for special cases (like sending files)
-    let msgOpts: MessageCreateOptions | undefined;
+    let msgOpts: MessageEditOptions | undefined;
 
     // add unit if defined in the object
     const unit = obj.common.unit ? ` ${obj.common.unit}` : '';
@@ -1244,7 +1241,7 @@ export class DiscordAdapterSlashCommands {
    * Handler for "set state" slash commands.
    * @param interaction The interaction which triggered this.
    */
-  private async handleCmdSetState (interaction: CommandInteraction<CacheType>): Promise<void> {
+  private async handleCmdSetState (interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const objAlias = interaction.options.get('state', true).value as string;
 
     const [ obj, cfg ] = await this.getObjectAndCfgFromAlias(objAlias, interaction);
@@ -1362,7 +1359,7 @@ export class DiscordAdapterSlashCommands {
    * Handler for custom slash commands.
    * @param interaction The interaction which triggered this.
    */
-  private async handleCmdCustom (interaction: CommandInteraction<CacheType>): Promise<void> {
+  private async handleCmdCustom (interaction: ChatInputCommandInteraction<CacheType>): Promise<void> {
     const {
       commandName,
       channelId,

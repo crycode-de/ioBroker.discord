@@ -83,6 +83,7 @@ class I18n {
   getString(key, ...args) {
     let str;
     switch (this.language) {
+      /* eslint-disable @stylistic/max-statements-per-line */
       case "de":
         str = import_de.default[key] ?? key;
         break;
@@ -113,6 +114,7 @@ class I18n {
       case "zh-cn":
         str = import_zh_cn.default[key] ?? key;
         break;
+      /* eslint-enable @stylistic/max-statements-per-line */
       default:
         str = key;
     }

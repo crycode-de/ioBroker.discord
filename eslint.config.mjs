@@ -1,8 +1,8 @@
-import tseslint from 'typescript-eslint';
+import { defineConfig } from 'eslint/config';
 
 import crycode from '@crycode/eslint-config';
 
-export default tseslint.config(
+export default defineConfig(
   ...crycode.configs.ts,
   ...crycode.configs.stylistic,
 

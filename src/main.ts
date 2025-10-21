@@ -27,6 +27,7 @@ import {
   HexColorString,
   Message,
   MessageCreateOptions,
+  MessageEditOptions,
   NonThreadGuildBasedChannel,
   Partials,
   PermissionsBitField,
@@ -186,15 +187,15 @@ class DiscordAdapter extends Adapter {
    * @returns A `MessageOptions` object.
    * @throws An error if parsing JSON or a check failed.
    */
-  public parseStringifiedMessageOptions (content: string): MessageCreateOptions {
-    let mo: MessageCreateOptions;
+  public parseStringifiedMessageOptions<T extends MessageEditOptions | MessageCreateOptions> (content: string): T {
+    let mo: T;
 
     if (content.startsWith('{') && content.endsWith('}')) {
       // seems to be json
       this.log.debug(`Content seems to be json`);
 
       try {
-        mo = JSON.parse(content) as MessageCreateOptions;
+        mo = JSON.parse(content) as T;
       } catch (_err) {
         throw new Error(`Content seems to be json but cannot be parsed!`);
       }
@@ -208,7 +209,7 @@ class DiscordAdapter extends Adapter {
       // just a string... create MessageOptions object
       mo = {
         content,
-      };
+      } as T;
     }
 
     return mo;
@@ -1528,13 +1529,9 @@ class DiscordAdapter extends Adapter {
   private async setBotPresence (opts?: SetBotPresenceOptions): Promise<void> {
     if (!this.client?.user) return;
 
-    if (!opts) {
-      opts = {};
-    }
+    opts ??= {};
 
-    if (!opts.status) {
-      opts.status = ((await this.getStateAsync('bot.status'))?.val as PresenceStatusData | undefined) ?? 'online';
-    }
+    opts.status ??= ((await this.getStateAsync('bot.status'))?.val as PresenceStatusData | undefined) ?? 'online';
     if (!VALID_PRESENCE_STATUS_DATA.includes(opts.status)) {
       opts.status = 'online';
     }
@@ -1544,16 +1541,12 @@ class DiscordAdapter extends Adapter {
       activities: [],
     };
 
-    if (opts.activityType === undefined) {
-      opts.activityType = ((await this.getStateAsync('bot.activityType'))?.val as ActivityTypeNames | undefined) ?? '';
-    }
+    opts.activityType ??= ((await this.getStateAsync('bot.activityType'))?.val as ActivityTypeNames | undefined) ?? '';
     if (!ACTIVITY_TYPES.includes(opts.activityType)) {
       this.log.warn(`Invalid activityType! ${opts.activityType}`);
       opts.activityType = '';
     }
-    if (opts.activityName === undefined) {
-      opts.activityName = ((await this.getStateAsync('bot.activityName'))?.val as string | undefined) ?? '';
-    }
+    opts.activityName ??= ((await this.getStateAsync('bot.activityName'))?.val as string | undefined) ?? '';
     if (opts.activityType && opts.activityName) {
       presenceData.activities = [ {
         type: ActivityType[opts.activityType],
@@ -2654,7 +2647,7 @@ class DiscordAdapter extends Adapter {
 
         // send the reply
         try {
-          const messageId = await this.discordSlashCommands.sendCmdCustomReply(sendCustomCommandReplyPayload.interactionId, this.prepareMessageForSend(sendCustomCommandReplyPayload.content));
+          const messageId = await this.discordSlashCommands.sendCmdCustomReply(sendCustomCommandReplyPayload.interactionId, this.prepareMessageForSend(sendCustomCommandReplyPayload.content) as string | MessageEditOptions);
           this.sendToIfCb(obj.from, obj.command, { result: `Reply sent`, ...sendCustomCommandReplyPayload, messageId }, obj.callback);
         } catch (err) {
           this.sendToIfCb(obj.from, obj.command, { error: `Error sending reply: ${err}`, ...sendCustomCommandReplyPayload }, obj.callback);
@@ -3079,7 +3072,7 @@ ${readableInstances.join('\n')}`;
    * @param msg The message as `string` or `MessageCreateOptions`.
    * @returns The prepared message.
    */
-  private prepareMessageForSend (msg: string | MessageCreateOptions): string | MessageCreateOptions {
+  private prepareMessageForSend<T extends string | MessageCreateOptions | MessageEditOptions> (msg: T): T {
     if (typeof msg === 'string') {
       return msg;
     }

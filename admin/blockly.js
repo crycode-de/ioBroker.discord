@@ -65,7 +65,7 @@ Blockly.Words['discord_interaction_id'] = { 'en': 'Interaction ID', 'de': 'Inter
 Blockly.Words['discord_help_url'] = { 'en': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'de': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/de/README.md#blockly', 'ru': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'pt': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'nl': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'fr': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'it': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'es': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'pl': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'uk': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly', 'zh-cn': 'https://github.com/crycode-de/ioBroker.discord/blob/main/docs/en/README.md#blockly' };
 /* eslint-enable @stylistic/quote-props */
 
-Blockly.CustomBlocks = Blockly.CustomBlocks || [];
+Blockly.CustomBlocks = Blockly.CustomBlocks ?? [];
 Blockly.CustomBlocks.push('Discord');
 
 Blockly.Discord = {
@@ -1072,7 +1072,7 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
    * @this Blockly.Block
    */
   updateShape_: function (names) {
-    names = names || [];
+    names = names ?? [];
     let _input;
     const wp = this.workspace;
 
@@ -1086,9 +1086,7 @@ Blockly.Blocks['discord_on_custom_cmd'] = {
 
       if (!_input) {
         _input = this.appendValueInput('option' + i);
-        if (!names[i]) {
-          names[i] = Blockly.Translate('discord_custom_cmd_option').toLowerCase() + (i + 1);
-        }
+        names[i] ??= Blockly.Translate('discord_custom_cmd_option').toLowerCase() + (i + 1);
         _input.appendField(new Blockly.FieldTextInput(names[i]));
         _input.setAlign(Blockly.ALIGN_RIGHT);
         _input.setCheck('Variable');

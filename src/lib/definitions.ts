@@ -236,5 +236,5 @@ export interface SendToActionServerMemberIdentifier extends SendToActionServerId
  */
 export interface SendToActionSendCustomCommandReplyPayload {
   interactionId: Snowflake;
-  content: string | MessageCreateOptions;
+  content: string | MessageCreateOptions | MessageEditOptions;
 }

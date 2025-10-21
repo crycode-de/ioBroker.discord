@@ -32,9 +32,7 @@ function getBufferAndNameFromBase64String(base64String, name) {
     return null;
   }
   const buffer = Buffer.from(b64match[3], "base64");
-  if (!name) {
-    name = `${b64match[1].replace(/\W/g, "_")}.${b64match[2].replace(/\W/g, "_")}`;
-  }
+  name ??= `${b64match[1].replace(/\W/g, "_")}.${b64match[2].replace(/\W/g, "_")}`;
   return {
     buffer,
     name

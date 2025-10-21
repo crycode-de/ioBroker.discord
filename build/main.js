@@ -17,8 +17,7 @@ var __decorateClass = (decorators, target, key, kind) => {
   for (var i = decorators.length - 1, decorator; i >= 0; i--)
     if (decorator = decorators[i])
       result = (kind ? decorator(target, key, result) : decorator(result)) || result;
-  if (kind && result)
-    __defProp(target, key, result);
+  if (kind && result) __defProp(target, key, result);
   return result;
 };
 var main_exports = {};
@@ -512,14 +511,11 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
     const allServersUsers = new import_discord.Collection();
     const knownServersAndChannelsIds = /* @__PURE__ */ new Set();
-    if (this.unloaded)
-      return;
+    if (this.unloaded) return;
     const guilds = await this.client.guilds.fetch();
-    if (this.unloaded)
-      return;
+    if (this.unloaded) return;
     for (const [, guildBase] of guilds) {
-      if (this.unloaded)
-        return;
+      if (this.unloaded) return;
       let guild;
       try {
         guild = await guildBase.fetch();
@@ -528,8 +524,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.log.debug(`Error: ${err}`);
         continue;
       }
-      if (this.unloaded)
-        return;
+      if (this.unloaded) return;
       knownServersAndChannelsIds.add(`${this.namespace}.servers.${guild.id}`);
       await this.extendObjectCached(`servers.${guild.id}`, {
         type: "channel",
@@ -555,8 +550,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         })
       ]);
       const guildMembers = await guild.members.fetch();
-      if (this.unloaded)
-        return;
+      if (this.unloaded) return;
       for (const [, member] of guildMembers) {
         if (member.user.id !== this.client.user.id) {
           allServersUsers.set(member.user.id, { user: member.user, presence: member.presence });
@@ -746,11 +740,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
           this.jsonStateCache.set(`${this.namespace}.servers.${guild.id}.members.${member.id}.json`, json);
         }
       }
-      if (this.unloaded)
-        return;
+      if (this.unloaded) return;
       const channels = await guild.channels.fetch();
-      if (this.unloaded)
-        return;
+      if (this.unloaded) return;
       for (const parents of [true, false]) {
         for (const [, channel] of channels) {
           if (!channel || parents && channel.parentId || !parents && !channel.parentId) {
@@ -1302,14 +1294,9 @@ class DiscordAdapter extends import_adapter_core.Adapter {
    * Set the presence status of the discord bot.
    */
   async setBotPresence(opts) {
-    if (!this.client?.user)
-      return;
-    if (!opts) {
-      opts = {};
-    }
-    if (!opts.status) {
-      opts.status = (await this.getStateAsync("bot.status"))?.val ?? "online";
-    }
+    if (!this.client?.user) return;
+    opts ??= {};
+    opts.status ??= (await this.getStateAsync("bot.status"))?.val ?? "online";
     if (!import_definitions.VALID_PRESENCE_STATUS_DATA.includes(opts.status)) {
       opts.status = "online";
     }
@@ -1317,16 +1304,12 @@ class DiscordAdapter extends import_adapter_core.Adapter {
       status: opts.status,
       activities: []
     };
-    if (opts.activityType === void 0) {
-      opts.activityType = (await this.getStateAsync("bot.activityType"))?.val ?? "";
-    }
+    opts.activityType ??= (await this.getStateAsync("bot.activityType"))?.val ?? "";
     if (!import_definitions.ACTIVITY_TYPES.includes(opts.activityType)) {
       this.log.warn(`Invalid activityType! ${opts.activityType}`);
       opts.activityType = "";
     }
-    if (opts.activityName === void 0) {
-      opts.activityName = (await this.getStateAsync("bot.activityName"))?.val ?? "";
-    }
+    opts.activityName ??= (await this.getStateAsync("bot.activityName"))?.val ?? "";
     if (opts.activityType && opts.activityName) {
       presenceData.activities = [{
         type: import_discord.ActivityType[opts.activityType],
@@ -1341,8 +1324,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     if (this.config.enableRawStates) {
       void this.setState("raw.messageJson", JSON.stringify(message.toJSON(), (_key, value) => typeof value === "bigint" ? value.toString() : value), true);
     }
-    if (!this.client?.user?.id)
-      return;
+    if (!this.client?.user?.id) return;
     if (message.interactionMetadata) {
       return;
     }
@@ -1567,8 +1549,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
   }
   async onStateChange(stateId, state) {
     this.log.silly(`State changed: ${stateId} ${state?.val} (ack=${state?.ack})`);
-    if (!state || state.ack)
-      return;
+    if (!state || state.ack) return;
     let setAck = false;
     if (stateId.startsWith(`${this.namespace}.`)) {
       switch (stateId) {
@@ -1846,8 +1827,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
     }
   }
   async onMessage(obj) {
-    if (typeof obj !== "object")
-      return;
+    if (typeof obj !== "object") return;
     this.log.debug(`Got message: ${JSON.stringify(obj)}`);
     let channel;
     let msg;
@@ -1873,6 +1853,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.sendTo(obj.from, obj.command, [{ value: "", label: "---" }, ...text2commandInstances], obj.callback);
         break;
       }
+      // getText2commandInstances
       case "getNotificationTargets": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -1897,6 +1878,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.sendTo(obj.from, obj.command, targets, obj.callback);
         break;
       }
+      // getNotificationTargets
       case "getUsers": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -1907,6 +1889,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.sendTo(obj.from, obj.command, users, obj.callback);
         break;
       }
+      // getUsers
       case "getServers": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -1917,6 +1900,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.sendTo(obj.from, obj.command, servers, obj.callback);
         break;
       }
+      // getServers
       case "getServerRoles": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -1939,6 +1923,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         this.sendTo(obj.from, obj.command, guildRolesWithLabel, obj.callback);
         break;
       }
+      // getServerRoles
       case "getAddToServerLink": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -1965,11 +1950,13 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         break;
       }
+      // getAddToServerLink
       case "logConfiguredCommandObjects": {
         this.discordSlashCommands.logConfiguredCommandObjects();
         this.sendToIfCb(obj.from, obj.command, { result: "ok" }, obj.callback);
         break;
       }
+      // logConfiguredCommandObjects
       case "send":
       case "sendMessage": {
         if (typeof obj.message !== "object") {
@@ -2024,6 +2011,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         break;
       }
+      // send / sendMessage
       case "editMessage": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
@@ -2056,6 +2044,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         break;
       }
+      // editMessage
       case "deleteMessage": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
@@ -2084,6 +2073,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         break;
       }
+      // deleteMessage
       case "addReaction": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
@@ -2112,6 +2102,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         break;
       }
+      // addReaction
       case "awaitMessageReaction": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -2150,6 +2141,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         });
         break;
       }
+      // awaitMessageReaction
       case "sendCustomCommandReply": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
@@ -2172,6 +2164,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         break;
       }
+      // sendCustomCommandReply
       case "leaveServer": {
         if (typeof obj.message !== "object") {
           this.sendToIfCb(obj.from, obj.command, { error: "sendTo message needs to be an object" }, obj.callback);
@@ -2196,6 +2189,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }
         break;
       }
+      // leaveServer
       case "getServerInfo": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -2239,6 +2233,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }, obj.callback);
         break;
       }
+      // getServerInfo
       case "getChannelInfo": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -2272,6 +2267,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }, obj.callback);
         break;
       }
+      // getChannelInfo
       case "getServerMemberInfo": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -2325,6 +2321,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }, obj.callback);
         break;
       }
+      // getServerMemberInfo
       case "getUserInfo": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -2368,6 +2365,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }, obj.callback);
         break;
       }
+      // getUserInfo
       case "getMessageInfo": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -2405,6 +2403,7 @@ class DiscordAdapter extends import_adapter_core.Adapter {
         }, obj.callback);
         break;
       }
+      // getMessageInfo
       case "sendNotification": {
         if (!obj.callback) {
           this.log.warn(`Message '${obj.command}' called without callback!`);
@@ -2467,6 +2466,7 @@ ${readableInstances.join("\n")}`;
         }
         break;
       }
+      // sendNotification
       default:
         this.log.warn(`Got message with unknown command: ${obj.command}`);
         if (obj.callback) {

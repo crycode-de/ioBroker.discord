@@ -24,9 +24,7 @@ export function getBufferAndNameFromBase64String (base64String: string, name?: s
   const buffer = Buffer.from(b64match[3], 'base64');
 
   // guess a generic name from the mime type if no name provided
-  if (!name) {
-    name = `${b64match[1].replace(/\W/g, '_')}.${b64match[2].replace(/\W/g, '_')}`;
-  }
+  name ??= `${b64match[1].replace(/\W/g, '_')}.${b64match[2].replace(/\W/g, '_')}`;
 
   return {
     buffer,
