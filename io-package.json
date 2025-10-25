@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "discord",
-    "version": "2.6.0",
+    "version": "2.6.1",
     "news": {
+      "2.6.1": {
+        "en": "Updated Sentry DSN\nUpdated dependencies",
+        "de": "Sentry DSN aktualisiert\nAbhängigkeiten aktualisiert",
+        "ru": "Обновленный Sentry DSN\nОбновленные зависимости",
+        "pt": "Atualizado Sentry DSN\nDependências atualizadas",
+        "nl": "Bijgewerkt Sentry DSN\nBijgewerkte afhankelijkheden",
+        "fr": "Mise à jour de la déclaration DSN\nDépendances actualisées",
+        "it": "Aggiornato Sentry DSN\nDipendenze aggiornate",
+        "es": "Actualizado Sentry DSN\nDependencias actualizadas",
+        "pl": "Aktualizacja Sentry DSN\nAktualizacja zależności",
+        "uk": "Оновлена Sentry DSN\nОновлені залежності",
+        "zh-cn": "更新的哨兵 DSN\n更新的依赖关系"
+      },
       "2.6.0": {
         "en": "Node.js >= 20, js-controller >= 6.0.11, Admin >= 7.6.17 required\nUpdated dependencies",
         "de": "Node.js >= 20, js-controller >= 6.0.11, Admin >= 7.6.17 erforderlich\nAbhängigkeiten aktualisiert",
@@ -80,19 +93,6 @@
         "pl": "Naprawiono blokowanie dla najnowszych zmian adaptera JavaScript\nAktualizacja zależności",
         "uk": "Виправлено Blockly для останніх змін адаптера JavaScript\nОновлені залежності",
         "zh-cn": "JavaScript 最新适配器更改的固定块\n更新的依赖关系"
-      },
-      "2.3.0": {
-        "en": "💥 Node.js 18+ is now required!\nAdded support for custom bot activities\nFixed Issue with embed colors not accepting hex color codes\nFixed user activities for users with custom activities (see [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nUpdated dependencies",
-        "de": "💥 Node.js 18+ ist jetzt erforderlich!\nUnterstützung für benutzerdefinierte Bot-Aktivitäten hinzugefügt\nFehler behoben, dass Einbettungen keine Hex-Farbwerte akzeptiert haben\nFehler bei benutzerdefinierten Aktivitäten behoben (siehe [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nAbhängigkeiten aktualisiert",
-        "ru": "💥 Node.js 18+ теперь требуется!\nДобавлена поддержка пользовательских действий бота\nФиксированный выпуск с встроенными цветами, не принимая коды цвета гекса\nFixed user activities for users with custom activities (see [#60] (https://github.com/crycode-de/ioBroker.discord/issues/60)\nОбновленные зависимости",
-        "pt": "! Node.js 18+ é agora necessário!\nAdicionado suporte para atividades de bot personalizadas\nCorrigido Problema com cores embutidas não aceitando códigos de cores hexagonais\nAtividades fixas para usuários com atividades personalizadas (ver [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))))\nDependências atualizadas",
-        "nl": "Node.js 18+ is nu nodig!\nExtra ondersteuning voor aangepaste botactiviteiten\nFixed Issue met ingebedde kleuren die geen hex kleurcodes accepteren\nVaste gebruikersactiviteiten voor gebruikers met aangepaste activiteiten (zie [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nBijgewerkte afhankelijkheden",
-        "fr": "Le Node.js 18+ est maintenant requis!\nAjout d'un support pour les activités bot personnalisées\nProblème corrigé avec les couleurs d'intégration n'acceptant pas les codes de couleur hexagonale\nActivités d'utilisateurs fixes pour les utilisateurs ayant des activités personnalisées (voir [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nDépendances actualisées",
-        "it": "💥 Node.js 18+ è ora richiesto!\nAggiunto supporto per attività bot personalizzate\nProblema fisso con colori incorporati non accettare codici colore esagonale\nAttività utente fissa per gli utenti con attività personalizzate (vedere [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nDipendenze aggiornate",
-        "es": "💥 Node.js 18+ se requiere ahora!\nApoyo añadido para actividades de bot personalizado\nEdición fija con colores incrustados que no aceptan códigos de color hex\nActividades de usuario fijas para usuarios con actividades personalizadas (véase [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nDependencias actualizadas",
-        "pl": "XionNode.js 18 + jest teraz wymagane!\nDodano wsparcie dla niestandardowych działań bot\nNaprawiono wydanie z osadzonymi kolorami, które nie akceptują kodów kolorów szesnastkowych\nDziałalność użytkowników stałych dla użytkowników prowadzących działalność na własny rachunek (zob. [# 60] (https: / / github.com / crycode- de / ioBroker.discord / issues / 60))\nAktualizacja zależności",
-        "uk": "浜у 涓 蹇!\nДодано підтримку користувацьких ботів\nВиправлено проблему з рельєфними кольорами, не приймається кольорові коди шестигранного кольору\nВиправлено роботу користувача для користувачів з індивідуальною діяльністю (див. [#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\nОновлені залежності",
-        "zh-cn": "现在需要18+节点!\n为自定义机器人活动添加支持\n嵌入颜色的固定问题, 不接受十六进制颜色代码\n有自定义活动的用户的固定用户活动(见[#60](https://github.com/crycode-de/ioBroker.discord/issues/60))\n更新的依赖关系"
       }
     },
     "titleLang": {
