@@ -84,9 +84,9 @@ jobs:
           # Then uncomment and customize the following block:
           sentry: true
           sentry-token: ${{ secrets.SENTRY_AUTH_TOKEN }}
-          sentry-url: https://sentry.cryhost.de
-          sentry-org: cryhost
-          sentry-project: "iobroker-discord"
+          sentry-url: https://glitchtip.crymg.de
+          sentry-org: crycode
+          sentry-project: "ioBroker.discord"
           sentry-version-prefix: "iobroker.discord"
           sentry-sourcemap-paths: "build/"
           # If your sentry project is linked to a GitHub repository, you can enable the following option
