@@ -60,6 +60,11 @@ A detailed documentation is available in the `docs` directory of the repository:
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+
+* (crycode-de) Updated Sentry DSN
+* (crycode-de) Updated dependencies
+
 ### 2.6.0 (2025-10-21)
 
 * (crycode-de) Node.js >= 20, js-controller >= 6.0.11, Admin >= 7.6.17 required

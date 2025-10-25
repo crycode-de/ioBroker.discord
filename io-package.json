@@ -163,7 +163,7 @@
     "supportCustoms": true,
     "plugins": {
       "sentry": {
-        "dsn": "https://6ee57be76f2d4df2b592e3dbee37fb89@sentry.cryhost.de/8"
+        "dsn": "https://b7197a75aedf45fe876c7efbb6a596ef@glitchtip.crymg.de/3"
       }
     },
     "dependencies": [
