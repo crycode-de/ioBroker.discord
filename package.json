@@ -26,7 +26,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^3.3.2",
     "autobind-decorator": "^2.4.0",
-    "discord.js": "^14.24.2",
+    "discord.js": "^14.25.1",
     "source-map-support": "^0.5.21"
   },
   "devDependencies": {
