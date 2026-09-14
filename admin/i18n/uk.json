@@ -139,7 +139,7 @@
     "Mentionable": "Варто згадати",
     "option-1": "варіант-1",
     "Option 1": "Варіант 1",
-    "Required": "вимагається",
+    "Required": "Обов'язковий",
     "Hint: For string options, you may set predefined options in the corresponding 'option-*.choices' state.": "Підказка: для параметрів рядка ви можете встановити попередньо визначені параметри у відповідному стані 'option-*.choices'.",
     "Add bot to server": "Додати бота на сервер",
     "Here you are able to get a link to add your bot to a discord server.": "Тут ви можете отримати посилання, щоб додати свого бота на сервер Discord.",
