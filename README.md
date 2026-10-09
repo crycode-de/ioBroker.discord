@@ -187,6 +187,8 @@ A detailed documentation is available in the `docs` directory of the repository:
 
 * (crycode-de) First release
 
+[Older changelogs can be found there](CHANGELOG_OLD.md)
+
 ## License
 
 MIT License
