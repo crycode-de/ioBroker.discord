@@ -60,6 +60,9 @@ A detailed documentation is available in the `docs` directory of the repository:
     Placeholder for the next version (at the beginning of the line):
     ### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+- (copilot) Adapter requires node.js >= 22 now
+
 ### 2.6.1 (2025-10-25)
 
 * (crycode-de) Updated Sentry DSN
